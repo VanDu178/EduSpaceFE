@@ -1,0 +1,15 @@
+# Chặn thư viện bên thứ 3
+**/node_modules/
+**/venv/
+**/.venv/
+
+# Chặn các thư mục build / biên dịch đầu ra
+**/dist/
+**/build/
+**/out/
+**/.next/
+
+# Chặn file log và file hệ thống
+**/*.log
+**/logs/
+**/.DS_Store
