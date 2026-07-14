@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Build outputs
+dist/
+build/
+
+# User Knowledge documentation
+KienThuc/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
