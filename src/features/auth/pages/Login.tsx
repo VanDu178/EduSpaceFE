@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Card, message } from 'antd';
+import { useEffect } from 'react';
+import { Form, Input, Button, Card } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../services/api';
+import { useLoginMutation } from '../hooks';
+import type { LoginPayload } from '../types';
 
-const Login: React.FC = () => {
-  const [loading, setLoading] = useState(false);
+const Login = () => {
   const navigate = useNavigate();
 
   // Kiểm tra xem đã đăng nhập chưa
@@ -16,31 +16,16 @@ const Login: React.FC = () => {
     }
   }, [navigate]);
 
-  const onFinish = async (values: any) => {
-    setLoading(true);
-    try {
-      const response = await api.post('/auth/login', {
-        email: values.email,
-        password: values.password
-      });
+  // Khởi tạo login mutation hook
+  const loginMutation = useLoginMutation(() => {
+    navigate('/admin');
+  });
 
-      if (response.data.success) {
-        message.success('Đăng nhập hệ thống thành công!');
-        
-        // Lưu access token và thông tin user vào localStorage
-        localStorage.setItem('accessToken', response.data.data.accessToken);
-        localStorage.setItem('user', JSON.stringify(response.data.data.user));
-        
-        // Chuyển hướng đến trang quản trị
-        navigate('/admin');
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      const errMsg = error.response?.data?.message || 'Đã xảy ra lỗi, vui lòng thử lại sau!';
-      message.error(errMsg);
-    } finally {
-      setLoading(false);
-    }
+  const onFinish = (values: LoginPayload) => {
+    loginMutation.mutate({
+      email: values.email,
+      password: values.password
+    });
   };
 
   return (
@@ -94,7 +79,7 @@ const Login: React.FC = () => {
             <Button
               type="primary"
               htmlType="submit"
-              loading={loading}
+              loading={loginMutation.isPending}
               className="w-full h-12 bg-gradient-to-r from-blue-500 to-indigo-600 border-none hover:from-blue-600 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-indigo-500/30 transition-all duration-300"
             >
               Đăng Nhập

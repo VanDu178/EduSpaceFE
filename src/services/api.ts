@@ -10,12 +10,17 @@ const api = axios.create({
   withCredentials: true, // Bắt buộc để tự động gửi HttpOnly cookie (refresh token) lên server
 });
 
+interface FailedRequestItem {
+  resolve: (token: string | null) => void;
+  reject: (error: unknown) => void;
+}
+
 // Biến lưu trạng thái đang refresh token để tránh gọi trùng lặp nhiều lần
 let isRefreshing = false;
-let failedQueue: any[] = [];
+let failedQueue: FailedRequestItem[] = [];
 
 // Hàm đẩy các request bị hoãn vào hàng đợi chờ refresh xong
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);

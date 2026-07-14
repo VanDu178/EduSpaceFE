@@ -1,34 +1,27 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Card, message } from 'antd';
+import { Form, Input, Button, Card } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../services/api';
+import { useRegisterMutation } from '../hooks';
+import type { RegisterPayload } from '../types';
 
-const Register: React.FC = () => {
-  const [loading, setLoading] = useState(false);
+interface RegisterFormValues extends RegisterPayload {
+  confirmPassword?: string;
+}
+
+const Register = () => {
   const navigate = useNavigate();
 
-  const onFinish = async (values: any) => {
-    setLoading(true);
-    try {
-      const response = await api.post('/auth/register', {
-        email: values.email,
-        password: values.password,
-        name: values.name
-      });
+  // Khởi tạo register mutation hook
+  const registerMutation = useRegisterMutation(() => {
+    navigate('/login');
+  });
 
-      if (response.data.success) {
-        message.success('Đăng ký tài khoản quản trị thành công! Hãy đăng nhập.');
-        // Chuyển hướng sang trang đăng nhập
-        navigate('/login');
-      }
-    } catch (error: any) {
-      console.error('Register error:', error);
-      const errMsg = error.response?.data?.message || 'Đã xảy ra lỗi khi đăng ký!';
-      message.error(errMsg);
-    } finally {
-      setLoading(false);
-    }
+  const onFinish = (values: RegisterFormValues) => {
+    registerMutation.mutate({
+      email: values.email,
+      password: values.password,
+      name: values.name
+    });
   };
 
   return (
@@ -117,7 +110,7 @@ const Register: React.FC = () => {
             <Button
               type="primary"
               htmlType="submit"
-              loading={loading}
+              loading={registerMutation.isPending}
               className="w-full h-12 bg-gradient-to-r from-blue-500 to-indigo-600 border-none hover:from-blue-600 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-indigo-500/30 transition-all duration-300"
             >
               Đăng Ký Tài Khoản
