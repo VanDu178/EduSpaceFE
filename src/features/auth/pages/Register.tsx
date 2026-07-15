@@ -3,6 +3,7 @@ import { EnvelopeIcon, LockClosedIcon, UserIcon } from '@heroicons/react/24/outl
 import { useNavigate, Link } from 'react-router-dom';
 import { useRegisterMutation } from '../hooks';
 import type { RegisterPayload } from '../types';
+import { handleApiError } from '../../../utils/errorHandler';
 
 interface RegisterFormValues extends RegisterPayload {
   confirmPassword?: string;
@@ -10,11 +11,17 @@ interface RegisterFormValues extends RegisterPayload {
 
 const Register = () => {
   const navigate = useNavigate();
+  const [form] = Form.useForm();
 
   // Khởi tạo register mutation hook
-  const registerMutation = useRegisterMutation(() => {
-    navigate('/login');
-  });
+  const registerMutation = useRegisterMutation(
+    () => {
+      navigate('/login');
+    },
+    (err) => {
+      handleApiError(err, { form });
+    }
+  );
 
   const onFinish = (values: RegisterFormValues) => {
     registerMutation.mutate({
@@ -39,6 +46,7 @@ const Register = () => {
         </div>
 
         <Form
+          form={form}
           name="register_form"
           layout="vertical"
           onFinish={onFinish}

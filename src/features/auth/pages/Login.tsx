@@ -4,9 +4,11 @@ import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLoginMutation } from '../hooks';
 import type { LoginPayload } from '../types';
+import { handleApiError } from '../../../utils/errorHandler';
 
 const Login = () => {
   const navigate = useNavigate();
+  const [form] = Form.useForm();
 
   // Kiểm tra xem đã đăng nhập chưa
   useEffect(() => {
@@ -17,9 +19,13 @@ const Login = () => {
   }, [navigate]);
 
   // Khởi tạo login mutation hook
-  const loginMutation = useLoginMutation(() => {
-    navigate('/admin');
-  }
+  const loginMutation = useLoginMutation(
+    () => {
+      navigate('/admin');
+    },
+    (err) => {
+      handleApiError(err, { form });
+    }
   );
 
   const onFinish = (values: LoginPayload) => {
@@ -44,6 +50,7 @@ const Login = () => {
         </div>
 
         <Form
+          form={form}
           name="login_form"
           layout="vertical"
           initialValues={{ remember: true }}

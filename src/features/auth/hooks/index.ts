@@ -2,12 +2,13 @@ import { useMutation } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import { loginApi, registerApi, logoutApi } from '../api';
 import type { LoginPayload, RegisterPayload, AuthResponse } from '../types';
+import type { ApiResponse } from '../../../types/api';
 import { toast } from '../../../utils/toastHelper';
 
 // Custom hook mutation Đăng nhập
 export const useLoginMutation = (
   onSuccessCallback?: (data: AuthResponse) => void,
-  onErrorCallback?: (errMsg: string) => void
+  onErrorCallback?: (error: AxiosError<ApiResponse>) => void
 ) => {
   return useMutation({
     mutationFn: (payload: LoginPayload) => loginApi(payload),
@@ -15,20 +16,18 @@ export const useLoginMutation = (
       if (res.success && res.data) {
         toast.success('Đăng nhập hệ thống thành công!');
         // Lưu access token và thông tin user vào localStorage
-        localStorage.setItem('accessToken', res.data.accessToken);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+        localStorage.setItem('accessToken', res?.data?.accessToken);
+        localStorage.setItem('user', JSON.stringify(res?.data?.user));
 
-        if (onSuccessCallback) onSuccessCallback(res.data);
+        if (onSuccessCallback) onSuccessCallback(res?.data);
       } else {
-        const errMsg = res.message || 'Đăng nhập thất bại!';
-        toast.error(errMsg);
-        if (onErrorCallback) onErrorCallback(errMsg);
+        const errMsg = res?.message || 'Đăng nhập thất bại!';
+        if (onErrorCallback) onErrorCallback({ response: { data: { message: errMsg } } } as AxiosError<ApiResponse>);
       }
     },
-    onError: (err: AxiosError<{ message?: string }>) => {
+    onError: (err: AxiosError<ApiResponse>) => {
       if (onErrorCallback) {
-        const errMsg = err.response?.data?.message || 'Đăng nhập thất bại!';
-        onErrorCallback(errMsg);
+        onErrorCallback(err);
       }
     },
   });
@@ -37,7 +36,7 @@ export const useLoginMutation = (
 // Custom hook mutation Đăng ký
 export const useRegisterMutation = (
   onSuccessCallback?: () => void,
-  onErrorCallback?: (errMsg: string) => void
+  onErrorCallback?: (error: AxiosError<ApiResponse>) => void
 ) => {
   return useMutation({
     mutationFn: (payload: RegisterPayload) => registerApi(payload),
@@ -47,16 +46,13 @@ export const useRegisterMutation = (
         if (onSuccessCallback) onSuccessCallback();
       } else {
         const errMsg = res.message || 'Đăng ký thất bại!';
-        toast.error(errMsg);
-        if (onErrorCallback) onErrorCallback(errMsg);
+        if (onErrorCallback) onErrorCallback({ response: { data: { message: errMsg } } } as AxiosError<ApiResponse>);
       }
     },
-    onError: (err: AxiosError<{ message?: string }>) => {
+    onError: (err: AxiosError<ApiResponse>) => {
       console.error('Register hook error:', err);
-      // Lỗi đã được Axios Interceptor tự động hiển thị qua toast.apiError
       if (onErrorCallback) {
-        const errMsg = err.response?.data?.message || 'Đăng ký thất bại!';
-        onErrorCallback(errMsg);
+        onErrorCallback(err);
       }
     },
   });
@@ -70,8 +66,7 @@ export const useLogoutMutation = (onSuccessCallback?: () => void) => {
       toast.success('Đăng xuất hệ thống thành công!');
       cleanupSession(onSuccessCallback);
     },
-    onError: (err) => {
-      console.error('Logout hook error:', err);
+    onError: (err: AxiosError<ApiResponse>) => {
       // Dù API lỗi vẫn xóa session để giải phóng giao diện
       cleanupSession(onSuccessCallback);
     },
