@@ -1,20 +1,10 @@
 import axios from 'axios';
-import { toast } from '../utils/toastHelper';
 
 
 
 interface FailedRequestItem {
   resolve: (token: string | null) => void;
   reject: (error: unknown) => void;
-}
-
-
-
-// Mở rộng AxiosRequestConfig của Axios để hỗ trợ thuộc tính skipToast dùng chung
-declare module 'axios' {
-  export interface AxiosRequestConfig {
-    skipToast?: boolean;
-  }
 }
 
 // Khởi tạo instance Axios dùng chung với cấu hình mặc định.
@@ -62,6 +52,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // Nếu request bị hủy (ví dụ: Component unmount trong React Query)
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config;
 
     // Nếu không có originalRequest hoặc lỗi không phải 401 Unauthorized
@@ -73,9 +68,6 @@ api.interceptors.response.use(
       originalRequest.url?.includes('/auth/login') ||
       originalRequest.url?.includes('/auth/refresh')
     ) {
-      if (!originalRequest || !originalRequest.skipToast) {
-        toast.apiError(error);
-      }
       return Promise.reject(error);
     }
 
@@ -89,9 +81,6 @@ api.interceptors.response.use(
           return api(originalRequest);
         })
         .catch((err) => {
-          if (!originalRequest || !originalRequest.skipToast) {
-            toast.apiError(err);
-          }
           return Promise.reject(err);
         });
     }
@@ -130,9 +119,6 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
 
-      if (!originalRequest || !originalRequest.skipToast) {
-        toast.apiError(refreshError);
-      }
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
