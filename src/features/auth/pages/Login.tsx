@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Form, Input, Button, Card } from 'antd';
-import { MailOutlined, LockOutlined } from '@ant-design/icons';
+import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLoginMutation } from '../hooks';
 import type { LoginPayload } from '../types';
@@ -19,7 +19,8 @@ const Login = () => {
   // Khởi tạo login mutation hook
   const loginMutation = useLoginMutation(() => {
     navigate('/admin');
-  });
+  }
+  );
 
   const onFinish = (values: LoginPayload) => {
     loginMutation.mutate({
@@ -57,9 +58,9 @@ const Login = () => {
               { type: 'email', message: 'Email không hợp lệ!' }
             ]}
           >
-            <Input 
-              prefix={<MailOutlined className="text-slate-400" />} 
-              placeholder="Email quản trị viên" 
+            <Input
+              prefix={<EnvelopeIcon className="h-5 w-5 text-slate-400" />}
+              placeholder="Email quản trị viên"
               className="bg-slate-800/50 border-slate-700 text-slate-200 placeholder-slate-500 hover:border-blue-500 focus:border-blue-500 rounded-lg"
             />
           </Form.Item>
@@ -69,7 +70,7 @@ const Login = () => {
             rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
           >
             <Input.Password
-              prefix={<LockOutlined className="text-slate-400" />}
+              prefix={<LockClosedIcon className="h-5 w-5 text-slate-400" />}
               placeholder="Mật khẩu"
               className="bg-slate-800/50 border-slate-700 text-slate-200 placeholder-slate-500 hover:border-blue-500 focus:border-blue-500 rounded-lg"
             />

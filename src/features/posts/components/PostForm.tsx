@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Form, Input, Select, Switch, Button, Row, Col } from 'antd';
-import { ArrowLeftOutlined, UploadOutlined, DeleteOutlined } from '@ant-design/icons';
+import { ArrowLeftIcon, ArrowUpTrayIcon, TrashIcon } from '@heroicons/react/24/outline';
 import type { Post, PostType, PostPayload } from '../types';
 
 interface PostFormProps {
@@ -114,9 +114,9 @@ const PostForm = ({
         <div className="flex items-center space-x-3">
           <Button
             type="text"
-            icon={<ArrowLeftOutlined />}
+            icon={<ArrowLeftIcon className="h-5 w-5" />}
             onClick={onCancel}
-            className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl"
+            className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl flex items-center justify-center"
             title="Quay lại"
           />
           <div>
@@ -240,7 +240,7 @@ const PostForm = ({
                         type="primary"
                         danger
                         shape="circle"
-                        icon={<DeleteOutlined />}
+                        icon={<TrashIcon className="h-4 w-4" />}
                         onClick={(e) => {
                           e.stopPropagation();
                           removeThumbnail();
@@ -252,7 +252,7 @@ const PostForm = ({
                 ) : (
                   <>
                     <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center mb-2.5 text-slate-400 group-hover:text-blue-500 transition-colors duration-200">
-                      <UploadOutlined className="text-lg" />
+                      <ArrowUpTrayIcon className="h-6 w-6" />
                     </div>
                     <span className="text-xs font-semibold text-slate-700">Kéo thả file hoặc nhấn để tải lên</span>
                     <span className="text-[10px] text-slate-400 mt-1">PNG, JPG, WEBP kích thước tối đa 5MB</span>

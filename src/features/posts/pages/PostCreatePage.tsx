@@ -5,7 +5,7 @@ import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
-import { ArrowLeftOutlined, UploadOutlined, DeleteOutlined } from '@ant-design/icons';
+import { ArrowLeftIcon, ArrowUpTrayIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useCreatePostMutation } from '../hooks';
 import type { PostType } from '../types';
 
@@ -107,9 +107,9 @@ const PostCreatePage = () => {
         <div className="flex items-center space-x-3">
           <Button
             type="text"
-            icon={<ArrowLeftOutlined />}
+            icon={<ArrowLeftIcon className="h-5 w-5" />}
             onClick={() => navigate('/admin/posts')}
-            className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl"
+            className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl flex items-center justify-center"
           />
           <div>
             <h3 className="text-lg font-bold text-slate-800">Tạo bài viết mới</h3>
@@ -215,7 +215,7 @@ const PostCreatePage = () => {
                           danger
                           shape="circle"
                           size="small"
-                          icon={<DeleteOutlined />}
+                          icon={<TrashIcon className="h-4 w-4" />}
                           onClick={(e) => {
                             e.stopPropagation();
                             removeThumbnail();
@@ -225,7 +225,7 @@ const PostCreatePage = () => {
                     </div>
                   ) : (
                     <>
-                      <UploadOutlined className="text-lg text-slate-400 mb-1" />
+                      <ArrowUpTrayIcon className="h-5 w-5 text-slate-400 mb-1" />
                       <span className="text-xs font-semibold text-slate-600">Nhấp để tải lên</span>
                     </>
                   )}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input, Select, Button } from 'antd';
-import { SearchOutlined, PlusOutlined, FilterOutlined } from '@ant-design/icons';
+import { MagnifyingGlassIcon, PlusIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import PostTable from '../components/PostTable';
 import { usePostsQuery, useDeletePostMutation } from '../hooks';
 
@@ -65,7 +65,7 @@ const PostManagementPage = () => {
           {/* Advanced Filter Button */}
           <Button
 
-            icon={<FilterOutlined />}
+            icon={<FunnelIcon className="h-5 w-5" />}
             className="h-11 rounded-xl flex items-center justify-center border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
             title="Bộ lọc nâng cao"
           />
@@ -76,7 +76,7 @@ const PostManagementPage = () => {
               placeholder="Tìm kiếm theo tiêu đề bài viết..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              prefix={<SearchOutlined className="text-slate-400 mr-1.5" />}
+              prefix={<MagnifyingGlassIcon className="h-5 w-5 text-slate-400 mr-1.5" />}
               className="w-full px-4 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-slate-700 text-sm"
             />
           </div>
@@ -96,7 +96,7 @@ const PostManagementPage = () => {
         {/* Create Button */}
         <Button
           type="primary"
-          icon={<PlusOutlined />}
+          icon={<PlusIcon className="h-5 w-5" />}
           onClick={() => {
             navigate('/admin/posts/create');
           }}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { User } from '../features/users/types';
+import { BellIcon, ChevronDownIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 interface NavbarProps {
   user: User | null;
@@ -11,11 +12,12 @@ const Navbar = ({ user, onLogout }: NavbarProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const getRoleLabel = (role?: string) => {
-    switch (role) {
-      case 'ADMIN':
+    switch (role?.toLowerCase()) {
+      case 'admin':
         return 'Quản trị viên';
-      case 'TEACHER':
+      case 'teacher':
         return 'Giảng viên';
+      case 'client':
       default:
         return 'Học viên';
     }
@@ -42,9 +44,7 @@ const Navbar = ({ user, onLogout }: NavbarProps) => {
       <div className="flex items-center space-x-4">
         {/* Nút thông báo */}
         <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors duration-200 relative">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
+          <BellIcon className="h-5 w-5" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full"></span>
         </button>
 
@@ -61,9 +61,7 @@ const Navbar = ({ user, onLogout }: NavbarProps) => {
             <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm select-none shadow-sm">
               {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
             </div>
-            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
+            <ChevronDownIcon className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Floating Dropdown Card */}
@@ -90,9 +88,7 @@ const Navbar = ({ user, onLogout }: NavbarProps) => {
                   }}
                   className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-left text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold transition-colors duration-150 cursor-pointer"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
+                  <ArrowRightOnRectangleIcon className="h-4.5 w-4.5" />
                   <span>Đăng xuất</span>
                 </button>
               </div>

@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { BookOpenIcon, DocumentTextIcon, UsersIcon } from '@heroicons/react/24/outline';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -13,9 +14,7 @@ const Sidebar = () => {
       <div className="h-16 flex items-center px-6 border-b border-slate-100 bg-white">
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/10">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
+            <BookOpenIcon className="h-5 w-5 text-white" />
           </div>
           <div>
             <h1 className="text-lg font-bold text-slate-800 tracking-wide">EduSpace</h1>
@@ -34,18 +33,11 @@ const Sidebar = () => {
               : 'hover:bg-slate-50 hover:text-slate-800 pl-4 border-l-4 border-transparent'
           }`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+          <DocumentTextIcon
             className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 ${
               isPostsActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'
             }`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-          </svg>
+          />
           <span>Bài viết</span>
         </Link>
 
@@ -57,18 +49,11 @@ const Sidebar = () => {
               : 'hover:bg-slate-50 hover:text-slate-800 pl-4 border-l-4 border-transparent'
           }`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+          <UsersIcon
             className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 ${
               isUsersActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'
             }`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
+          />
           <span>Danh sách người dùng</span>
         </Link>
       </nav>

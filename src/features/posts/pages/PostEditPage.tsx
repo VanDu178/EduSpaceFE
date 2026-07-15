@@ -5,7 +5,7 @@ import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
-import { ArrowLeftOutlined, UploadOutlined, DeleteOutlined } from '@ant-design/icons';
+import { ArrowLeftIcon, ArrowUpTrayIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { usePostsQuery, useUpdatePostMutation } from '../hooks';
 import type { PostType, PostPayload } from '../types';
 
@@ -151,9 +151,9 @@ const PostEditPage = () => {
         <div className="flex items-center space-x-3">
           <Button
             type="text"
-            icon={<ArrowLeftOutlined />}
+            icon={<ArrowLeftIcon className="h-5 w-5" />}
             onClick={() => navigate('/admin/posts')}
-            className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl"
+            className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl flex items-center justify-center"
           />
           <div>
             <h3 className="text-lg font-bold text-slate-800">Chỉnh sửa bài viết</h3>
@@ -260,7 +260,7 @@ const PostEditPage = () => {
                               danger
                               shape="circle"
                               size="small"
-                              icon={<DeleteOutlined />}
+                              icon={<TrashIcon className="h-4 w-4" />}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 removeThumbnail();
@@ -270,7 +270,7 @@ const PostEditPage = () => {
                         </div>
                       ) : (
                         <>
-                          <UploadOutlined className="text-base text-slate-400 mb-0.5" />
+                          <ArrowUpTrayIcon className="h-5 w-5 text-slate-400 mb-0.5" />
                           <span className="text-xs font-semibold text-slate-600">Chọn ảnh đại diện</span>
                           <span className="text-[10px] font-semibold text-slate-500">Tải lên</span>
                         </>

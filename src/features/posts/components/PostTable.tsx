@@ -1,5 +1,5 @@
 import { Table, Tag, Badge, Space, Button, Popconfirm, Empty } from 'antd';
-import { EditOutlined, DeleteOutlined, PictureOutlined, EyeOutlined } from '@ant-design/icons';
+import { PencilSquareIcon, TrashIcon, PhotoIcon, EyeIcon } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
 import type { Post } from '../types';
 
@@ -47,7 +47,7 @@ const PostTable = ({ posts, onViewDetail, onEdit, onDelete, isLoading }: PostTab
         }
         return (
           <div className="w-12 h-12 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400">
-            <PictureOutlined className="text-lg" />
+            <PhotoIcon className="h-6 w-6" />
           </div>
         );
       },
@@ -111,16 +111,16 @@ const PostTable = ({ posts, onViewDetail, onEdit, onDelete, isLoading }: PostTab
         <Space size="small">
           <Button
             type="text"
-            icon={<EyeOutlined />}
+            icon={<EyeIcon className="h-5 w-5" />}
             onClick={() => onViewDetail(record.id)}
-            className="text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"
+            className="text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center justify-center"
             title="Xem chi tiết"
           />
           <Button
             type="text"
-            icon={<EditOutlined />}
+            icon={<PencilSquareIcon className="h-5 w-5" />}
             onClick={() => onEdit(record.id)}
-            className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+            className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center"
             title="Sửa bài viết"
           />
           <Popconfirm
@@ -134,8 +134,8 @@ const PostTable = ({ posts, onViewDetail, onEdit, onDelete, isLoading }: PostTab
             <Button
               type="text"
               danger
-              icon={<DeleteOutlined />}
-              className="text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+              icon={<TrashIcon className="h-5 w-5" />}
+              className="text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg flex items-center justify-center"
               title="Xóa bài viết"
             />
           </Popconfirm>

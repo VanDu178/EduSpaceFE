@@ -1,5 +1,5 @@
 import { Form, Input, Button, Card } from 'antd';
-import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
+import { EnvelopeIcon, LockClosedIcon, UserIcon } from '@heroicons/react/24/outline';
 import { useNavigate, Link } from 'react-router-dom';
 import { useRegisterMutation } from '../hooks';
 import type { RegisterPayload } from '../types';
@@ -50,7 +50,7 @@ const Register = () => {
             rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
           >
             <Input 
-              prefix={<UserOutlined className="text-slate-400" />} 
+              prefix={<UserIcon className="h-5 w-5 text-slate-400" />} 
               placeholder="Họ và tên" 
               className="bg-slate-800/50 border-slate-700 text-slate-200 placeholder-slate-500 hover:border-blue-500 focus:border-blue-500 rounded-lg"
             />
@@ -64,7 +64,7 @@ const Register = () => {
             ]}
           >
             <Input 
-              prefix={<MailOutlined className="text-slate-400" />} 
+              prefix={<EnvelopeIcon className="h-5 w-5 text-slate-400" />} 
               placeholder="Email quản trị" 
               className="bg-slate-800/50 border-slate-700 text-slate-200 placeholder-slate-500 hover:border-blue-500 focus:border-blue-500 rounded-lg"
             />
@@ -78,7 +78,7 @@ const Register = () => {
             ]}
           >
             <Input.Password
-              prefix={<LockOutlined className="text-slate-400" />}
+              prefix={<LockClosedIcon className="h-5 w-5 text-slate-400" />}
               placeholder="Mật khẩu"
               className="bg-slate-800/50 border-slate-700 text-slate-200 placeholder-slate-500 hover:border-blue-500 focus:border-blue-500 rounded-lg"
             />
@@ -100,7 +100,7 @@ const Register = () => {
             ]}
           >
             <Input.Password
-              prefix={<LockOutlined className="text-slate-400" />}
+              prefix={<LockClosedIcon className="h-5 w-5 text-slate-400" />}
               placeholder="Xác nhận mật khẩu"
               className="bg-slate-800/50 border-slate-700 text-slate-200 placeholder-slate-500 hover:border-blue-500 focus:border-blue-500 rounded-lg"
             />

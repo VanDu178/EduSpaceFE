@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Tag, Badge, Spin, Space } from 'antd';
-import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons';
+import { ArrowLeftIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { usePostsQuery } from '../hooks';
 
 const PostDetailPage = () => {
@@ -54,9 +54,9 @@ const PostDetailPage = () => {
         <div className="flex items-center space-x-3">
           <Button
             type="text"
-            icon={<ArrowLeftOutlined />}
+            icon={<ArrowLeftIcon className="h-5 w-5" />}
             onClick={() => navigate('/admin/posts')}
-            className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl"
+            className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl flex items-center justify-center"
           />
           <div>
             <h3 className="text-lg font-bold text-slate-800">Chi tiết bài viết</h3>
@@ -65,7 +65,7 @@ const PostDetailPage = () => {
         </div>
         <Button
           type="primary"
-          icon={<EditOutlined />}
+          icon={<PencilSquareIcon className="h-5 w-5" />}
           onClick={() => navigate(`/admin/posts/${post.id}/edit`)}
           className="px-5 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-sm font-semibold flex items-center justify-center cursor-pointer"
         >

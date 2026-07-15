@@ -1,3 +1,4 @@
+import { Toaster } from 'react-hot-toast';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './features/auth/pages/Login';
 import Register from './features/auth/pages/Register';
@@ -12,7 +13,9 @@ import './App.css';
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <>
+      <Toaster position="top-right" reverseOrder={false} />
+      <BrowserRouter>
       <Routes>
         {/* Route đăng nhập công khai */}
         <Route path="/login" element={<Login />} />
@@ -45,7 +48,8 @@ const App = () => {
         {/* Redirect mặc định về /admin nếu gõ sai route */}
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </>
   );
 };
 

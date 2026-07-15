@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Table, Badge, Input, Empty, Popconfirm, Button, Tooltip } from 'antd';
-import { SearchOutlined, LockOutlined, UnlockOutlined, FilterOutlined } from '@ant-design/icons';
+import { MagnifyingGlassIcon, LockClosedIcon, LockOpenIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
 import { useUsersQuery } from '../hooks';
 import type { User } from '../types';
@@ -74,8 +74,8 @@ const UserManagementPage = () => {
               <Button
                 type="text"
                 danger={!isLocked}
-                className={isLocked ? 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg' : 'text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg'}
-                icon={isLocked ? <UnlockOutlined /> : <LockOutlined />}
+                className={isLocked ? 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center' : 'text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg flex items-center justify-center'}
+                icon={isLocked ? <LockOpenIcon className="h-5 w-5" /> : <LockClosedIcon className="h-5 w-5" />}
               />
             </Tooltip>
           </Popconfirm>
@@ -100,7 +100,7 @@ const UserManagementPage = () => {
         {/* Advanced Filter Button */}
         <Button
 
-          icon={<FilterOutlined />}
+          icon={<FunnelIcon className="h-5 w-5" />}
           className="h-11 rounded-xl flex items-center justify-center border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
           title="Bộ lọc nâng cao"
         />
@@ -109,7 +109,7 @@ const UserManagementPage = () => {
         <div className="w-full sm:w-[320px]">
           <Input
 
-            prefix={<SearchOutlined className="text-slate-400 mr-1.5" />}
+            prefix={<MagnifyingGlassIcon className="h-5 w-5 text-slate-400 mr-1.5" />}
             placeholder="Tìm theo tên hoặc email người dùng..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

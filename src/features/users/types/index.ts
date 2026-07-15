@@ -1,5 +1,5 @@
 // Định nghĩa vai trò của người dùng
-export type UserRole = 'ADMIN' | 'USER' | 'TEACHER';
+export type UserRole = 'ADMIN' | 'USER' | 'TEACHER' | 'admin' | 'client';
 
 // Interface thông tin người dùng / quản trị viên
 export interface User {

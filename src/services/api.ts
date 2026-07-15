@@ -1,4 +1,21 @@
 import axios from 'axios';
+import { toast } from '../utils/toastHelper';
+
+
+
+interface FailedRequestItem {
+  resolve: (token: string | null) => void;
+  reject: (error: unknown) => void;
+}
+
+
+
+// Mở rộng AxiosRequestConfig của Axios để hỗ trợ thuộc tính skipToast dùng chung
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipToast?: boolean;
+  }
+}
 
 // Khởi tạo instance Axios dùng chung với cấu hình mặc định.
 const api = axios.create({
@@ -10,10 +27,6 @@ const api = axios.create({
   withCredentials: true, // Bắt buộc để tự động gửi HttpOnly cookie (refresh token) lên server
 });
 
-interface FailedRequestItem {
-  resolve: (token: string | null) => void;
-  reject: (error: unknown) => void;
-}
 
 // Biến lưu trạng thái đang refresh token để tránh gọi trùng lặp nhiều lần
 let isRefreshing = false;
@@ -60,6 +73,9 @@ api.interceptors.response.use(
       originalRequest.url?.includes('/auth/login') ||
       originalRequest.url?.includes('/auth/refresh')
     ) {
+      if (!originalRequest || !originalRequest.skipToast) {
+        toast.apiError(error);
+      }
       return Promise.reject(error);
     }
 
@@ -73,6 +89,9 @@ api.interceptors.response.use(
           return api(originalRequest);
         })
         .catch((err) => {
+          if (!originalRequest || !originalRequest.skipToast) {
+            toast.apiError(err);
+          }
           return Promise.reject(err);
         });
     }
@@ -105,12 +124,15 @@ api.interceptors.response.use(
     } catch (refreshError) {
       // Nếu refresh token thất bại (ví dụ: refresh token hết hạn hoặc bị thu hồi)
       processQueue(refreshError, null);
-      
+
       // Xóa thông tin đăng nhập và chuyển hướng về trang login
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
       window.location.href = '/login';
-      
+
+      if (!originalRequest || !originalRequest.skipToast) {
+        toast.apiError(refreshError);
+      }
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
