@@ -13,7 +13,7 @@ const filterOptions = [
   { value: 'GENERAL', label: 'Chung' }
 ];
 
-const PostManagementPage = () => {
+const ListPage = () => {
   const navigate = useNavigate();
 
   // State tìm kiếm và lọc dữ liệu
@@ -64,7 +64,6 @@ const PostManagementPage = () => {
         <div className="flex flex-wrap items-center gap-3">
           {/* Advanced Filter Button */}
           <Button
-
             icon={<FunnelIcon className="h-5 w-5" />}
             className="h-11 rounded-xl flex items-center justify-center border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
             title="Bộ lọc nâng cao"
@@ -84,7 +83,6 @@ const PostManagementPage = () => {
           {/* Post Type Filter */}
           <div className="w-full sm:w-[180px]">
             <Select
-
               value={filterType}
               onChange={(value) => setFilterType(value)}
               options={filterOptions}
@@ -120,4 +118,4 @@ const PostManagementPage = () => {
   );
 };
 
-export default PostManagementPage;
+export default ListPage;

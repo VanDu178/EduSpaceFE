@@ -3,7 +3,7 @@ import { Button, Tag, Badge, Spin, Space } from 'antd';
 import { ArrowLeftIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { usePostsQuery } from '../hooks';
 
-const PostDetailPage = () => {
+const DetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -39,7 +39,7 @@ const PostDetailPage = () => {
 
   if (!post) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl max-w-2xl mx-auto text-center">
+      <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl max-w-2xl mx-auto text-center mt-10">
         <p className="font-semibold text-lg">⚠️ Không tìm thấy bài viết!</p>
         <p className="text-sm mt-1">Bài viết này không tồn tại hoặc đã bị xóa khỏi hệ thống.</p>
         <Button onClick={() => navigate('/admin/posts')} className="mt-4 rounded-xl">Quay lại danh sách</Button>
@@ -138,4 +138,4 @@ const PostDetailPage = () => {
   );
 };
 
-export default PostDetailPage;
+export default DetailPage;

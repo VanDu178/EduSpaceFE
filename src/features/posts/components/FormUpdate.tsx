@@ -1,61 +1,58 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Input, Select, Switch, Button, Row, Col, Spin } from 'antd';
+import { Form, Input, Select, Switch, Button, Row, Col } from 'antd';
+import { ArrowLeftIcon, ArrowUpTrayIcon, TrashIcon } from '@heroicons/react/24/outline';
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
-import { ArrowLeftIcon, ArrowUpTrayIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { usePostsQuery, useUpdatePostMutation } from '../hooks';
-import type { PostType, PostPayload } from '../types';
+import type { FormInstance } from 'antd';
+import type { Post, PostType, PostPayload } from '../types';
+
+interface FormUpdateProps {
+  form: FormInstance;
+  postTypes: PostType[];
+  initialData: Post;
+  onSubmit: (values: PostPayload) => void;
+  onCancel: () => void;
+  isSaving: boolean;
+}
 
 const { Option } = Select;
 const { TextArea } = Input;
 
-const staticPostTypes: PostType[] = [
-  { id: 1, name: 'Kiến thức', code: 'KIENTHUC', description: 'Bài viết chia sẻ kiến thức' },
-  { id: 2, name: 'Bài tập', code: 'BAITAP', description: 'Bài viết chứa bài tập và lời giải' },
-  { id: 3, name: 'Project Log', code: 'PROJECT_LOG', description: 'Nhật ký thực hiện dự án' },
-  { id: 4, name: 'Chung', code: 'GENERAL', description: 'Danh mục bài viết chung' },
-];
-
-const PostEditPage = () => {
+const FormUpdate = ({
+  form,
+  postTypes,
+  initialData,
+  onSubmit,
+  onCancel,
+  isSaving,
+}: FormUpdateProps) => {
   const editor = useCreateBlockNote();
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [form] = Form.useForm();
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Lấy dữ liệu từ cache/query danh sách bài viết
-  const { data: posts = [], isLoading } = usePostsQuery();
-  const post = posts.find((p) => p.id === Number(id));
-
-  const updateMutation = useUpdatePostMutation(Number(id), staticPostTypes, () => {
-    navigate('/admin/posts');
-  });
-
-  // Tải trước dữ liệu vào form
+  // Nạp dữ liệu ban đầu cho Form khi initialData thay đổi
   useEffect(() => {
-    if (post) {
+    if (initialData) {
       form.setFieldsValue({
-        title: post.title,
-        summary: post.summary || '',
-        content: post.content || '',
-        postTypeId: post.postTypeId,
-        published: post.published || false,
+        title: initialData.title,
+        summary: initialData.summary || '',
+        postTypeId: initialData.postTypeId,
+        published: initialData.published || false,
       });
-      setThumbnail(post.thumbnail || null);
+      setThumbnail(initialData.thumbnail || null);
     }
-  }, [post, form]);
-  // Load existing HTML content into BlockNote editor when editing
+  }, [initialData, form]);
+
+  // Nạp dữ liệu HTML vào BlockNote editor khi có nội dung cũ
   useEffect(() => {
-    if (post?.content) {
-      const blocks = editor.tryParseHTMLToBlocks(post.content);
+    if (initialData?.content) {
+      const blocks = editor.tryParseHTMLToBlocks(initialData.content);
       editor.replaceBlocks(editor.document, blocks);
     }
-  }, [post, editor]);
+  }, [initialData, editor]);
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -106,37 +103,15 @@ const PostEditPage = () => {
 
   const onFinish = (values: any) => {
     const contentHtml = editor.blocksToHTMLLossy(editor.document);
-    const payload: PostPayload = {
+    onSubmit({
       title: values.title,
       summary: values.summary,
       content: contentHtml,
       postTypeId: values.postTypeId,
       published: values.published,
       thumbnail: thumbnail,
-    };
-    updateMutation.mutate({
-      id: Number(id),
-      data: payload,
     });
   };
-
-  if (isLoading) {
-    return (
-      <div className="h-96 flex items-center justify-center">
-        <Spin size="large" tip="Đang tải dữ liệu bài viết..." />
-      </div>
-    );
-  }
-
-  if (!post) {
-    return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl max-w-2xl mx-auto text-center">
-        <p className="font-semibold text-lg">⚠️ Không tìm thấy bài viết!</p>
-        <p className="text-sm mt-1">Bài viết này không tồn tại hoặc đã bị xóa khỏi hệ thống.</p>
-        <Button onClick={() => navigate('/admin/posts')} className="mt-4 rounded-xl">Quay lại danh sách</Button>
-      </div>
-    );
-  }
 
   return (
     <Form
@@ -144,15 +119,15 @@ const PostEditPage = () => {
       layout="vertical"
       onFinish={onFinish}
       requiredMark={false}
-      className="-mx-8 -mt-8"
+      className="-m-5 h-[calc(100vh-64px)] flex flex-col overflow-hidden bg-slate-50/30"
     >
-      {/* Sticky Header */}
-      <div className="sticky top-16 bg-white z-30 border-b border-slate-200/80 py-4 px-8 flex items-center justify-between shadow-sm">
+      {/* Header cố định */}
+      <div className="bg-white border-b border-slate-200/80 py-4 px-8 flex items-center justify-between shadow-sm z-30 flex-shrink-0">
         <div className="flex items-center space-x-3">
           <Button
             type="text"
             icon={<ArrowLeftIcon className="h-5 w-5" />}
-            onClick={() => navigate('/admin/posts')}
+            onClick={onCancel}
             className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl flex items-center justify-center"
           />
           <div>
@@ -162,7 +137,7 @@ const PostEditPage = () => {
         </div>
         <div className="flex items-center space-x-3">
           <Button
-            onClick={() => navigate('/admin/posts')}
+            onClick={onCancel}
             className="px-5 h-10 rounded-xl border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50"
           >
             Hủy bỏ
@@ -170,7 +145,7 @@ const PostEditPage = () => {
           <Button
             type="primary"
             htmlType="submit"
-            loading={updateMutation.isPending}
+            loading={isSaving}
             className="px-5 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-sm font-semibold flex items-center"
           >
             Lưu thay đổi
@@ -178,7 +153,8 @@ const PostEditPage = () => {
         </div>
       </div>
 
-      <div className="p-8 space-y-6 max-w-7xl mx-auto">
+      {/* Vùng nội dung cuộn nội bộ */}
+      <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-7xl w-full mx-auto">
         {/* Vùng Thông Tin Trên */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-sm">
           <Row gutter={24}>
@@ -218,7 +194,7 @@ const PostEditPage = () => {
                   placeholder="Chọn thể loại"
                   className="w-full h-11 [&_.ant-select-selector]:!rounded-xl [&_.ant-select-selector]:!border-slate-200 [&_.ant-select-selector]:!px-4"
                 >
-                  {staticPostTypes.map((type) => (
+                  {postTypes.map((type) => (
                     <Option key={type.id} value={type.id}>
                       {type.name}
                     </Option>
@@ -236,8 +212,9 @@ const PostEditPage = () => {
                       onDragLeave={handleDrag}
                       onDrop={handleDrop}
                       onClick={() => fileInputRef.current?.click()}
-                      className={`border border-dashed rounded-xl p-2 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 relative min-h-[90px] ${dragActive ? 'border-blue-500 bg-blue-50/20' : 'border-slate-200 hover:border-blue-500 bg-slate-50/50 hover:bg-slate-50'
-                        }`}
+                      className={`border border-dashed rounded-xl p-2 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 relative min-h-[90px] ${
+                        dragActive ? 'border-blue-500 bg-blue-50/20' : 'border-slate-200 hover:border-blue-500 bg-slate-50/50 hover:bg-slate-50'
+                      }`}
                     >
                       <input
                         ref={fileInputRef}
@@ -271,7 +248,7 @@ const PostEditPage = () => {
                       ) : (
                         <>
                           <ArrowUpTrayIcon className="h-5 w-5 text-slate-400 mb-0.5" />
-                          <span className="text-xs font-semibold text-slate-600">Chọn ảnh đại diện</span>
+                          <span className="text-xs font-semibold text-slate-600">Chọn ảnh</span>
                           <span className="text-[10px] font-semibold text-slate-500">Tải lên</span>
                         </>
                       )}
@@ -309,4 +286,4 @@ const PostEditPage = () => {
   );
 };
 
-export default PostEditPage;
+export default FormUpdate;

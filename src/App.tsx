@@ -3,10 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './features/auth/pages/Login';
 import Register from './features/auth/pages/Register';
 import DashboardPage from './pages/DashboardPage';
-import PostManagementPage from './features/posts/pages/PostManagementPage';
-import PostCreatePage from './features/posts/pages/PostCreatePage';
-import PostEditPage from './features/posts/pages/PostEditPage';
-import PostDetailPage from './features/posts/pages/PostDetailPage';
+import ListPage from './features/posts/pages/ListPage';
+import CreatePage from './features/posts/pages/CreatePage';
+import UpdatePage from './features/posts/pages/UpdatePage';
+import DetailPage from './features/posts/pages/DetailPage';
 import UserManagementPage from './features/users/pages/UserManagementPage';
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
@@ -36,10 +36,10 @@ const App = () => {
           <Route index element={<Navigate to="posts" replace />} />
           
           {/* Các phân hệ route con quản lý bài viết */}
-          <Route path="posts" element={<PostManagementPage />} />
-          <Route path="posts/create" element={<PostCreatePage />} />
-          <Route path="posts/:id" element={<PostDetailPage />} />
-          <Route path="posts/:id/edit" element={<PostEditPage />} />
+          <Route path="posts" element={<ListPage />} />
+          <Route path="posts/create" element={<CreatePage />} />
+          <Route path="posts/:id" element={<DetailPage />} />
+          <Route path="posts/:id/edit" element={<UpdatePage />} />
           
           {/* Phân hệ route con quản lý người dùng */}
           <Route path="users" element={<UserManagementPage />} />

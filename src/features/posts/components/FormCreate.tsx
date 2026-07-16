@@ -1,35 +1,35 @@
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Form, Input, Select, Button, Row, Col } from 'antd';
+import { ArrowLeftIcon, ArrowUpTrayIcon, TrashIcon } from '@heroicons/react/24/outline';
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
-import { ArrowLeftIcon, ArrowUpTrayIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { useCreatePostMutation } from '../hooks';
-import type { PostType } from '../types';
+import type { FormInstance } from 'antd';
+import type { PostType, PostPayload } from '../types';
 
-const { Option } = Select; // Ant Design Select options
+interface FormCreateProps {
+  form: FormInstance;
+  postTypes: PostType[];
+  onSubmit: (values: PostPayload) => void;
+  onCancel: () => void;
+  isSaving: boolean;
+}
+
+const { Option } = Select;
 const { TextArea } = Input;
 
-const staticPostTypes: PostType[] = [
-  { id: 1, name: 'Kiến thức', code: 'KIENTHUC', description: 'Bài viết chia sẻ kiến thức' },
-  { id: 2, name: 'Bài tập', code: 'BAITAP', description: 'Bài viết chứa bài tập và lời giải' },
-  { id: 3, name: 'Project Log', code: 'PROJECT_LOG', description: 'Nhật ký thực hiện dự án' },
-  { id: 4, name: 'Chung', code: 'GENERAL', description: 'Danh mục bài viết chung' },
-];
-
-const PostCreatePage = () => {
+const FormCreate = ({
+  form,
+  postTypes,
+  onSubmit,
+  onCancel,
+  isSaving,
+}: FormCreateProps) => {
   const editor = useCreateBlockNote();
-  const navigate = useNavigate();
-  const [form] = Form.useForm();
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const createMutation = useCreatePostMutation(() => {
-    navigate('/admin/posts');
-  });
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -80,15 +80,14 @@ const PostCreatePage = () => {
 
   const onFinish = (values: any) => {
     const contentHtml = editor.blocksToHTMLLossy(editor.document);
-    createMutation.mutate({
+    onSubmit({
       title: values.title,
       summary: values.summary,
       content: contentHtml,
       postTypeId: values.postTypeId,
-      published: false,
+      published: false, // Mặc định tạo mới chưa xuất bản
       thumbnail: thumbnail,
     });
-
   };
 
   return (
@@ -98,27 +97,26 @@ const PostCreatePage = () => {
       onFinish={onFinish}
       requiredMark={false}
       initialValues={{
-        postTypeId: 1,
+        postTypeId: postTypes[0]?.id || 1,
       }}
-      className="-mx-8 -mt-8"
+      className="-m-5 h-[calc(100vh-120px)] flex flex-col overflow-hidden bg-slate-50/30"
     >
-      {/* Sticky Header */}
-      <div className="sticky top-16 bg-white z-30 border-b border-slate-200/80 py-4 px-8 flex items-center justify-between shadow-sm">
+      {/* Header cố định */}
+      <div className="bg-white py-4 px-8 flex items-center justify-between z-30 flex-shrink-0">
         <div className="flex items-center space-x-3">
           <Button
             type="text"
             icon={<ArrowLeftIcon className="h-5 w-5" />}
-            onClick={() => navigate('/admin/posts')}
+            onClick={onCancel}
             className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl flex items-center justify-center"
           />
           <div>
             <h3 className="text-lg font-bold text-slate-800">Tạo bài viết mới</h3>
-            <p className="text-xs text-slate-400 font-medium">Bố cục soạn thảo bài viết tối giản và rộng rãi.</p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
           <Button
-            onClick={() => navigate('/admin/posts')}
+            onClick={onCancel}
             className="px-5 h-10 rounded-xl border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50"
           >
             Hủy bỏ
@@ -126,7 +124,7 @@ const PostCreatePage = () => {
           <Button
             type="primary"
             htmlType="submit"
-            loading={createMutation.isPending}
+            loading={isSaving}
             className="px-5 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-sm font-semibold flex items-center"
           >
             Tạo bài đăng
@@ -134,7 +132,8 @@ const PostCreatePage = () => {
         </div>
       </div>
 
-      <div className="p-8 space-y-6 max-w-7xl mx-auto">
+      {/* Vùng nội dung cuộn nội bộ */}
+      <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-7xl w-full mx-auto">
         {/* Vùng Thông Tin Trên */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-sm">
           <Row gutter={24}>
@@ -172,9 +171,9 @@ const PostCreatePage = () => {
               >
                 <Select
                   placeholder="Chọn thể loại"
-                  className="w-full h-11 [&_.ant-select-selector]:!rounded-xl [&_.ant-select-selector]:!border-slate-200 [&_.ant-select-selector]:!px-4"
+                  className="w-full"
                 >
-                  {staticPostTypes.map((type) => (
+                  {postTypes.map((type) => (
                     <Option key={type.id} value={type.id}>
                       {type.name}
                     </Option>
@@ -190,9 +189,8 @@ const PostCreatePage = () => {
                   onDragLeave={handleDrag}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className={`border border-dashed rounded-xl p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 relative min-h-[110px] ${
-                    dragActive ? 'border-blue-500 bg-blue-50/20' : 'border-slate-200 hover:border-blue-500 bg-slate-50/50 hover:bg-slate-50'
-                  }`}
+                  className={`border border-dashed rounded-xl p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 relative min-h-[110px] ${dragActive ? 'border-blue-500 bg-blue-50/20' : 'border-slate-200 hover:border-blue-500 bg-slate-50/50 hover:bg-slate-50'
+                    }`}
                 >
                   <input
                     ref={fileInputRef}
@@ -237,7 +235,7 @@ const PostCreatePage = () => {
         </div>
 
         {/* Vùng Soạn Thảo Dưới Trải Rộng 100% */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-sm">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-sm min-h-[350px]">
           <Form.Item
             label={<span className="text-sm font-semibold text-slate-700">Nội dung bài viết chi tiết</span>}
             name="content"
@@ -250,4 +248,4 @@ const PostCreatePage = () => {
   );
 };
 
-export default PostCreatePage;
+export default FormCreate;

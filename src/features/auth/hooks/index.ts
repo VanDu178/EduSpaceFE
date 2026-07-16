@@ -50,7 +50,6 @@ export const useRegisterMutation = (
       }
     },
     onError: (err: AxiosError<ApiResponse>) => {
-      console.error('Register hook error:', err);
       if (onErrorCallback) {
         onErrorCallback(err);
       }
@@ -66,7 +65,7 @@ export const useLogoutMutation = (onSuccessCallback?: () => void) => {
       toast.success('Đăng xuất hệ thống thành công!');
       cleanupSession(onSuccessCallback);
     },
-    onError: (err: AxiosError<ApiResponse>) => {
+    onError: () => {
       // Dù API lỗi vẫn xóa session để giải phóng giao diện
       cleanupSession(onSuccessCallback);
     },
