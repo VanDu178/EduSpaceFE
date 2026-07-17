@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from 'antd';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { ListPage, FilterBar } from '../components';
-import { usePostsQuery, useDeletePostMutation } from '../hooks';
+import { usePostsQuery, useDeletePostMutation, useUpdatePostStatusMutation } from '../hooks';
+import { usePostTypesQuery } from '../../postTypes';
 import type { Params } from '../types';
 
 import { DEFAULT_PARAMS } from '../constants';
@@ -21,7 +22,9 @@ const Index = () => {
     keyword: params.keyword || undefined,
     postType: params.postType !== 'ALL' ? params.postType : undefined,
   });
+  const { data: postTypes = [] } = usePostTypesQuery();
   const deleteMutation = useDeletePostMutation();
+  const updateStatusMutation = useUpdatePostStatusMutation();
 
   const posts = data?.posts || [];
 
@@ -38,6 +41,11 @@ const Index = () => {
   // Kích hoạt chế độ Delete bài viết
   const handleDeleteClick = (id: number) => {
     deleteMutation.mutate(id);
+  };
+
+  // Kích hoạt cập nhật trạng thái bài viết
+  const handleUpdateStatusClick = (id: number, published: boolean) => {
+    updateStatusMutation.mutate({ id, published });
   };
 
 
@@ -57,6 +65,7 @@ const Index = () => {
         <FilterBar
           params={params}
           setParams={setParams}
+          postTypes={postTypes}
         />
 
         {/* Create Button */}
@@ -81,6 +90,9 @@ const Index = () => {
           onViewDetail={handleViewDetailClick}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
+          onUpdateStatus={handleUpdateStatusClick}
+          isUpdatingStatus={updateStatusMutation.isPending}
+          updatingStatusId={updateStatusMutation.variables?.id}
           isLoading={isLoading}
           pagination={{
             current: params.page || 1,

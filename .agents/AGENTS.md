@@ -24,6 +24,8 @@ Tài liệu này quy định các nguyên tắc thiết kế mã nguồn, giao d
     *   Sử dụng `<Button />`, `<Input />`, `<Select />`, `<Switch />` từ Ant Design.
 *   **Tùy biến phong cách phẳng, trắng bằng Tailwind CSS:**
     *   Không tự viết lại các component giao diện thô từ thẻ HTML cơ bản. Hãy bọc các component của Ant Design bằng các class Tailwind (như `className="w-full rounded-xl..."`) để đồng bộ với ngôn ngữ thiết kế chung: **Sạch sẽ, phẳng, trắng tối giản, bo góc mềm mại, sang trọng.**
+*   **Không sử dụng bóng đổ (box-shadow/shadow classes):**
+    *   Tuyệt đối không sử dụng thuộc tính `box-shadow` hoặc các class shadow của Tailwind (như `shadow`, `shadow-sm`, `shadow-md`, `shadow-lg`, `shadow-xl`, `shadow-2xl`, v.v.) trên các component và container. Thiết kế phải tuân thủ phong cách phẳng (flat design), sử dụng các đường viền mờ (`border-slate-100`, `border-slate-200/80`, v.v.) để phân định không gian hiển thị và các layer giao diện.
 
 ---
 

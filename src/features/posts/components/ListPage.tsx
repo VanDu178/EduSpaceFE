@@ -1,13 +1,17 @@
-import { Table, Tag, Badge, Button, Popconfirm, Empty, Image } from 'antd';
+import { Table, Tag, Button, Popconfirm, Empty, Image, Switch } from 'antd';
 import { PencilSquareIcon, TrashIcon, PhotoIcon, EyeIcon } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
 import type { Post } from '../types';
+import { getPostTypeStyles } from '../utils';
 
 interface PostTableProps {
   posts: Post[];
   onViewDetail: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
+  onUpdateStatus: (id: number, published: boolean) => void;
+  isUpdatingStatus?: boolean;
+  updatingStatusId?: number;
   isLoading: boolean;
   pagination?: {
     current: number;
@@ -22,32 +26,12 @@ const PostTable = ({
   onViewDetail,
   onEdit,
   onDelete,
+  onUpdateStatus,
+  isUpdatingStatus,
+  updatingStatusId,
   isLoading,
   pagination,
 }: PostTableProps) => {
-  // Lấy kiểu màu sắc tương ứng cho loại bài viết (badge)
-  const getPostTypeStyles = (code?: string) => {
-    const normCode = code?.toUpperCase() || 'GENERAL';
-    switch (normCode) {
-      case 'FRONTEND':
-      case 'KIENTHUC':
-      case 'KIEN_THUC':
-        return 'purple';
-      case 'BACKEND':
-      case 'BAITAP':
-      case 'BAI_TAP':
-        return 'blue';
-      case 'UIUX':
-      case 'PROJECT_LOG':
-      case 'PROJECTLOG':
-        return 'magenta';
-      case 'DEVOPS':
-      case 'GENERAL':
-        return 'cyan';
-      default:
-        return 'default';
-    }
-  };
 
   const columns: ColumnsType<Post> = [
     {
@@ -60,7 +44,7 @@ const PostTable = ({
             <Image
               src={record?.thumbnail}
               alt={record?.title}
-              className="w-12 h-12 rounded-lg object-cover border border-slate-100 shadow-sm"
+              className="w-12 h-12 rounded-lg object-cover border border-slate-100"
             />
           );
         }
@@ -110,14 +94,17 @@ const PostTable = ({
     },
     {
       title: 'Trạng thái',
+      align: "center",
       dataIndex: 'published',
       key: 'published',
-      width: 140,
-      render: (published) => (
-        <Badge
-          status={published ? 'success' : 'warning'}
-          text={published ? 'Đã xuất bản' : 'Bản nháp'}
-          className="font-semibold text-xs"
+      width: 150,
+      render: (published, record) => (
+        <Switch
+          checked={published}
+          loading={isUpdatingStatus && updatingStatusId === record.id}
+          onChange={(checked) => onUpdateStatus(record.id, checked)}
+          checkedChildren="Đã xuất bản"
+          unCheckedChildren="Bản nháp"
         />
       ),
     },
@@ -143,8 +130,9 @@ const PostTable = ({
             title="Sửa bài viết"
           />
           <Popconfirm
+            placement='topLeft'
             title="Xóa bài viết"
-            description={`Bạn có chắc chắn muốn xóa bài viết "${record.title}"?`}
+            description={`Bạn có chắc chắn muốn xóa bài viết ?`}
             onConfirm={() => onDelete(record.id)}
             okText="Xóa"
             cancelText="Hủy"

@@ -3,16 +3,10 @@ import { Form, Spin, Button } from 'antd';
 import type { AxiosError } from 'axios';
 import { FormUpdate } from '../components';
 import { usePostsQuery, useUpdatePostMutation } from '../hooks';
-import type { PostType, PostPayload } from '../types';
+import { usePostTypesQuery } from '../../postTypes';
+import type { PostPayload } from '../types';
 import type { ApiResponse } from '../../../types/api';
 import { handleApiError } from '../../../utils/errorHandler';
-
-const staticPostTypes: PostType[] = [
-  { id: 1, name: 'Frontend Development', code: 'FRONTEND', description: 'Bài viết về Phát triển Frontend' },
-  { id: 2, name: 'Backend Development', code: 'BACKEND', description: 'Bài viết về Phát triển Backend' },
-  { id: 3, name: 'UI/UX Design', code: 'UIUX', description: 'Bài viết về Thiết kế Giao diện & Trải nghiệm' },
-  { id: 4, name: 'DevOps', code: 'DEVOPS', description: 'Bài viết về DevOps & Triển khai' },
-];
 
 const UpdatePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,12 +15,12 @@ const UpdatePage = () => {
 
   // Lấy danh sách bài viết để tìm bài viết cần chỉnh sửa
   const { data, isLoading } = usePostsQuery({ limit: 1000 });
+  const { data: postTypes = [], isLoading: isLoadingTypes } = usePostTypesQuery();
   const posts = data?.posts || [];
   const post = posts.find((p) => p.id === Number(id));
 
   const updateMutation = useUpdatePostMutation(
     Number(id),
-    staticPostTypes,
     () => {
       navigate('/admin/posts');
     },
@@ -44,7 +38,7 @@ const UpdatePage = () => {
     navigate('/admin/posts');
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingTypes) {
     return (
       <div className="h-96 flex items-center justify-center">
         <Spin size="large" tip="Đang tải dữ liệu bài viết..." />
@@ -65,7 +59,7 @@ const UpdatePage = () => {
   return (
     <FormUpdate
       form={form}
-      postTypes={staticPostTypes}
+      postTypes={postTypes}
       initialData={post}
       onSubmit={handleSubmit}
       onCancel={handleCancel}

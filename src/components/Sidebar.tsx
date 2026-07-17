@@ -19,7 +19,7 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
       {/* Toggle button - floating on the border */}
       <button
         onClick={onToggle}
-        className="absolute -right-3.5 top-20 w-7 h-7 bg-white border border-slate-200/80 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 shadow-md shadow-slate-200/50 cursor-pointer z-50 transition-all duration-200 active:scale-95"
+        className="absolute -right-3.5 top-20 w-7 h-7 bg-white border border-slate-200/80 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 cursor-pointer z-50 transition-all duration-200 active:scale-95"
         title={isCollapsed ? 'Mở rộng menu' : 'Thu nhỏ menu'}
       >
         {isCollapsed ? (
@@ -32,7 +32,7 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
       {/* Brand logo section */}
       <div className={`h-16 flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-6'} border-b border-slate-100 bg-white transition-all duration-300`}>
         <div className="flex items-center space-x-3 overflow-hidden">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/10 shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
             <BookOpenIcon className="h-5 w-5 text-white" />
           </div>
           <div className={`flex flex-col transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>

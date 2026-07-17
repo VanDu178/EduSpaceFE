@@ -1,145 +1,165 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Tag, Badge, Spin, Space } from 'antd';
-import { ArrowLeftIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
-import { usePostsQuery } from '../hooks';
+import { Button, Tag, Badge, Spin } from 'antd';
+import { CalendarIcon, ClockIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { usePostQuery } from '../hooks';
+import { getPostTypeStyles } from '../utils';
 
 const DetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Lấy dữ liệu từ cache/query danh sách bài viết
-  const { data, isLoading } = usePostsQuery({ limit: 1000 });
-  const posts = data?.posts || [];
-  const post = posts.find((p) => p.id === Number(id));
+  // Gọi API lấy chi tiết bài viết theo ID
+  const { data, isLoading } = usePostQuery(id ? Number(id) : undefined);
+  const post = data?.post;
 
-  // Lấy kiểu màu sắc tương ứng cho loại bài viết (badge)
-  const getPostTypeStyles = (code?: string) => {
-    const normCode = code?.toUpperCase() || 'GENERAL';
-    switch (normCode) {
-      case 'FRONTEND':
-      case 'KIENTHUC':
-      case 'KIEN_THUC':
-        return 'purple';
-      case 'BACKEND':
-      case 'BAITAP':
-      case 'BAI_TAP':
-        return 'blue';
-      case 'UIUX':
-      case 'PROJECT_LOG':
-      case 'PROJECTLOG':
-        return 'magenta';
-      case 'DEVOPS':
-      case 'GENERAL':
-        return 'cyan';
-      default:
-        return 'default';
+  // Định dạng ngày tháng hiển thị đẹp mắt
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return 'N/A';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateStr;
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="h-96 flex items-center justify-center">
-        <Spin size="large" tip="Đang tải thông tin chi tiết bài viết..." />
-      </div>
-    );
-  }
-
-  if (!post) {
-    return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl max-w-2xl mx-auto text-center mt-10">
-        <p className="font-semibold text-lg">⚠️ Không tìm thấy bài viết!</p>
-        <p className="text-sm mt-1">Bài viết này không tồn tại hoặc đã bị xóa khỏi hệ thống.</p>
-        <Button onClick={() => navigate('/admin/posts')} className="mt-4 rounded-xl">Quay lại danh sách</Button>
-      </div>
-    );
-  }
-
   return (
-    <div className="-mx-8 -mt-8">
-      {/* Sticky Header */}
-      <div className="sticky top-16 bg-white z-30 border-b border-slate-200/80 py-4 px-8 flex items-center justify-between shadow-sm">
-        <div className="flex items-center space-x-3">
-          <Button
-            type="text"
-            icon={<ArrowLeftIcon className="h-5 w-5" />}
-            onClick={() => navigate('/admin/posts')}
-            className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl flex items-center justify-center"
-          />
-          <div>
-            <h3 className="text-lg font-bold text-slate-800">Chi tiết bài viết</h3>
-            <p className="text-xs text-slate-400 font-medium">Xem nội dung bài viết và định cấu hình xuất bản.</p>
-          </div>
-        </div>
+    <div className="-m-5 h-[calc(100vh-104px)] flex flex-col overflow-hidden bg-slate-50/30">
+      {/* Title Bar với Button Back */}
+      <div className="bg-white border-b border-slate-100 p-3.5 pr-6 flex items-center sticky top-0 z-30 flex-shrink-0">
         <Button
-          type="primary"
-          icon={<PencilSquareIcon className="h-5 w-5" />}
-          onClick={() => navigate(`/admin/posts/${post.id}/edit`)}
-          className="px-5 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-sm font-semibold flex items-center justify-center cursor-pointer"
-        >
-          Chỉnh sửa bài đăng
-        </Button>
+          type="text"
+          icon={<ArrowLeftIcon className="h-4 w-4" />}
+          onClick={() => navigate('/admin/posts')}
+          className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg flex items-center justify-center p-2 mr-2"
+        />
+        <span className="text-sm font-bold text-slate-800 uppercase tracking-wider">Chi tiết bài viết</span>
       </div>
 
-      <div className="p-8 max-w-4xl mx-auto space-y-8">
-        {/* Main Content Card */}
-        <article className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-10 shadow-sm space-y-6">
-          
-          {/* Categories and Status tags */}
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <Space>
-              <Tag color={getPostTypeStyles(post.postType?.code)} className="font-semibold px-3 py-1 rounded-full border-none">
-                {post.postType?.name || 'Chung'}
-              </Tag>
-              <Badge
-                status={post.published ? 'success' : 'warning'}
-                text={post.published ? 'Đã xuất bản' : 'Bản nháp'}
-                className="font-bold text-xs"
-              />
-            </Space>
-            <span className="text-xs text-slate-400 font-medium">Mã số bài đăng: #{post.id}</span>
+      {/* Vùng nội dung cuộn */}
+      <div className="flex-1 overflow-y-auto p-5">
+        {isLoading ? (
+          <div className="h-96 flex items-center justify-center">
+            <Spin size="large" tip="Đang tải thông tin chi tiết bài viết..." />
           </div>
-
-          {/* Title */}
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-800 leading-tight">
-            {post.title}
-          </h1>
-
-          {/* Summary Block */}
-          {post.summary && (
-            <div className="bg-slate-50/70 border-l-4 border-blue-500 p-4 rounded-r-xl">
-              <p className="text-slate-600 italic text-sm md:text-base leading-relaxed">
-                {post.summary}
-              </p>
-            </div>
-          )}
-
-          {/* Thumbnail Image */}
-          {post.thumbnail && (
-            <div className="w-full max-h-[400px] overflow-hidden rounded-xl border border-slate-100 shadow-sm">
-              <img
-                src={post.thumbnail}
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-
-          {/* Horizontal divider */}
-          <hr className="border-slate-100" />
-
-          {/* Content Description */}
-          <div className="prose max-w-none text-slate-700 text-sm md:text-base leading-relaxed space-y-4">
-            {post.content ? (
-              post.content.split('\n').map((paragraph: string, index: number) => (
-                <p key={index} className="whitespace-pre-line">
-                  {paragraph}
-                </p>
-              ))
-            ) : (
-              <p className="text-slate-400 italic">Không có nội dung chi tiết cho bài viết này.</p>
-            )}
+        ) : !post ? (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl max-w-2xl mx-auto text-center mt-10">
+            <p className="font-semibold text-lg">Không tìm thấy bài viết!</p>
+            <p className="text-sm mt-1">Bài viết này không tồn tại hoặc đã bị xóa khỏi hệ thống.</p>
+            <Button onClick={() => navigate('/admin/posts')} className="mt-4 rounded-xl">Quay lại danh sách</Button>
           </div>
-        </article>
+        ) : (
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start">
+              {/* Main Content Column */}
+              <div className="lg:col-span-2">
+                <article className="bg-white border border-slate-200/80 rounded-2xl p-3 md:p-8 space-y-3">
+                  {/* Category tag & ID */}
+                  <div className="flex items-center justify-between">
+                    <Tag color={getPostTypeStyles(post.postType?.code)} className="font-semibold px-3 py-1 rounded-full border-none">
+                      {post.postType?.name || 'Chung'}
+                    </Tag>
+                    <span className="text-xs text-slate-400 font-medium bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+                      Mã bài viết: #{post.id}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h1 className="text-2xl md:text-3xl font-extrabold text-slate-800 leading-tight">
+                    {post.title}
+                  </h1>
+
+                  {/* Summary Block */}
+                  {post.summary && (
+                    <div className="bg-slate-50/70 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                      <p className="text-slate-600 italic text-sm md:text-base leading-relaxed">
+                        {post.summary}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Thumbnail Image */}
+                  {post.thumbnail && (
+                    <div className="w-full max-h-[400px] overflow-hidden rounded-xl border border-slate-100">
+                      <img
+                        src={post.thumbnail}
+                        alt={post.title}
+                        className="w-full h-full object-cover hover:scale-[1.01] transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+
+                  {/* Horizontal divider */}
+                  <hr className="border-slate-100" />
+
+                  {/* Content Description */}
+                  <div className="prose max-w-none text-slate-700 text-sm md:text-base leading-relaxed">
+                    {post.content ? (
+                      <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                    ) : (
+                      <p className="text-slate-400 italic">Không có nội dung chi tiết cho bài viết này.</p>
+                    )}
+                  </div>
+                </article>
+              </div>
+
+              {/* Sidebar / Info Column */}
+              <div className="space-y-6">
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-5">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Thông tin bài viết</h4>
+
+                  <div className="space-y-4">
+                    {/* Status */}
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <span className="text-slate-500 text-sm font-medium">Trạng thái</span>
+                      <Badge
+                        status={post.published ? 'success' : 'warning'}
+                        text={post.published ? 'Đã xuất bản' : 'Bản nháp'}
+                        className="font-bold text-xs"
+                      />
+                    </div>
+
+                    {/* Post Type */}
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <span className="text-slate-500 text-sm font-medium">Thể loại</span>
+                      <Tag color={getPostTypeStyles(post.postType?.code)} className="font-semibold px-2.5 py-0.5 rounded-full border-none">
+                        {post.postType?.name || 'Chung'}
+                      </Tag>
+                    </div>
+
+                    {/* Created At */}
+                    <div className="space-y-1 border-b border-slate-100 pb-3">
+                      <div className="flex items-center text-slate-500 text-sm font-medium gap-1.5">
+                        <CalendarIcon className="h-4 w-4 text-slate-400" />
+                        <span>Ngày đăng</span>
+                      </div>
+                      <div className="text-slate-800 text-sm font-semibold pl-[22px]">
+                        {formatDate(post.createdAt)}
+                      </div>
+                    </div>
+
+                    {/* Updated At */}
+                    <div className="space-y-1">
+                      <div className="flex items-center text-slate-500 text-sm font-medium gap-1.5">
+                        <ClockIcon className="h-4 w-4 text-slate-400" />
+                        <span>Cập nhật cuối</span>
+                      </div>
+                      <div className="text-slate-800 text-sm font-semibold pl-[22px]">
+                        {formatDate(post.updatedAt)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

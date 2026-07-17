@@ -1,10 +1,5 @@
-// Interface loại bài viết (khớp với bảng post_types trong database)
-export interface PostType {
-  id: number;
-  name: string;      // Tên hiển thị (Kiến thức, Bài tập, Project Log)
-  code: string;      // Mã định danh dạng UPPERCASE (KIENTHUC, BAITAP, PROJECT_LOG, GENERAL...)
-  description?: string | null;
-}
+import type { PostType } from '../../postTypes';
+export type { PostType };
 
 // Interface bài viết đầy đủ
 export interface Post {

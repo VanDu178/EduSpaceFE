@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { fetchPostsApi, createPostApi, deletePostApi, updatePostApi } from '../api';
+import { fetchPostsApi, createPostApi, deletePostApi, updatePostApi, updatePostStatusApi, fetchPostByIdApi } from '../api';
 import type { Post, PostPayload, PostType, Params } from '../types';
 import type { ApiResponse, PaginatedData } from '../../../types/api';
 import { handleApiError } from '../../../utils/errorHandler';
@@ -11,6 +11,15 @@ export const usePostsQuery = (params?: Params) => {
   return useQuery<PaginatedData<{ posts: Post[] }>>({
     queryKey: ['posts', params],
     queryFn: () => fetchPostsApi(params),
+  });
+};
+
+// Custom hook truy vấn chi tiết một bài viết theo ID
+export const usePostQuery = (id: number | undefined) => {
+  return useQuery<{ post: Post }>({
+    queryKey: ['post', id],
+    queryFn: () => fetchPostByIdApi(id!),
+    enabled: typeof id === 'number' && !isNaN(id),
   });
 };
 
@@ -75,7 +84,6 @@ export const useDeletePostMutation = (
 // Custom hook mutation chỉnh sửa bài viết (có fallback mô phỏng nếu API PUT backend chưa viết)
 export const useUpdatePostMutation = (
   selectedPostId: number | undefined,
-  staticPostTypes: PostType[],
   onSuccessCallback?: () => void,
   onErrorCallback?: (error: AxiosError<ApiResponse>) => void
 ) => {
@@ -99,25 +107,43 @@ export const useUpdatePostMutation = (
       if (isNotImplemented) {
         console.warn('PUT /posts/:id failed or not implemented yet. Using simulated success on frontend.', err);
         
+        // Lấy danh mục postTypes từ React Query cache
+        const postTypes = queryClient.getQueryData<PostType[]>(['postTypes']) || [];
+        
         setTimeout(() => {
           toast.success('Cập nhật thành công (Giả lập phía giao diện, đang chờ API cập nhật của Backend)!');
           
-          queryClient.setQueryData(['posts'], (oldPosts: Post[] | undefined) => {
-            if (!oldPosts) return [];
-            return oldPosts.map((p) =>
-              p.id === selectedPostId
-                ? {
-                    ...p,
-                    title: variables.data.title,
-                    content: variables.data.content,
-                    published: variables.data.published,
-                    thumbnail: variables.data.thumbnail || p.thumbnail,
-                    postTypeId: variables.data.postTypeId,
-                    postType: staticPostTypes.find((t) => t.id === variables.data.postTypeId) || p.postType,
-                    updatedAt: new Date().toISOString(),
-                  }
-                : p
-            );
+          queryClient.setQueryData(['posts'], (oldData: any) => {
+            if (!oldData) return undefined;
+            
+            const updatePostInList = (list: Post[]) =>
+              list.map((p) =>
+                p.id === selectedPostId
+                  ? {
+                      ...p,
+                      title: variables.data.title,
+                      content: variables.data.content,
+                      published: variables.data.published,
+                      thumbnail: variables.data.thumbnail || p.thumbnail,
+                      postTypeId: variables.data.postTypeId,
+                      postType: postTypes.find((t) => t.id === variables.data.postTypeId) || p.postType,
+                      updatedAt: new Date().toISOString(),
+                    }
+                  : p
+              );
+
+            if (Array.isArray(oldData)) {
+              return updatePostInList(oldData);
+            }
+            
+            if (oldData.posts && Array.isArray(oldData.posts)) {
+              return {
+                ...oldData,
+                posts: updatePostInList(oldData.posts),
+              };
+            }
+            
+            return oldData;
           });
           
           if (onSuccessCallback) onSuccessCallback();
@@ -129,6 +155,36 @@ export const useUpdatePostMutation = (
           handleApiError(err);
         }
       }
-    }
+    },
+  });
+};
+
+// Custom hook mutation cập nhật trạng thái bài viết
+export const useUpdatePostStatusMutation = (
+  onSuccessCallback?: () => void,
+  onErrorCallback?: (error: AxiosError<ApiResponse>) => void
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (variables: { id: number; published: boolean }) =>
+      updatePostStatusApi(variables.id, variables.published),
+    onSuccess: (res) => {
+      if (res.success) {
+        toast.success('Cập nhật trạng thái bài viết thành công!');
+        queryClient.invalidateQueries({ queryKey: ['posts'] });
+        if (onSuccessCallback) onSuccessCallback();
+      } else {
+        toast.error(res.message || 'Cập nhật trạng thái bài viết thất bại!');
+      }
+    },
+    onError: (err: AxiosError<ApiResponse>) => {
+      console.error('Update post status error:', err);
+      if (onErrorCallback) {
+        onErrorCallback(err);
+      } else {
+        handleApiError(err);
+      }
+    },
   });
 };

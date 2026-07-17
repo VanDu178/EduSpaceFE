@@ -31,3 +31,22 @@ export const updatePostApi = async (
   const response = await api.put(`/posts/${id}`, updatedPost);
   return response.data;
 };
+
+// Hàm gọi API cập nhật trạng thái bài viết
+export const updatePostStatusApi = async (
+  id: number,
+  published: boolean
+): Promise<ApiResponse<{ post: Post }>> => {
+  const response = await api.patch(`/posts/${id}/status`, { published });
+  return response.data;
+};
+
+// Hàm gọi API lấy chi tiết bài viết
+export const fetchPostByIdApi = async (id: number): Promise<{ post: Post }> => {
+  const response = await api.get(`/posts/${id}`);
+  if (response.data.success) {
+    return response.data.data;
+  }
+  throw new Error(response.data.message || 'Không thể lấy thông tin chi tiết bài viết');
+};
+

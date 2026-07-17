@@ -2,17 +2,27 @@ import { Input, Select, Button } from 'antd';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import type React from 'react';
 import type { Params } from '../types';
-import { FILTER_OPTIONS } from '../constants';
+import type { PostType } from '../../postTypes';
 
 interface FilterBarProps {
   params: Params;
   setParams: React.Dispatch<React.SetStateAction<Params>>;
+  postTypes: PostType[];
 }
 
 const FilterBar = ({
   params,
-  setParams
+  setParams,
+  postTypes
 }: FilterBarProps) => {
+  const filterOptions = [
+    { value: 'ALL', label: 'Tất cả thể loại' },
+    ...postTypes.map((type) => ({
+      value: type.code,
+      label: type.name,
+    }))
+  ];
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       {/* Advanced Filter Button */}
@@ -50,7 +60,7 @@ const FilterBar = ({
               page: 1,
             }))
           }
-          options={FILTER_OPTIONS}
+          options={filterOptions}
           className="w-full"
         />
       </div>

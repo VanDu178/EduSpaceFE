@@ -10,6 +10,7 @@ import {
 import BlockNoteEditor from '../../../components/BlockNoteEditor';
 import type { FormInstance } from 'antd';
 import type { Post, PostType, PostPayload } from '../types';
+import { getPostTypeStyles } from '../utils';
 
 interface FormUpdateProps {
   form: FormInstance;
@@ -56,29 +57,6 @@ const FormUpdate = ({
       setThumbnail(initialData.thumbnail || null);
     }
   }, [initialData, form]);
-
-  const getPostTypeStyles = (code?: string) => {
-    const normCode = code?.toUpperCase() || 'GENERAL';
-    switch (normCode) {
-      case 'FRONTEND':
-      case 'KIENTHUC':
-      case 'KIEN_THUC':
-        return 'purple';
-      case 'BACKEND':
-      case 'BAITAP':
-      case 'BAI_TAP':
-        return 'blue';
-      case 'UIUX':
-      case 'PROJECT_LOG':
-      case 'PROJECTLOG':
-        return 'magenta';
-      case 'DEVOPS':
-      case 'GENERAL':
-        return 'cyan';
-      default:
-        return 'default';
-    }
-  };
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith('image/')) {

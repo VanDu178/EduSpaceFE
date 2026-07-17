@@ -10,6 +10,7 @@ import {
 import BlockNoteEditor from '../../../components/BlockNoteEditor';
 import type { FormInstance } from 'antd';
 import type { PostType, PostPayload } from '../types';
+import { getPostTypeStyles } from '../utils';
 
 interface FormCreateProps {
   form: FormInstance;
@@ -40,29 +41,6 @@ const FormCreate = ({
   const contentHtml = Form.useWatch('content', form) || '';
 
   const selectedPostType = postTypes.find((type) => type.id === postTypeId) || postTypes[0];
-
-  const getPostTypeStyles = (code?: string) => {
-    const normCode = code?.toUpperCase() || 'GENERAL';
-    switch (normCode) {
-      case 'FRONTEND':
-      case 'KIENTHUC':
-      case 'KIEN_THUC':
-        return 'purple';
-      case 'BACKEND':
-      case 'BAITAP':
-      case 'BAI_TAP':
-        return 'blue';
-      case 'UIUX':
-      case 'PROJECT_LOG':
-      case 'PROJECTLOG':
-        return 'magenta';
-      case 'DEVOPS':
-      case 'GENERAL':
-        return 'cyan';
-      default:
-        return 'default';
-    }
-  };
 
 
   const handleFile = (file: File) => {

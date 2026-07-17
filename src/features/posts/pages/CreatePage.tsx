@@ -1,22 +1,17 @@
 import { useNavigate } from 'react-router-dom';
-import { Form } from 'antd';
+import { Form, Spin } from 'antd';
 import type { AxiosError } from 'axios';
 import { FormCreate } from '../components';
 import { useCreatePostMutation } from '../hooks';
-import type { PostType, PostPayload } from '../types';
+import { usePostTypesQuery } from '../../postTypes';
+import type { PostPayload } from '../types';
 import type { ApiResponse } from '../../../types/api';
 import { handleApiError } from '../../../utils/errorHandler';
-
-const staticPostTypes: PostType[] = [
-  { id: 1, name: 'Frontend Development', code: 'FRONTEND', description: 'Bài viết về Phát triển Frontend' },
-  { id: 2, name: 'Backend Development', code: 'BACKEND', description: 'Bài viết về Phát triển Backend' },
-  { id: 3, name: 'UI/UX Design', code: 'UIUX', description: 'Bài viết về Thiết kế Giao diện & Trải nghiệm' },
-  { id: 4, name: 'DevOps', code: 'DEVOPS', description: 'Bài viết về DevOps & Triển khai' },
-];
 
 const CreatePage = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const { data: postTypes = [], isLoading: isLoadingTypes } = usePostTypesQuery();
 
   const createMutation = useCreatePostMutation(
     () => {
@@ -33,10 +28,18 @@ const CreatePage = () => {
     navigate('/admin/posts');
   };
 
+  if (isLoadingTypes) {
+    return (
+      <div className="h-96 flex items-center justify-center">
+        <Spin size="large" tip="Đang tải danh sách thể loại..." />
+      </div>
+    );
+  }
+
   return (
     <FormCreate
       form={form}
-      postTypes={staticPostTypes}
+      postTypes={postTypes}
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isSaving={createMutation.isPending}

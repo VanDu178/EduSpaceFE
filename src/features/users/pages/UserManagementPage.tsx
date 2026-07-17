@@ -119,7 +119,7 @@ const UserManagementPage = () => {
       </div>
 
       {/* User Table / Empty State Wrapper */}
-      <div className="flex-1 min-h-0 bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm flex flex-col">
+      <div className="flex-1 min-h-0 bg-white rounded-2xl border border-slate-200/80 overflow-hidden flex flex-col">
         {!isLoading && filteredUsers.length === 0 ? (
           <div className="py-16 flex items-center justify-center flex-1">
             <Empty description="Không có người dùng nào" />

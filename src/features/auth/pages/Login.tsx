@@ -41,7 +41,7 @@ const Login = () => {
       <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
       <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob delay-2000"></div>
 
-      <Card className="w-full max-w-md shadow-2xl border border-slate-700/50 bg-slate-900/80 backdrop-blur-md rounded-2xl text-slate-100">
+      <Card className="w-full max-w-md border border-slate-700/50 bg-slate-900/80 backdrop-blur-md rounded-2xl text-slate-100">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 tracking-tight">
             EduSpace Admin
@@ -88,7 +88,7 @@ const Login = () => {
               type="primary"
               htmlType="submit"
               loading={loginMutation.isPending}
-              className="w-full h-12 bg-gradient-to-r from-blue-500 to-indigo-600 border-none hover:from-blue-600 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-indigo-500/30 transition-all duration-300"
+              className="w-full h-12 bg-gradient-to-r from-blue-500 to-indigo-600 border-none hover:from-blue-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all duration-300"
             >
               Đăng Nhập
             </Button>
