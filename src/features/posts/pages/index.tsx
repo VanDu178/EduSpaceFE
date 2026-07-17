@@ -52,7 +52,21 @@ const Index = () => {
 
   return (
     <div className="space-y-6 flex flex-1 flex-col ">
-      <h2 className="text-xl font-bold text-slate-800 mb-2 shrink-0">Danh sách bài viết</h2>
+      <div className="flex items-center justify-between mb-2 shrink-0">
+        <h2 className="text-xl font-bold text-slate-800">Danh sách bài viết</h2>
+        <Button
+          type="primary"
+          onClick={() => {
+            navigate('/admin/posts/create');
+          }}
+          className="px-5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-sm font-semibold flex items-center justify-center cursor-pointer"
+        >
+          <span className='flex items-center gap-2'>
+            <PlusIcon className="h-5 w-5" />
+            Viết bài mới
+          </span>
+        </Button>
+      </div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium shrink-0">
@@ -60,27 +74,14 @@ const Index = () => {
         </div>
       )}
 
+
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 shrink-0">
+      <div className="shrink-0">
         <FilterBar
           params={params}
           setParams={setParams}
           postTypes={postTypes}
         />
-
-        {/* Create Button */}
-        <Button
-          type="primary"
-          onClick={() => {
-            navigate('/admin/posts/create');
-          }}
-          className="px-5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-sm font-semibold flex items-center justify-center cursor-pointer shrink-0"
-        >
-          <span className='flex items-center gap-2'>
-            <PlusIcon className="h-5 w-5" />
-            Viết bài mới
-          </span>
-        </Button>
       </div>
 
       {/* Table list wrapper */}

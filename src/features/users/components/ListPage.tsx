@@ -1,5 +1,5 @@
-import { Table, Badge, Button, Popconfirm, Tooltip, Tag } from 'antd';
-import { LockClosedIcon, LockOpenIcon } from '@heroicons/react/24/outline';
+import { Table, Badge, Button, Popconfirm, Tooltip, Tag, Empty } from 'antd';
+import { LockClosedIcon, LockOpenIcon, PencilIcon, KeyIcon } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
 import type { User } from '../types';
 
@@ -8,6 +8,8 @@ interface ListPageProps {
   isLoading: boolean;
   lockedUserIds: number[];
   onToggleLock: (id: number) => void;
+  onEdit: (user: User) => void;
+  onResetPassword: (user: User) => void;
   pagination?: {
     current: number;
     pageSize: number;
@@ -21,8 +23,19 @@ const ListPage = ({
   isLoading,
   lockedUserIds,
   onToggleLock,
+  onEdit,
+  onResetPassword,
   pagination,
 }: ListPageProps) => {
+
+
+  if (!isLoading && users.length === 0) {
+    return (
+      <div className="py-16 flex items-center justify-center flex-1">
+        <Empty description="Không có người dùng nào" />
+      </div>
+    );
+  }
 
   const columns: ColumnsType<User> = [
     {
@@ -31,7 +44,7 @@ const ListPage = ({
       key: 'name',
       render: (name) => (
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 font-bold text-xs border border-slate-200/80">
+          <div className="w-8 h-8 bg-yellow-300 text-yellow-800 text-white rounded-full flex items-center justify-center text-slate-500 font-bold text-xs border border-slate-200/80">
             {name ? name.charAt(0).toUpperCase() : 'U'}
           </div>
           <span className="font-semibold text-slate-800">{name || 'Người dùng ẩn danh'}</span>
@@ -83,12 +96,37 @@ const ListPage = ({
     {
       title: 'Hành động',
       key: 'action',
-      width: 120,
+      width: 180,
       align: 'center',
       render: (_, record) => {
         const isLocked = lockedUserIds.includes(record.id);
         return (
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center space-x-2">
+            <Tooltip title="Cập nhật tài khoản">
+              <Button
+                type="text"
+                onClick={() => onEdit(record)}
+                className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center"
+                icon={<PencilIcon className="h-4 w-4" />}
+              />
+            </Tooltip>
+
+            <Popconfirm
+              title="Đặt lại mật khẩu"
+              description={`Bạn có chắc chắn muốn đặt lại mật khẩu của "${record.name || record.email}"? Mật khẩu mới sẽ được sinh ngẫu nhiên.`}
+              onConfirm={() => onResetPassword(record)}
+              okText="Đồng ý"
+              cancelText="Hủy"
+            >
+              <Tooltip title="Đặt lại mật khẩu">
+                <Button
+                  type="text"
+                  className="text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg flex items-center justify-center"
+                  icon={<KeyIcon className="h-4 w-4" />}
+                />
+              </Tooltip>
+            </Popconfirm>
+
             <Popconfirm
               title={isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}
               description={`Bạn có chắc chắn muốn ${isLocked ? 'mở khóa' : 'khóa'} tài khoản của "${record.name || record.email}"?`}
