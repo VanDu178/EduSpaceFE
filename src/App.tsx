@@ -7,7 +7,7 @@ import ListPage from './features/posts/pages';
 import CreatePage from './features/posts/pages/CreatePage';
 import UpdatePage from './features/posts/pages/UpdatePage';
 import DetailPage from './features/posts/pages/DetailPage';
-import UserManagementPage from './features/users/pages/UserManagementPage';
+import UserListPage from './features/users/pages';
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 
@@ -42,7 +42,7 @@ const App = () => {
           <Route path="posts/:id/edit" element={<UpdatePage />} />
           
           {/* Phân hệ route con quản lý người dùng */}
-          <Route path="users" element={<UserManagementPage />} />
+          <Route path="users" element={<UserListPage />} />
         </Route>
 
         {/* Redirect mặc định về /admin nếu gõ sai route */}

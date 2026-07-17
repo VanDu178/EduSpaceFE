@@ -4,11 +4,11 @@ import type { User } from '../types';
 
 // Danh sách mockup người dùng mẫu để dự phòng
 const mockUsersFallback: User[] = [
-  { id: 1, name: 'Nguyễn Văn A', email: 'vanda@eduspace.vn', role: 'ADMIN', createdAt: '2026-06-15T08:30:00Z' },
-  { id: 2, name: 'Trần Thị B', email: 'thib@eduspace.vn', role: 'TEACHER', createdAt: '2026-06-20T09:15:00Z' },
-  { id: 3, name: 'Phạm Minh C', email: 'minhc@eduspace.vn', role: 'USER', createdAt: '2026-07-01T14:45:00Z' },
-  { id: 4, name: 'Hoàng Văn D', email: 'vand@eduspace.vn', role: 'USER', createdAt: '2026-07-05T10:00:00Z' },
-  { id: 5, name: 'Lê Thanh E', email: 'thanhe@eduspace.vn', role: 'TEACHER', createdAt: '2026-07-10T16:20:00Z' },
+  { id: 1, name: 'Nguyễn Văn A', email: 'vanda@eduspace.vn', role: 'admin', createdAt: '2026-06-15T08:30:00Z' },
+  { id: 2, name: 'Trần Thị B', email: 'thib@eduspace.vn', role: 'client', createdAt: '2026-06-20T09:15:00Z' },
+  { id: 3, name: 'Phạm Minh C', email: 'minhc@eduspace.vn', role: 'client', createdAt: '2026-07-01T14:45:00Z' },
+  { id: 4, name: 'Hoàng Văn D', email: 'vand@eduspace.vn', role: 'client', createdAt: '2026-07-05T10:00:00Z' },
+  { id: 5, name: 'Lê Thanh E', email: 'thanhe@eduspace.vn', role: 'client', createdAt: '2026-07-10T16:20:00Z' },
 ];
 
 export const useUsersQuery = () => {
@@ -33,7 +33,7 @@ export const useUsersQuery = () => {
                 id: currentUser.id || 99,
                 name: currentUser.name || 'Admin',
                 email: currentUser.email,
-                role: currentUser.role || 'ADMIN',
+                role: currentUser.role || 'admin',
                 createdAt: currentUser.createdAt || new Date().toISOString(),
               },
               ...filtered

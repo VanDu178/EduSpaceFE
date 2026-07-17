@@ -1,5 +1,5 @@
 // Định nghĩa vai trò của người dùng
-export type UserRole = 'ADMIN' | 'USER' | 'TEACHER' | 'admin' | 'client';
+export type UserRole = 'admin' | 'client';
 
 // Interface thông tin người dùng / quản trị viên
 export interface User {
@@ -10,3 +10,12 @@ export interface User {
   createdAt: string;
   updatedAt?: string;
 }
+
+// Interface tham số truy vấn phục vụ phân trang & bộ lọc
+export interface UserParams {
+  page?: number;
+  limit?: number;
+  keyword?: string;
+  role?: string;
+}
+
