@@ -1,16 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import { fetchPostsApi, createPostApi, deletePostApi, updatePostApi } from '../api';
-import type { Post, PostPayload, PostType } from '../types';
-import type { ApiResponse } from '../../../types/api';
+import type { Post, PostPayload, PostType, Params } from '../types';
+import type { ApiResponse, PaginatedData } from '../../../types/api';
 import { handleApiError } from '../../../utils/errorHandler';
 import { toast } from '../../../utils/toastHelper';
 
 // Custom hook truy vấn danh sách bài viết
-export const usePostsQuery = () => {
-  return useQuery<Post[]>({
-    queryKey: ['posts'],
-    queryFn: fetchPostsApi,
+export const usePostsQuery = (params?: Params) => {
+  return useQuery<PaginatedData<{ posts: Post[] }>>({
+    queryKey: ['posts', params],
+    queryFn: () => fetchPostsApi(params),
   });
 };
 

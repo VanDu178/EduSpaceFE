@@ -1,10 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
-import { Form, Input, Select, Switch, Button, Row, Col } from 'antd';
-import { ArrowLeftIcon, ArrowUpTrayIcon, TrashIcon } from '@heroicons/react/24/outline';
-import "@blocknote/core/fonts/inter.css";
-import { BlockNoteView } from "@blocknote/mantine";
-import "@blocknote/mantine/style.css";
-import { useCreateBlockNote } from "@blocknote/react";
+import { useState, useEffect } from 'react';
+import { Form, Input, Select, Button, Space, Tag, Modal, Switch, Upload, message } from 'antd';
+import {
+  ArrowLeftIcon,
+  ArrowUpTrayIcon,
+  TrashIcon,
+  EyeIcon,
+  PaperAirplaneIcon,
+} from '@heroicons/react/24/outline';
+import BlockNoteEditor from '../../../components/BlockNoteEditor';
 import type { FormInstance } from 'antd';
 import type { Post, PostType, PostPayload } from '../types';
 
@@ -28,10 +31,17 @@ const FormUpdate = ({
   onCancel,
   isSaving,
 }: FormUpdateProps) => {
-  const editor = useCreateBlockNote();
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
-  const [dragActive, setDragActive] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Watch form fields for live preview modal
+  const title = Form.useWatch('title', form);
+  const summary = Form.useWatch('summary', form);
+  const postTypeId = Form.useWatch('postTypeId', form);
+  const published = Form.useWatch('published', form);
+  const contentHtml = Form.useWatch('content', form) || '';
+
+  const selectedPostType = postTypes.find((type) => type.id === postTypeId) || postTypes[0];
 
   // Nạp dữ liệu ban đầu cho Form khi initialData thay đổi
   useEffect(() => {
@@ -39,6 +49,7 @@ const FormUpdate = ({
       form.setFieldsValue({
         title: initialData.title,
         summary: initialData.summary || '',
+        content: initialData.content || '',
         postTypeId: initialData.postTypeId,
         published: initialData.published || false,
       });
@@ -46,20 +57,34 @@ const FormUpdate = ({
     }
   }, [initialData, form]);
 
-  // Nạp dữ liệu HTML vào BlockNote editor khi có nội dung cũ
-  useEffect(() => {
-    if (initialData?.content) {
-      const blocks = editor.tryParseHTMLToBlocks(initialData.content);
-      editor.replaceBlocks(editor.document, blocks);
+  const getPostTypeStyles = (code?: string) => {
+    const normCode = code?.toUpperCase() || 'GENERAL';
+    switch (normCode) {
+      case 'FRONTEND':
+      case 'KIENTHUC':
+      case 'KIEN_THUC':
+        return 'purple';
+      case 'BACKEND':
+      case 'BAITAP':
+      case 'BAI_TAP':
+        return 'blue';
+      case 'UIUX':
+      case 'PROJECT_LOG':
+      case 'PROJECTLOG':
+        return 'magenta';
+      case 'DEVOPS':
+      case 'GENERAL':
+        return 'cyan';
+      default:
+        return 'default';
     }
-  }, [initialData, editor]);
+  };
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
-      alert('Vui lòng chọn một file ảnh hợp lệ (PNG, JPG, WEBP)!');
+      message.error('Vui lòng chọn một file ảnh hợp lệ (PNG, JPG, WEBP)!');
       return;
     }
-
     const reader = new FileReader();
     reader.onload = (e) => {
       if (e.target?.result) {
@@ -69,220 +94,283 @@ const FormUpdate = ({
     reader.readAsDataURL(file);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
-    }
-  };
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  };
-
   const removeThumbnail = () => {
     setThumbnail(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   const onFinish = (values: any) => {
-    const contentHtml = editor.blocksToHTMLLossy(editor.document);
     onSubmit({
       title: values.title,
       summary: values.summary,
-      content: contentHtml,
+      content: values.content,
       postTypeId: values.postTypeId,
-      published: values.published,
+      published: values.published || false,
       thumbnail: thumbnail,
     });
   };
 
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      onFinish={onFinish}
-      requiredMark={false}
-      className="-m-5 h-[calc(100vh-64px)] flex flex-col overflow-hidden bg-slate-50/30"
-    >
-      {/* Header cố định */}
-      <div className="bg-white border-b border-slate-200/80 py-4 px-8 flex items-center justify-between shadow-sm z-30 flex-shrink-0">
-        <div className="flex items-center space-x-3">
-          <Button
-            type="text"
-            icon={<ArrowLeftIcon className="h-5 w-5" />}
-            onClick={onCancel}
-            className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl flex items-center justify-center"
-          />
-          <div>
-            <h3 className="text-lg font-bold text-slate-800">Chỉnh sửa bài viết</h3>
-            <p className="text-xs text-slate-400 font-medium">Bố cục chỉnh sửa dữ liệu và thay đổi trạng thái xuất bản.</p>
+    <>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        requiredMark={false}
+        className="-m-5 h-[calc(100vh-104px)] flex flex-col overflow-hidden bg-slate-50/30"
+      >
+        {/* Thanh Tiêu Đề (Title Bar) */}
+        <div className="bg-white py-3.5 pt-1 pb-6 pr-6 flex items-center justify-between z-30 flex-shrink-0 border-b border-slate-200/60">
+          <div className="flex items-center">
+            <Button
+              type="text"
+              icon={<ArrowLeftIcon className="h-4 w-4" />}
+              onClick={onCancel}
+              className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg flex items-center justify-center p-2"
+            />
+            <span className="text-sm font-bold text-slate-800">CHỈNH SỬA BÀI VIẾT</span>
+          </div>
+          <div className="flex items-center space-x-2.5">
+            <Button
+              onClick={() => setIsPreviewOpen(true)}
+              className="px-4 h-9.5 rounded-lg border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-1.5"
+            >
+              <span className="flex items-center gap-1.5">
+                <EyeIcon className="h-4 w-4" />
+                Xem trước
+              </span>
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={isSaving}
+              className="px-4 h-9.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 border-none text-sm font-semibold flex items-center gap-1.5 animate-pulse-subtle"
+            >
+              <span className="flex items-center gap-1.5">
+                <PaperAirplaneIcon className="h-4 w-4" />
+                Lưu thay đổi
+              </span>
+            </Button>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <Button
-            onClick={onCancel}
-            className="px-5 h-10 rounded-xl border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50"
-          >
-            Hủy bỏ
-          </Button>
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={isSaving}
-            className="px-5 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-sm font-semibold flex items-center"
-          >
-            Lưu thay đổi
-          </Button>
-        </div>
-      </div>
 
-      {/* Vùng nội dung cuộn nội bộ */}
-      <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-7xl w-full mx-auto">
-        {/* Vùng Thông Tin Trên */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-sm">
-          <Row gutter={24}>
-            {/* Cột 1 & 2: Tiêu đề và mô tả */}
-            <Col xs={24} md={16} className="space-y-4">
-              <Form.Item
-                label={<span className="text-sm font-semibold text-slate-700">Tiêu đề bài viết</span>}
-                name="title"
-                rules={[{ required: true, message: 'Vui lòng nhập tiêu đề bài viết!' }]}
-              >
-                <Input
-                  placeholder="Nhập tiêu đề hấp dẫn..."
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-slate-800 text-sm placeholder-slate-400"
-                />
-              </Form.Item>
+        {/* Vùng nội dung chia làm 2 cột: Trái nhập liệu, Phải cài đặt */}
+        <div className="flex-1 overflow-y-auto pt-3 md:pt-3 ">
+          <div className="max-w-6xl mx-auto grid grid-cols-12 gap-3">
+            {/* Cột Trái: Vùng soạn thảo chính */}
+            <div className="col-span-12 lg:col-span-8 space-y-6">
+              <div className="bg-white border border-slate-100 rounded-2xl p-3  space-y-6 min-h-[500px]">
+                {/* Tiêu đề bài viết */}
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block mb-1">TIÊU ĐỀ</span>
+                  <Form.Item
+                    name="title"
+                    rules={[{ required: true, message: 'Vui lòng nhập tiêu đề bài viết!' }]}
+                    className="mb-0"
+                  >
+                    <Input
+                      placeholder="Nhập tiêu đề bài viết..."
+                      className="text-2xl font-bold border-0 border-b border-slate-100 rounded-none hover:border-slate-200 focus:border-indigo-500  focus:ring-0 px-0 pb-3 transition-colors bg-transparent placeholder:text-slate-300 [&_.ant-input]:text-2xl [&_.ant-input]:font-bold"
+                    />
+                  </Form.Item>
+                </div>
 
-              <Form.Item
-                label={<span className="text-sm font-semibold text-slate-700">Mô tả ngắn</span>}
-                name="summary"
-              >
-                <TextArea
-                  rows={3}
-                  placeholder="Mô tả tóm tắt nội dung để hiển thị trên thẻ bài viết..."
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 text-slate-800 text-sm placeholder-slate-400"
-                />
-              </Form.Item>
-            </Col>
+                {/* BlockNote Editor */}
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block mb-1">NỘI DUNG</span>
+                  <Form.Item
+                    name="content"
+                    className="mb-0"
+                  >
+                    <BlockNoteEditor placeholder="Bắt đầu viết nội dung bài viết tuyệt vời của bạn ở đây..." />
+                  </Form.Item>
+                </div>
+              </div>
+            </div>
 
-            {/* Cột 3: Loại bài viết, Ảnh đại diện & Trạng thái xuất bản */}
-            <Col xs={24} md={8} className="space-y-4">
-              <Form.Item
-                label={<span className="text-sm font-semibold text-slate-700">Phân loại bài viết</span>}
-                name="postTypeId"
-                rules={[{ required: true, message: 'Vui lòng chọn thể loại!' }]}
-              >
-                <Select
-                  placeholder="Chọn thể loại"
-                  className="w-full h-11 [&_.ant-select-selector]:!rounded-xl [&_.ant-select-selector]:!border-slate-200 [&_.ant-select-selector]:!px-4"
-                >
-                  {postTypes.map((type) => (
-                    <Option key={type.id} value={type.id}>
-                      {type.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
+            {/* Cột Phải: Sidebar cài đặt */}
+            <div className="col-span-12 lg:col-span-4">
+              <div className="bg-white border border-slate-100 rounded-2xl p-3 space-y-4">
+                {/* Phần 1: Ảnh đại diện bài viết */}
+                <div className=" space-y-2">
+                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block">ẢNH ĐẠI DIỆN BÀI VIẾT</span>
 
-              <Row gutter={16}>
-                <Col span={12}>
-                  <div className="space-y-2">
-                    <span className="text-sm font-semibold text-slate-700 block">Ảnh đại diện</span>
-                    <div
-                      onDragEnter={handleDrag}
-                      onDragOver={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDrop={handleDrop}
-                      onClick={() => fileInputRef.current?.click()}
-                      className={`border border-dashed rounded-xl p-2 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 relative min-h-[90px] ${
-                        dragActive ? 'border-blue-500 bg-blue-50/20' : 'border-slate-200 hover:border-blue-500 bg-slate-50/50 hover:bg-slate-50'
-                      }`}
-                    >
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
+                  {thumbnail ? (
+                    <div className="relative w-full h-[140px] rounded-xl overflow-hidden group/img border border-slate-200">
+                      <img
+                        src={thumbnail}
+                        alt="Thumbnail preview"
+                        className="w-full h-full object-cover"
                       />
-
-                      {thumbnail ? (
-                        <div className="relative w-full h-[70px] rounded-lg overflow-hidden group/img">
-                          <img
-                            src={thumbnail}
-                            alt="Thumbnail preview"
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity duration-200">
-                            <Button
-                              type="primary"
-                              danger
-                              shape="circle"
-                              size="small"
-                              icon={<TrashIcon className="h-4 w-4" />}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeThumbnail();
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <ArrowUpTrayIcon className="h-5 w-5 text-slate-400 mb-0.5" />
-                          <span className="text-xs font-semibold text-slate-600">Chọn ảnh</span>
-                          <span className="text-[10px] font-semibold text-slate-500">Tải lên</span>
-                        </>
-                      )}
+                      <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity duration-200">
+                        <Button
+                          type="primary"
+                          danger
+                          shape="circle"
+                          size="small"
+                          icon={<TrashIcon className="h-4 w-4" />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeThumbnail();
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                </Col>
+                  ) : (
+                    <Upload.Dragger
+                      accept="image/*"
+                      showUploadList={false}
+                      beforeUpload={(file) => {
+                        handleFile(file);
+                        return false;
+                      }}
+                      className="!border-dashed !border-slate-200 hover:!border-indigo-500 !bg-slate-50/30 hover:!bg-slate-50 !rounded-xl  transition-all duration-200 flex flex-col items-center justify-center text-center"
+                    >
+                      <div className="flex flex-col items-center justify-center ">
+                        <ArrowUpTrayIcon className="h-6 w-6 text-slate-400 mb-2" />
+                        <span className="text-sm font-medium text-slate-600">Kéo thả hoặc click để tải ảnh đại diện</span>
+                        <span className="text-xs text-slate-400 mt-1">Hỗ trợ PNG, JPG, WEBP</span>
+                      </div>
+                    </Upload.Dragger>
+                  )}
+                </div>
 
-                <Col span={12}>
-                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 h-[115px] flex flex-col justify-between">
-                    <div>
-                      <span className="text-xs font-semibold text-slate-700 block">Xuất bản</span>
-                      <span className="text-[9px] text-slate-400 leading-tight block mt-0.5">Hiển thị cho học viên</span>
-                    </div>
-                    <Form.Item name="published" valuePropName="checked" className="mb-0">
-                      <Switch size="small" />
-                    </Form.Item>
-                  </div>
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-        </div>
+                {/* Phần 2: Phân loại bài viết */}
+                <div className="space-y-2">
+                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block">PHÂN LOẠI BÀI VIẾT</span>
 
-        {/* Vùng Soạn Thảo Dưới Trải Rộng 100% */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-sm">
-          <Form.Item
-            label={<span className="text-sm font-semibold text-slate-700">Nội dung bài viết chi tiết</span>}
-            name="content"
-          >
-            <BlockNoteView editor={editor} theme="light" />
-          </Form.Item>
+                  <Form.Item
+                    name="postTypeId"
+                    rules={[{ required: true, message: 'Vui lòng chọn thể loại!' }]}
+                    className="mb-0"
+                  >
+                    <Select
+                      placeholder="Chọn phân loại bài viết"
+                      className="w-full h-11"
+                      dropdownClassName="rounded-xl border border-slate-100"
+                    >
+                      {postTypes.map((type) => {
+                        return (
+                          <Option key={type.id} value={type.id}>
+                            <div className="flex items-center gap-2 py-1">
+                              <span className="text-slate-700 text-sm font-medium">{type.name}</span>
+                            </div>
+                          </Option>
+                        );
+                      })}
+                    </Select>
+                  </Form.Item>
+                </div>
+
+                {/* Phần 3: Mô tả ngắn */}
+                <div className="space-y-2">
+                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block">MÔ TẢ NGẮN BÀI VIẾT</span>
+
+                  <Form.Item
+                    name="summary"
+                    className="mb-0"
+                  >
+                    <TextArea
+                      rows={4}
+                      placeholder="Mô tả tóm tắt nội dung để hiển thị trên thẻ bài viết..."
+                      className="px-4 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 text-slate-800 text-sm placeholder-slate-400"
+                    />
+                  </Form.Item>
+                </div>
+
+                {/* Phần 4: Trạng thái hiển thị */}
+                <div className="flex items-center justify-between pt-2">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-bold text-slate-400 tracking-wider block">TRẠNG THÁI HIỂN THỊ</span>
+                    <span className="text-xs text-slate-400">Công khai bài viết sau khi lưu</span>
+                  </div>
+                  <Form.Item name="published" valuePropName="checked" className="mb-0">
+                    <Switch
+                      className="bg-slate-200 [&.ant-switch-checked]:bg-indigo-600"
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </Form>
+      </Form>
+
+      {/* Modal Xem trước bài viết */}
+      <Modal
+        title={null}
+        open={isPreviewOpen}
+        onCancel={() => setIsPreviewOpen(false)}
+        footer={null}
+        width={900}
+        centered
+        styles={{ body: { padding: '24px', backgroundColor: '#f8fafc', maxHeight: '80vh', overflowY: 'auto' } }}
+        className="preview-modal rounded-2xl overflow-hidden"
+      >
+        <div className="max-w-3xl mx-auto py-4">
+          <article className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8  space-y-6">
+            {/* Phân loại & Trạng thái */}
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <Space>
+                <Tag color={getPostTypeStyles(selectedPostType?.code)} className="font-semibold px-3 py-0.5 rounded-full border-none">
+                  {selectedPostType?.name || 'Frontend Development'}
+                </Tag>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${published
+                  ? 'bg-emerald-50 text-emerald-800'
+                  : 'bg-amber-50 text-amber-800'
+                  }`}>
+                  {published ? 'Đã xuất bản' : 'Bản nháp'}
+                </span>
+              </Space>
+              <span className="text-xs text-slate-400 font-medium">Bản xem trước</span>
+            </div>
+
+            {/* Tiêu đề */}
+            <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">
+              {title || <span className="text-slate-300 italic">Tiêu đề bài viết chưa nhập...</span>}
+            </h1>
+
+            {/* Mô tả ngắn */}
+            {summary ? (
+              <div className="bg-slate-50/70 border-l-4 border-indigo-500 p-4 rounded-r-xl">
+                <p className="text-slate-600 italic text-sm leading-relaxed whitespace-pre-wrap">
+                  {summary}
+                </p>
+              </div>
+            ) : (
+              <div className="bg-slate-50/30 border-l-4 border-slate-200 p-4 rounded-r-xl">
+                <p className="text-slate-300 italic text-xs leading-relaxed">
+                  Mô tả ngắn chưa nhập...
+                </p>
+              </div>
+            )}
+
+            {/* Ảnh đại diện */}
+            {thumbnail ? (
+              <div className="w-full max-h-[350px] overflow-hidden rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-center">
+                <img
+                  src={thumbnail}
+                  alt={title || "Preview image"}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-full h-[180px] rounded-xl border border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center text-slate-400">
+                <span className="text-xs">Chưa chọn ảnh đại diện</span>
+              </div>
+            )}
+
+            {/* Đường kẻ phân cách */}
+            <hr className="border-slate-100" />
+
+            {/* Nội dung chi tiết */}
+            <div
+              className="text-slate-700 text-sm leading-relaxed space-y-4 break-words prose max-w-none [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_p]:leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: contentHtml || '<p class="text-slate-400 italic">Nội dung chi tiết chưa nhập...</p>' }}
+            />
+          </article>
+        </div>
+      </Modal>
+    </>
   );
 };
 

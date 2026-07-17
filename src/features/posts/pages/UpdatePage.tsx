@@ -1,17 +1,17 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Spin, Button } from 'antd';
 import type { AxiosError } from 'axios';
-import FormUpdate from '../components/FormUpdate';
+import { FormUpdate } from '../components';
 import { usePostsQuery, useUpdatePostMutation } from '../hooks';
 import type { PostType, PostPayload } from '../types';
 import type { ApiResponse } from '../../../types/api';
 import { handleApiError } from '../../../utils/errorHandler';
 
 const staticPostTypes: PostType[] = [
-  { id: 1, name: 'Kiến thức', code: 'KIENTHUC', description: 'Bài viết chia sẻ kiến thức' },
-  { id: 2, name: 'Bài tập', code: 'BAITAP', description: 'Bài viết chứa bài tập và lời giải' },
-  { id: 3, name: 'Project Log', code: 'PROJECT_LOG', description: 'Nhật ký thực hiện dự án' },
-  { id: 4, name: 'Chung', code: 'GENERAL', description: 'Danh mục bài viết chung' },
+  { id: 1, name: 'Frontend Development', code: 'FRONTEND', description: 'Bài viết về Phát triển Frontend' },
+  { id: 2, name: 'Backend Development', code: 'BACKEND', description: 'Bài viết về Phát triển Backend' },
+  { id: 3, name: 'UI/UX Design', code: 'UIUX', description: 'Bài viết về Thiết kế Giao diện & Trải nghiệm' },
+  { id: 4, name: 'DevOps', code: 'DEVOPS', description: 'Bài viết về DevOps & Triển khai' },
 ];
 
 const UpdatePage = () => {
@@ -20,7 +20,8 @@ const UpdatePage = () => {
   const [form] = Form.useForm();
 
   // Lấy danh sách bài viết để tìm bài viết cần chỉnh sửa
-  const { data: posts = [], isLoading } = usePostsQuery();
+  const { data, isLoading } = usePostsQuery({ limit: 1000 });
+  const posts = data?.posts || [];
   const post = posts.find((p) => p.id === Number(id));
 
   const updateMutation = useUpdatePostMutation(

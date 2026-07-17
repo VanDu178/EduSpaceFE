@@ -7,6 +7,9 @@ import { useLogoutMutation } from '../features/auth/hooks';
 
 const DashboardPage = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('sidebar_collapsed') === 'true';
+  });
   const navigate = useNavigate();
 
   // Load thông tin người dùng từ localStorage khi khởi chạy
@@ -30,18 +33,26 @@ const DashboardPage = () => {
     logoutMutation.mutate();
   };
 
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed(prev => {
+      const nextVal = !prev;
+      localStorage.setItem('sidebar_collapsed', String(nextVal));
+      return nextVal;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-white flex">
       {/* Sidebar bên trái (Tự động nhận biết active route qua URL) */}
-      <Sidebar />
+      <Sidebar isCollapsed={isSidebarCollapsed} onToggle={handleToggleSidebar} />
 
       {/* Vùng nội dung chính bên phải */}
-      <div className="flex-1 pl-64 flex flex-col min-h-screen bg-slate-50/30">
+      <div className={`flex-1 ${isSidebarCollapsed ? 'pl-20' : 'pl-64'} flex flex-col min-h-screen bg-slate-50/30 transition-all duration-300 overflow-hidden`}>
         {/* Top Navbar */}
         <Navbar user={user} onLogout={handleLogout} />
 
         {/* Nội dung các phân hệ route con */}
-        <main className="p-5 flex-1">
+        <main className="p-5 flex-1  overflow-y-auto">
           <Outlet />
         </main>
       </div>

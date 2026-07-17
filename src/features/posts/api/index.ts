@@ -1,12 +1,12 @@
 import api from '../../../services/api';
-import type { Post, PostPayload } from '../types';
-import type { ApiResponse } from '../../../types/api';
+import type { Post, PostPayload, Params } from '../types';
+import type { ApiResponse, PaginatedData } from '../../../types/api';
 
 // Hàm gọi API lấy danh sách bài viết
-export const fetchPostsApi = async (): Promise<Post[]> => {
-  const response = await api.get('/posts');
+export const fetchPostsApi = async (params?: Params): Promise<PaginatedData<{ posts: Post[] }>> => {
+  const response = await api.get('/posts', { params });
   if (response.data.success) {
-    return response.data.data.posts;
+    return response.data.data;
   }
   throw new Error(response.data.message || 'Không thể lấy danh sách bài viết');
 };

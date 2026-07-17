@@ -6,3 +6,15 @@ export interface ApiResponse<T = unknown> {
   errorCode?: string | null; // Mã lỗi hệ thống tự định nghĩa cho Frontend xử lý logic
   errors?: Record<string, string[]> | null; // Chứa thông tin lỗi chi tiết của từng trường input (ví dụ: validation errors)
 }
+
+export interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export type PaginatedData<T> = T & {
+  pagination: Pagination;
+};
+

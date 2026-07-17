@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './features/auth/pages/Login';
 import Register from './features/auth/pages/Register';
 import DashboardPage from './pages/DashboardPage';
-import ListPage from './features/posts/pages/ListPage';
+import ListPage from './features/posts/pages';
 import CreatePage from './features/posts/pages/CreatePage';
 import UpdatePage from './features/posts/pages/UpdatePage';
 import DetailPage from './features/posts/pages/DetailPage';

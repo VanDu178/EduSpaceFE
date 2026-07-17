@@ -29,3 +29,12 @@ export interface PostPayload {
   summary?: string | null;
   thumbnail?: string | null;
 }
+
+// Interface tham số truy vấn bài viết phục vụ phân trang & bộ lọc
+export interface Params {
+  page?: number;
+  limit?: number;
+  keyword?: string;
+  postType?: string;
+}
+

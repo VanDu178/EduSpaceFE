@@ -15,11 +15,6 @@ const Navbar = ({ user, onLogout }: NavbarProps) => {
     switch (role?.toLowerCase()) {
       case 'admin':
         return 'Quản trị viên';
-      case 'teacher':
-        return 'Giảng viên';
-      case 'client':
-      default:
-        return 'Học viên';
     }
   };
 

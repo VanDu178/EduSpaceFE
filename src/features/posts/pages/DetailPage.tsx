@@ -8,24 +8,31 @@ const DetailPage = () => {
   const navigate = useNavigate();
 
   // Lấy dữ liệu từ cache/query danh sách bài viết
-  const { data: posts = [], isLoading } = usePostsQuery();
+  const { data, isLoading } = usePostsQuery({ limit: 1000 });
+  const posts = data?.posts || [];
   const post = posts.find((p) => p.id === Number(id));
 
   // Lấy kiểu màu sắc tương ứng cho loại bài viết (badge)
   const getPostTypeStyles = (code?: string) => {
     const normCode = code?.toUpperCase() || 'GENERAL';
     switch (normCode) {
+      case 'FRONTEND':
       case 'KIENTHUC':
       case 'KIEN_THUC':
         return 'purple';
+      case 'BACKEND':
       case 'BAITAP':
       case 'BAI_TAP':
-        return 'emerald';
+        return 'blue';
+      case 'UIUX':
       case 'PROJECT_LOG':
       case 'PROJECTLOG':
-        return 'amber';
+        return 'magenta';
+      case 'DEVOPS':
+      case 'GENERAL':
+        return 'cyan';
       default:
-        return 'blue';
+        return 'default';
     }
   };
 
@@ -123,7 +130,7 @@ const DetailPage = () => {
           {/* Content Description */}
           <div className="prose max-w-none text-slate-700 text-sm md:text-base leading-relaxed space-y-4">
             {post.content ? (
-              post.content.split('\n').map((paragraph, index) => (
+              post.content.split('\n').map((paragraph: string, index: number) => (
                 <p key={index} className="whitespace-pre-line">
                   {paragraph}
                 </p>

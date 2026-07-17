@@ -1,4 +1,4 @@
-import { Table, Tag, Badge, Space, Button, Popconfirm, Empty } from 'antd';
+import { Table, Tag, Badge, Button, Popconfirm, Empty, Image } from 'antd';
 import { PencilSquareIcon, TrashIcon, PhotoIcon, EyeIcon } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
 import type { Post } from '../types';
@@ -9,24 +9,43 @@ interface PostTableProps {
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
   isLoading: boolean;
+  pagination?: {
+    current: number;
+    pageSize: number;
+    total: number;
+    onChange: (page: number, pageSize: number) => void;
+  };
 }
 
-const PostTable = ({ posts, onViewDetail, onEdit, onDelete, isLoading }: PostTableProps) => {
+const PostTable = ({
+  posts,
+  onViewDetail,
+  onEdit,
+  onDelete,
+  isLoading,
+  pagination,
+}: PostTableProps) => {
   // Lấy kiểu màu sắc tương ứng cho loại bài viết (badge)
   const getPostTypeStyles = (code?: string) => {
     const normCode = code?.toUpperCase() || 'GENERAL';
     switch (normCode) {
+      case 'FRONTEND':
       case 'KIENTHUC':
       case 'KIEN_THUC':
         return 'purple';
+      case 'BACKEND':
       case 'BAITAP':
       case 'BAI_TAP':
-        return 'emerald';
+        return 'blue';
+      case 'UIUX':
       case 'PROJECT_LOG':
       case 'PROJECTLOG':
-        return 'amber';
+        return 'magenta';
+      case 'DEVOPS':
+      case 'GENERAL':
+        return 'cyan';
       default:
-        return 'blue';
+        return 'default';
     }
   };
 
@@ -36,11 +55,11 @@ const PostTable = ({ posts, onViewDetail, onEdit, onDelete, isLoading }: PostTab
       key: 'thumbnail',
       width: 90,
       render: (_, record) => {
-        if (record.thumbnail) {
+        if (record?.thumbnail) {
           return (
-            <img
-              src={record.thumbnail}
-              alt={record.title}
+            <Image
+              src={record?.thumbnail}
+              alt={record?.title}
               className="w-12 h-12 rounded-lg object-cover border border-slate-100 shadow-sm"
             />
           );
@@ -67,7 +86,7 @@ const PostTable = ({ posts, onViewDetail, onEdit, onDelete, isLoading }: PostTab
       title: 'Mô tả ngắn',
       key: 'summary',
       render: (_, record) => {
-        const text = record.summary || record.content || '';
+        const text = record?.summary || '';
         return (
           <span className="text-slate-500 line-clamp-2">
             {text.length > 80 ? `${text.substring(0, 80)}...` : text || 'Không có mô tả'}
@@ -108,17 +127,17 @@ const PostTable = ({ posts, onViewDetail, onEdit, onDelete, isLoading }: PostTab
       width: 140,
       align: 'center',
       render: (_, record) => (
-        <Space size="small">
+        <div >
           <Button
             type="text"
-            icon={<EyeIcon className="h-5 w-5" />}
+            icon={<EyeIcon className="h-4 w-4" />}
             onClick={() => onViewDetail(record.id)}
             className="text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center justify-center"
             title="Xem chi tiết"
           />
           <Button
             type="text"
-            icon={<PencilSquareIcon className="h-5 w-5" />}
+            icon={<PencilSquareIcon className="h-4 w-4" />}
             onClick={() => onEdit(record.id)}
             className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center"
             title="Sửa bài viết"
@@ -134,12 +153,12 @@ const PostTable = ({ posts, onViewDetail, onEdit, onDelete, isLoading }: PostTab
             <Button
               type="text"
               danger
-              icon={<TrashIcon className="h-5 w-5" />}
+              icon={<TrashIcon className="h-4 w-4" />}
               className="text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg flex items-center justify-center"
               title="Xóa bài viết"
             />
           </Popconfirm>
-        </Space>
+        </div>
       ),
     },
   ];
@@ -159,14 +178,16 @@ const PostTable = ({ posts, onViewDetail, onEdit, onDelete, isLoading }: PostTab
       columns={columns}
       rowKey="id"
       loading={isLoading}
-      size="middle"
-      scroll={{ x: true, y: 'calc(100vh - 370px)' }}
-      pagination={{
-        pageSize: 10,
-        showSizeChanger: false,
-        className: 'pr-6 my-4 shrink-0',
-      }}
-      className="flex-1 flex flex-col overflow-hidden [&_.ant-spin-nested-loading]:flex-1 [&_.ant-spin-nested-loading]:flex [&_.ant-spin-nested-loading]:flex-col [&_.ant-spin-container]:flex-1 [&_.ant-spin-container]:flex [&_.ant-spin-container]:flex-col [&_.ant-table]:flex-1 [&_.ant-table]:flex [&_.ant-table]:flex-col [&_.ant-table-container]:flex-1 [&_.ant-table-container]:flex [&_.ant-table-container]:flex-col [&_.ant-table-content]:flex-1 [&_.ant-table-content]:overflow-auto [&_.ant-table]:bg-transparent [&_.ant-table-thead_tr_th]:bg-slate-50/75 [&_.ant-table-thead_tr_th]:text-slate-500 [&_.ant-table-thead_tr_th]:font-semibold [&_.ant-table-thead_tr_th]:text-xs [&_.ant-table-thead_tr_th]:uppercase [&_.ant-table-thead_tr_th]:tracking-wider [&_.ant-table-thead_tr_th]:border-b [&_.ant-table-thead_tr_th]:border-slate-200 [&_.ant-table-row]:hover:bg-slate-50/50 [&_.ant-table-cell]:py-4 [&_.ant-table-cell]:px-6"
+      scroll={{ y: 'calc(100vh - 316px)' }}
+      pagination={pagination ? {
+        current: pagination.current,
+        pageSize: pagination.pageSize,
+        total: pagination.total,
+        onChange: pagination.onChange,
+        showSizeChanger: true,
+        pageSizeOptions: ['5', '10', '20', '50'],
+        style: { marginBottom: 0 }
+      } : false}
     />
   );
 };
