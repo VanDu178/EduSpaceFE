@@ -20,5 +20,6 @@ export interface UserParams {
   limit?: number;
   keyword?: string;
   role?: string;
+  status?: string;
 }
 

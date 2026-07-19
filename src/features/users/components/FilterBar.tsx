@@ -2,7 +2,7 @@ import { Input, Select } from 'antd';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import type React from 'react';
 import type { UserParams } from '../types';
-import { ROLE_OPTIONS } from '../constants';
+import { ROLE_OPTIONS, STATUS_OPTIONS } from '../constants';
 
 interface FilterBarProps {
   params: UserParams;
@@ -26,9 +26,9 @@ const FilterBar = ({
         </span>
       </span>
 
-      <div className='flex items-center gap-2'>
-        {/* Select Filter */}
-        <div className="w-full sm:w-[200px]">
+      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        {/* Role Select Filter */}
+        <div className="w-full sm:w-[180px]">
           <Select
             value={params.role || 'ALL'}
             onChange={(value) =>
@@ -43,8 +43,24 @@ const FilterBar = ({
           />
         </div>
 
+        {/* Status Select Filter */}
+        <div className="w-full sm:w-[180px]">
+          <Select
+            value={params.status || 'ALL'}
+            onChange={(value) =>
+              setParams((prev) => ({
+                ...prev,
+                status: value,
+                page: 1,
+              }))
+            }
+            options={STATUS_OPTIONS}
+            className="w-full"
+          />
+        </div>
+
         {/* Search input */}
-        <div className="w-full sm:w-[320px]">
+        <div className="w-full sm:w-[280px]">
           <Input
             placeholder="Tìm theo tên hoặc email người dùng..."
             value={params.keyword || ''}
