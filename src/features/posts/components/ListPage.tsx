@@ -1,4 +1,4 @@
-import { Table, Tag, Button, Popconfirm, Empty, Image, Switch } from 'antd';
+import { Table, Tag, Button, Popconfirm, Empty, Image, Switch, Tooltip } from 'antd';
 import { PencilSquareIcon, TrashIcon, PhotoIcon, EyeIcon } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
 import type { Post } from '../types';
@@ -115,20 +115,24 @@ const PostTable = ({
       align: 'center',
       render: (_, record) => (
         <div >
-          <Button
-            type="text"
-            icon={<EyeIcon className="h-4 w-4" />}
-            onClick={() => onViewDetail(record.id)}
-            className="text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center justify-center"
-            title="Xem chi tiết"
-          />
-          <Button
-            type="text"
-            icon={<PencilSquareIcon className="h-4 w-4" />}
-            onClick={() => onEdit(record.id)}
-            className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center"
-            title="Cập nhật"
-          />
+          <Tooltip title="Xem chi tiết">
+            <Button
+              type="text"
+              icon={<EyeIcon className="h-4 w-4" />}
+              onClick={() => onViewDetail(record.id)}
+              className="text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center justify-center"
+            />
+          </Tooltip>
+
+          <Tooltip title="Cập nhật">
+            <Button
+              type="text"
+              icon={<PencilSquareIcon className="h-4 w-4" />}
+              onClick={() => onEdit(record.id)}
+              className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center"
+            />
+          </Tooltip>
+
           <Popconfirm
             placement='topLeft'
             title="Xóa"
@@ -138,13 +142,14 @@ const PostTable = ({
             cancelText="Hủy"
             okButtonProps={{ danger: true }}
           >
-            <Button
-              type="text"
-              danger
-              icon={<TrashIcon className="h-4 w-4" />}
-              className="text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg flex items-center justify-center"
-              title="Xóa"
-            />
+            <Tooltip title="Xóa">
+              <Button
+                type="text"
+                danger
+                icon={<TrashIcon className="h-4 w-4" />}
+                className="text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg flex items-center justify-center"
+              />
+            </Tooltip>
           </Popconfirm>
         </div>
       ),
