@@ -97,7 +97,7 @@ const FormUpdate = ({
         className="-m-5 h-[calc(100vh-104px)] flex flex-col overflow-hidden bg-slate-50/30"
       >
         {/* Thanh Tiêu Đề (Title Bar) */}
-        <div className="bg-white py-3.5 pt-1 pb-6 pr-6 flex items-center justify-between z-30 flex-shrink-0 border-b border-slate-200/60">
+        <div className="bg-white py-3.5 pt-1 pb-6 pr-6 flex items-center justify-between z-10 flex-shrink-0 border-b border-slate-200/60">
           <div className="flex items-center">
             <Button
               type="text"

@@ -32,7 +32,7 @@ const DetailPage = () => {
   return (
     <div className="-m-5 h-[calc(100vh-104px)] flex flex-col overflow-hidden bg-slate-50/30">
       {/* Title Bar với Button Back */}
-      <div className="bg-white border-b border-slate-100 p-3.5 pr-6 flex items-center sticky top-0 z-30 flex-shrink-0">
+      <div className="bg-white border-b border-slate-100 p-3.5 pr-6 flex items-center sticky top-0 z-10 flex-shrink-0">
         <Button
           type="text"
           icon={<ArrowLeftIcon className="h-4 w-4" />}
