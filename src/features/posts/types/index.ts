@@ -31,5 +31,6 @@ export interface Params {
   limit?: number;
   keyword?: string;
   postType?: string;
+  published?: string;
 }
 

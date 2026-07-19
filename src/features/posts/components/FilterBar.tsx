@@ -23,6 +23,12 @@ const FilterBar = ({
     }))
   ];
 
+  const statusOptions = [
+    { value: 'ALL', label: 'Tất cả trạng thái' },
+    { value: 'true', label: 'Đã xuất bản' },
+    { value: 'false', label: 'Bản nháp' },
+  ];
+
   return (
     <div className="flex flex-wrap justify-between items-center gap-3">
       {/* Advanced Filter Button */}
@@ -48,6 +54,21 @@ const FilterBar = ({
               }))
             }
             options={filterOptions}
+            className="w-full"
+          />
+        </div>
+        {/* Select Status */}
+        <div className="w-full sm:w-[160px]">
+          <Select
+            value={params.published || 'ALL'}
+            onChange={(value) =>
+              setParams((prev) => ({
+                ...prev,
+                published: value,
+                page: 1,
+              }))
+            }
+            options={statusOptions}
             className="w-full"
           />
         </div>

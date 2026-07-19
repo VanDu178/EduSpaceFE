@@ -21,6 +21,7 @@ const Index = () => {
     limit: params.limit,
     keyword: params.keyword || undefined,
     postType: params.postType !== 'ALL' ? params.postType : undefined,
+    published: params.published !== 'ALL' ? params.published : undefined,
   });
   const { data: postTypes = [] } = usePostTypesQuery();
   const deleteMutation = useDeletePostMutation();
