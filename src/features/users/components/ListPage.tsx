@@ -6,8 +6,7 @@ import type { User } from '../types';
 interface ListPageProps {
   users: User[];
   isLoading: boolean;
-  lockedUserIds: number[];
-  onToggleLock: (id: number) => void;
+  onToggleLock: (id: number, currentStatus: 'active' | 'locked') => void;
   onEdit: (user: User) => void;
   onResetPassword: (user: User) => void;
   pagination?: {
@@ -21,13 +20,21 @@ interface ListPageProps {
 const ListPage = ({
   users,
   isLoading,
-  lockedUserIds,
   onToggleLock,
   onEdit,
   onResetPassword,
   pagination,
 }: ListPageProps) => {
 
+  const currentUserStr = localStorage.getItem('user');
+  let currentUserId: number | null = null;
+  if (currentUserStr) {
+    try {
+      currentUserId = JSON.parse(currentUserStr).id;
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   if (!isLoading && users.length === 0) {
     return (
@@ -84,7 +91,7 @@ const ListPage = ({
       width: 120,
       align: 'center',
       render: (_, record) => {
-        const isLocked = lockedUserIds.includes(record.id);
+        const isLocked = record.status === 'locked';
         return (
           <Badge
             status={isLocked ? 'error' : 'processing'}
@@ -100,7 +107,9 @@ const ListPage = ({
       width: 180,
       align: 'center',
       render: (_, record) => {
-        const isLocked = lockedUserIds.includes(record.id);
+        const isLocked = record.status === 'locked';
+        const isSelf = record.id === currentUserId;
+
         return (
           <div className="flex items-center justify-center space-x-2">
             <Tooltip title="Cập nhật">
@@ -129,24 +138,38 @@ const ListPage = ({
               </Tooltip>
             </Popconfirm>
 
-            <Popconfirm
-              title={isLocked ? 'Mở khóa' : 'Khóa'}
-              description={`Bạn có chắc chắn muốn ${isLocked ? 'mở khóa' : 'khóa'} tài khoản của "${record.name || record.email}"?`}
-              onConfirm={() => onToggleLock(record.id)}
-              okText="Đồng ý"
-              cancelText="Hủy"
-              okButtonProps={{ danger: !isLocked }}
-              placement='topLeft'
-            >
-              <Tooltip title={isLocked ? 'Mở khóa' : 'Khóa'}>
-                <Button
-                  type="text"
-                  danger={!isLocked}
-                  className={isLocked ? 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center' : 'text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg flex items-center justify-center'}
-                  icon={isLocked ? <LockOpenIcon className="h-4 w-4" /> : <LockClosedIcon className="h-4 w-4" />}
-                />
+            {isSelf ? (
+              <Tooltip title="Không được phép tự khóa tài khoản của chính mình">
+                <span className="inline-block cursor-not-allowed">
+                  <Button
+                    type="text"
+                    danger
+                    disabled
+                    className="text-slate-300 hover:text-slate-300 hover:bg-transparent rounded-lg flex items-center justify-center cursor-not-allowed opacity-50"
+                    icon={<LockClosedIcon className="h-4 w-4" />}
+                  />
+                </span>
               </Tooltip>
-            </Popconfirm>
+            ) : (
+              <Popconfirm
+                title={isLocked ? 'Mở khóa' : 'Khóa'}
+                description={`Bạn có chắc chắn muốn ${isLocked ? 'mở khóa' : 'khóa'} tài khoản của "${record.name || record.email}"?`}
+                onConfirm={() => onToggleLock(record.id, record.status || 'active')}
+                okText="Đồng ý"
+                cancelText="Hủy"
+                okButtonProps={{ danger: !isLocked }}
+                placement='topLeft'
+              >
+                <Tooltip title={isLocked ? 'Mở khóa' : 'Khóa'}>
+                  <Button
+                    type="text"
+                    danger={!isLocked}
+                    className={isLocked ? 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center' : 'text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg flex items-center justify-center'}
+                    icon={isLocked ? <LockOpenIcon className="h-4 w-4" /> : <LockClosedIcon className="h-4 w-4" />}
+                  />
+                </Tooltip>
+              </Popconfirm>
+            )}
           </div>
         );
       },

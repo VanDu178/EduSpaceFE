@@ -29,6 +29,15 @@ export const updateUserApi = async (id: number, data: Partial<User>): Promise<Us
   throw new Error(response.data.message || 'Không thể cập nhật tài khoản');
 };
 
+// Hàm gọi API cập nhật trạng thái tài khoản (khóa / mở khóa)
+export const toggleUserStatusApi = async (id: number, status: 'active' | 'locked'): Promise<User> => {
+  const response = await api.put(`/users/${id}/status`, { status });
+  if (response.data.success) {
+    return response.data.data.user;
+  }
+  throw new Error(response.data.message || 'Không thể cập nhật trạng thái tài khoản');
+};
+
 export interface ResetPasswordResponse {
   email: string;
   newPassword: string;

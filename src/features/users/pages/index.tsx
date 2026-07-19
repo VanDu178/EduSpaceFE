@@ -5,15 +5,15 @@ import {
   useUsersQuery,
   useCreateUserMutation,
   useUpdateUserMutation,
-  useResetPasswordMutation
+  useResetPasswordMutation,
+  useToggleUserStatusMutation
 } from '../hooks';
-import { DEFAULT_USER_PARAMS } from '../constants';
 import type { UserParams, User } from '../types';
 import { PlusIcon } from '@heroicons/react/16/solid';
+import { DEFAULT_USER_PARAMS } from '../constants';
 
 const UserListPage = () => {
   const [params, setParams] = useState<UserParams>(DEFAULT_USER_PARAMS);
-  const [lockedUserIds, setLockedUserIds] = useState<number[]>([]);
 
   // State quản lý độc lập 2 Modal Thêm và Cập nhật
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -35,12 +35,22 @@ const UserListPage = () => {
   const createUserMutation = useCreateUserMutation();
   const updateUserMutation = useUpdateUserMutation();
   const resetPasswordMutation = useResetPasswordMutation();
+  const toggleUserStatusMutation = useToggleUserStatusMutation();
 
   // Khóa / mở khóa tài khoản
-  const handleToggleLock = (userId: number) => {
-    setLockedUserIds((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
-    );
+  const handleToggleLock = (userId: number, currentStatus: 'active' | 'locked') => {
+    const nextStatus = currentStatus === 'active' ? 'locked' : 'active';
+    toggleUserStatusMutation.mutate({
+      id: userId,
+      status: nextStatus
+    }, {
+      onSuccess: () => {
+        message.success(nextStatus === 'locked' ? 'Khóa tài khoản thành công!' : 'Mở khóa tài khoản thành công!');
+      },
+      onError: (err: any) => {
+        message.error(err.message || 'Lỗi khi cập nhật trạng thái tài khoản');
+      }
+    });
   };
 
   // Mở modal tạo mới
@@ -139,7 +149,6 @@ const UserListPage = () => {
         <ListPage
           users={users}
           isLoading={isLoading}
-          lockedUserIds={lockedUserIds}
           onToggleLock={handleToggleLock}
           onEdit={handleOpenEdit}
           onResetPassword={handleResetPassword}

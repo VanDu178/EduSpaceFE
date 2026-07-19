@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchUsersApi, createUserApi, updateUserApi, resetPasswordApi } from '../api';
+import { fetchUsersApi, createUserApi, updateUserApi, resetPasswordApi, toggleUserStatusApi } from '../api';
 import type { User, UserParams } from '../types';
 import type { PaginatedData } from '../../../types/api';
 
@@ -38,6 +38,17 @@ export const useResetPasswordMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => resetPasswordApi(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    }
+  });
+};
+
+// Hook mutation cập nhật trạng thái hoạt động/khóa của user
+export const useToggleUserStatusMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: number; status: 'active' | 'locked' }) => toggleUserStatusApi(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
     }
