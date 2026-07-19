@@ -94,7 +94,7 @@ const FormCreate = ({
               onClick={onCancel}
               className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg flex items-center justify-center p-2"
             />
-            <span className="text-sm font-bold text-slate-800">TẠO MỚI BÀI VIẾT</span>
+            <span className="text-sm font-bold text-slate-800">THÊM MỚI BÀI VIẾT</span>
           </div>
           <div className="flex items-center space-x-2.5">
             <Button
@@ -115,7 +115,7 @@ const FormCreate = ({
             >
               <span className="flex items-center gap-1.5">
                 <PaperAirplaneIcon className="h-4 w-4" />
-                Xuất bản bài viết
+                Lưu
               </span>
             </Button>
           </div>
@@ -127,16 +127,16 @@ const FormCreate = ({
             {/* Cột Trái: Vùng soạn thảo chính */}
             <div className="col-span-12 lg:col-span-8 space-y-6">
               <div className="bg-white border border-slate-100 rounded-2xl p-3  space-y-6 min-h-[500px]">
-                {/* Tiêu đề bài viết */}
+                {/* Tiêu đề  */}
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 tracking-wider block mb-1">TIÊU ĐỀ</span>
                   <Form.Item
                     name="title"
-                    rules={[{ required: true, message: 'Vui lòng nhập tiêu đề bài viết!' }]}
+                    rules={[{ required: true, message: 'Vui lòng nhập tiêu đề!' }]}
                     className="mb-0"
                   >
                     <Input
-                      placeholder="Nhập tiêu đề bài viết..."
+                      placeholder="Nhập tiêu đề..."
                       className="text-2xl font-bold border-0 border-b border-slate-100 rounded-none hover:border-slate-200 focus:border-indigo-500  focus:ring-0 px-0 pb-3 transition-colors bg-transparent placeholder:text-slate-300 [&_.ant-input]:text-2xl [&_.ant-input]:font-bold"
                     />
                   </Form.Item>
@@ -149,7 +149,7 @@ const FormCreate = ({
                     name="content"
                     className="mb-0"
                   >
-                    <BlockNoteEditor placeholder="Bắt đầu viết nội dung bài viết tuyệt vời của bạn ở đây..." />
+                    <BlockNoteEditor placeholder="Bắt đầu viết nội dung  tuyệt vời của bạn ở đây..." />
                   </Form.Item>
                 </div>
               </div>
@@ -158,9 +158,9 @@ const FormCreate = ({
             {/* Cột Phải: Sidebar cài đặt */}
             <div className="col-span-12 lg:col-span-4">
               <div className="bg-white border border-slate-100 rounded-2xl p-3 space-y-4">
-                {/* Phần 1: Ảnh đại diện bài viết */}
+                {/* Phần 1: Ảnh đại diện  */}
                 <div className=" space-y-2">
-                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block">ẢNH ĐẠI DIỆN BÀI VIẾT</span>
+                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block">ẢNH ĐẠI DIỆN</span>
 
                   {thumbnail ? (
                     <div className="relative w-full h-[140px] rounded-xl overflow-hidden group/img border border-slate-200">
@@ -202,9 +202,9 @@ const FormCreate = ({
                   )}
                 </div>
 
-                {/* Phần 2: Phân loại bài viết */}
+                {/* Phần 2: Phân loại */}
                 <div className="space-y-2">
-                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block">PHÂN LOẠI BÀI VIẾT</span>
+                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block">PHÂN LOẠI</span>
 
                   <Form.Item
                     name="postTypeId"
@@ -212,7 +212,7 @@ const FormCreate = ({
                     className="mb-0"
                   >
                     <Select
-                      placeholder="Chọn phân loại bài viết"
+                      placeholder="Chọn phân loại"
                       className="w-full h-11"
                       dropdownClassName="rounded-xl border border-slate-100"
                     >
@@ -231,7 +231,7 @@ const FormCreate = ({
 
                 {/* Phần 3: Mô tả ngắn */}
                 <div className="space-y-2">
-                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block">MÔ TẢ NGẮN BÀI VIẾT</span>
+                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block">MÔ TẢ NGẮN</span>
 
                   <Form.Item
                     name="summary"
@@ -239,7 +239,7 @@ const FormCreate = ({
                   >
                     <TextArea
                       rows={4}
-                      placeholder="Mô tả tóm tắt nội dung để hiển thị trên thẻ bài viết..."
+                      placeholder="Mô tả tóm tắt nội dung..."
                       className="px-4 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 text-slate-800 text-sm placeholder-slate-400"
                     />
                   </Form.Item>
@@ -249,7 +249,7 @@ const FormCreate = ({
                 <div className="flex items-center justify-between pt-2">
                   <div className="space-y-0.5">
                     <span className="text-[10px] font-bold text-slate-400 tracking-wider block">TRẠNG THÁI HIỂN THỊ</span>
-                    <span className="text-xs text-slate-400">Công khai bài viết sau khi lưu</span>
+                    <span className="text-xs text-slate-400">Công khai  sau khi lưu</span>
                   </div>
                   <Form.Item name="published" valuePropName="checked" className="mb-0">
                     <Switch
@@ -263,7 +263,7 @@ const FormCreate = ({
         </div>
       </Form>
 
-      {/* Modal Xem trước bài viết */}
+      {/* Modal Xem trước  */}
       <Modal
         title={null}
         open={isPreviewOpen}
@@ -294,7 +294,7 @@ const FormCreate = ({
 
             {/* Tiêu đề */}
             <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">
-              {title || <span className="text-slate-300 italic">Tiêu đề bài viết chưa nhập...</span>}
+              {title || <span className="text-slate-300 italic">Tiêu đề  chưa nhập...</span>}
             </h1>
 
             {/* Mô tả ngắn */}

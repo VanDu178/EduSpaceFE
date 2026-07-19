@@ -1,25 +1,24 @@
 import { useMutation } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import { loginApi, registerApi, logoutApi } from '../api';
-import type { LoginPayload, RegisterPayload, AuthResponse } from '../types';
+import type { LoginPayload, RegisterPayload, AuthData } from '../types';
 import type { ApiResponse } from '../../../types/api';
 import { toast } from '../../../utils/toastHelper';
 
 // Custom hook mutation Đăng nhập
 export const useLoginMutation = (
-  onSuccessCallback?: (data: AuthResponse) => void,
+  onSuccessCallback?: (message?: string) => void,
   onErrorCallback?: (error: AxiosError<ApiResponse>) => void
 ) => {
   return useMutation({
     mutationFn: (payload: LoginPayload) => loginApi(payload),
-    onSuccess: (res) => {
-      if (res.success && res.data) {
-        toast.success('Đăng nhập hệ thống thành công!');
+    onSuccess: (res: ApiResponse<AuthData>) => {
+      if (res?.success && res?.data) {
         // Lưu access token và thông tin user vào localStorage
         localStorage.setItem('accessToken', res?.data?.accessToken);
         localStorage.setItem('user', JSON.stringify(res?.data?.user));
 
-        if (onSuccessCallback) onSuccessCallback(res?.data);
+        if (onSuccessCallback) onSuccessCallback(res?.message);
       } else {
         const errMsg = res?.message || 'Đăng nhập thất bại!';
         if (onErrorCallback) onErrorCallback({ response: { data: { message: errMsg } } } as AxiosError<ApiResponse>);

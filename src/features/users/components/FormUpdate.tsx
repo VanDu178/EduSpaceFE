@@ -43,7 +43,7 @@ const FormUpdate = ({
   return (
     <Modal
       open={isOpen}
-      title={<span className="text-lg font-bold text-slate-800">Cập nhật tài khoản</span>}
+      title={<span className="text-lg font-bold text-slate-800">Cập nhật</span>}
       onCancel={onClose}
       footer={[
         <Button

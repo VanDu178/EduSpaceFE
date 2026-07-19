@@ -1,5 +1,5 @@
 import { Table, Badge, Button, Popconfirm, Tooltip, Tag, Empty } from 'antd';
-import { LockClosedIcon, LockOpenIcon, PencilIcon, KeyIcon } from '@heroicons/react/24/outline';
+import { LockClosedIcon, LockOpenIcon, PencilIcon, KeyIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
 import type { User } from '../types';
 
@@ -52,7 +52,7 @@ const ListPage = ({
       ),
     },
     {
-      title: 'Email Đăng Ký',
+      title: 'Email',
       dataIndex: 'email',
       key: 'email',
       render: (email) => <span className="text-slate-500 font-medium">{email}</span>,
@@ -60,6 +60,7 @@ const ListPage = ({
     {
       title: 'Vai trò',
       dataIndex: 'role',
+      align: 'center',
       key: 'role',
       width: 150,
       render: (role) => {
@@ -102,12 +103,12 @@ const ListPage = ({
         const isLocked = lockedUserIds.includes(record.id);
         return (
           <div className="flex items-center justify-center space-x-2">
-            <Tooltip title="Cập nhật tài khoản">
+            <Tooltip title="Cập nhật">
               <Button
                 type="text"
                 onClick={() => onEdit(record)}
                 className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center"
-                icon={<PencilIcon className="h-4 w-4" />}
+                icon={<PencilSquareIcon className="h-4 w-4" />}
               />
             </Tooltip>
 
@@ -117,6 +118,7 @@ const ListPage = ({
               onConfirm={() => onResetPassword(record)}
               okText="Đồng ý"
               cancelText="Hủy"
+              placement='topLeft'
             >
               <Tooltip title="Đặt lại mật khẩu">
                 <Button
@@ -128,14 +130,15 @@ const ListPage = ({
             </Popconfirm>
 
             <Popconfirm
-              title={isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}
+              title={isLocked ? 'Mở khóa' : 'Khóa'}
               description={`Bạn có chắc chắn muốn ${isLocked ? 'mở khóa' : 'khóa'} tài khoản của "${record.name || record.email}"?`}
               onConfirm={() => onToggleLock(record.id)}
               okText="Đồng ý"
               cancelText="Hủy"
               okButtonProps={{ danger: !isLocked }}
+              placement='topLeft'
             >
-              <Tooltip title={isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}>
+              <Tooltip title={isLocked ? 'Mở khóa' : 'Khóa'}>
                 <Button
                   type="text"
                   danger={!isLocked}

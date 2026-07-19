@@ -63,7 +63,7 @@ const Index = () => {
         >
           <span className='flex items-center gap-2'>
             <PlusIcon className="h-5 w-5" />
-            Viết bài mới
+            Thêm mới
           </span>
         </Button>
       </div>

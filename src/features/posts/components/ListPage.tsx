@@ -56,7 +56,7 @@ const PostTable = ({
       },
     },
     {
-      title: 'Tiêu đề bài viết',
+      title: 'Tiêu đề',
       dataIndex: 'title',
       key: 'title',
       width: 250,
@@ -127,12 +127,12 @@ const PostTable = ({
             icon={<PencilSquareIcon className="h-4 w-4" />}
             onClick={() => onEdit(record.id)}
             className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center"
-            title="Sửa bài viết"
+            title="Cập nhật"
           />
           <Popconfirm
             placement='topLeft'
-            title="Xóa bài viết"
-            description={`Bạn có chắc chắn muốn xóa bài viết ?`}
+            title="Xóa"
+            description="Bạn có chắc chắn muốn xóa?"
             onConfirm={() => onDelete(record.id)}
             okText="Xóa"
             cancelText="Hủy"
@@ -143,7 +143,7 @@ const PostTable = ({
               danger
               icon={<TrashIcon className="h-4 w-4" />}
               className="text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg flex items-center justify-center"
-              title="Xóa bài viết"
+              title="Xóa"
             />
           </Popconfirm>
         </div>

@@ -8,7 +8,7 @@ const DetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Gọi API lấy chi tiết bài viết theo ID
+  // Gọi API lấy chi tiết  theo ID
   const { data, isLoading } = usePostQuery(id ? Number(id) : undefined);
   const post = data?.post;
 
@@ -46,12 +46,12 @@ const DetailPage = () => {
       <div className="flex-1 overflow-y-auto p-5">
         {isLoading ? (
           <div className="h-96 flex items-center justify-center">
-            <Spin size="large" tip="Đang tải thông tin chi tiết bài viết..." />
+            <Spin size="large" tip="Đang tải thông tin chi tiết ..." />
           </div>
         ) : !post ? (
           <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl max-w-2xl mx-auto text-center mt-10">
-            <p className="font-semibold text-lg">Không tìm thấy bài viết!</p>
-            <p className="text-sm mt-1">Bài viết này không tồn tại hoặc đã bị xóa khỏi hệ thống.</p>
+            <p className="font-semibold text-lg">Không tìm thấy !</p>
+            <p className="text-sm mt-1"> này không tồn tại hoặc đã bị xóa khỏi hệ thống.</p>
             <Button onClick={() => navigate('/admin/posts')} className="mt-4 rounded-xl">Quay lại danh sách</Button>
           </div>
         ) : (
@@ -66,7 +66,7 @@ const DetailPage = () => {
                       {post.postType?.name || 'Chung'}
                     </Tag>
                     <span className="text-xs text-slate-400 font-medium bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
-                      Mã bài viết: #{post.id}
+                      Mã : #{post.id}
                     </span>
                   </div>
 
@@ -103,7 +103,7 @@ const DetailPage = () => {
                     {post.content ? (
                       <div dangerouslySetInnerHTML={{ __html: post.content }} />
                     ) : (
-                      <p className="text-slate-400 italic">Không có nội dung chi tiết cho bài viết này.</p>
+                      <p className="text-slate-400 italic">Không có nội dung chi tiết cho  này.</p>
                     )}
                   </div>
                 </article>
@@ -112,7 +112,7 @@ const DetailPage = () => {
               {/* Sidebar / Info Column */}
               <div className="space-y-6">
                 <div className="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-5">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Thông tin bài viết</h4>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Thông tin </h4>
 
                   <div className="space-y-4">
                     {/* Status */}

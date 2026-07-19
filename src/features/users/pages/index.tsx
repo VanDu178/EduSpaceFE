@@ -9,6 +9,7 @@ import {
 } from '../hooks';
 import { DEFAULT_USER_PARAMS } from '../constants';
 import type { UserParams, User } from '../types';
+import { PlusIcon } from '@heroicons/react/16/solid';
 
 const UserListPage = () => {
   const [params, setParams] = useState<UserParams>(DEFAULT_USER_PARAMS);
@@ -120,9 +121,11 @@ const UserListPage = () => {
         <Button
           type="primary"
           onClick={handleOpenCreate}
-          className="rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold border-none flex items-center"
-        >
-          Thêm người dùng
+          className="px-5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-sm font-semibold flex items-center justify-center cursor-pointer">
+          <span className='flex items-center gap-2'>
+            <PlusIcon className="h-5 w-5" />
+            Thêm mới
+          </span>
         </Button>
       </div>
 

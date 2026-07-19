@@ -36,7 +36,7 @@ const FormCreate = ({
   return (
     <Modal
       open={isOpen}
-      title={<span className="text-lg font-bold text-slate-800">Thêm người dùng mới</span>}
+      title={<span className="text-lg font-bold text-slate-800">Thêm mới</span>}
       onCancel={onClose}
       footer={[
         <Button
@@ -53,7 +53,7 @@ const FormCreate = ({
           onClick={handleSubmit}
           className="rounded-lg bg-blue-600 hover:bg-blue-700 font-medium border-none"
         >
-          Tạo tài khoản
+          Thêm mới
         </Button>,
       ]}
       className="max-w-md"

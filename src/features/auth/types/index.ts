@@ -14,7 +14,7 @@ export interface RegisterPayload {
 }
 
 // Kiểu dữ liệu phản hồi xác thực thành công từ backend
-export interface AuthResponse {
+export interface AuthData {
   accessToken: string;
   user: User;
 }

@@ -5,6 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useLoginMutation } from '../hooks';
 import type { LoginPayload } from '../types';
 import { handleApiError } from '../../../utils/errorHandler';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,7 +21,8 @@ const Login = () => {
 
   // Khởi tạo login mutation hook
   const loginMutation = useLoginMutation(
-    () => {
+    (message) => {
+      toast.success(message || 'Đăng nhập thành công!');
       navigate('/admin');
     },
     (err) => {
