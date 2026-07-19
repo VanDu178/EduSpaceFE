@@ -51,7 +51,7 @@ const Index = () => {
 
 
   return (
-    <div className="space-y-6 flex flex-1 flex-col ">
+    <div className="space-y-6 flex flex-1 flex-col h-full">
       <div className="flex items-center justify-between mb-2 shrink-0">
         <h2 className="text-xl font-bold text-slate-800">Danh sách bài viết</h2>
         <Button
@@ -85,7 +85,7 @@ const Index = () => {
       </div>
 
       {/* Table list wrapper */}
-      <div>
+      <div className="flex-1 flex flex-col overflow-hidden">
         <ListPage
           posts={posts}
           onViewDetail={handleViewDetailClick}

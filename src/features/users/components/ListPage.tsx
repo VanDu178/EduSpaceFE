@@ -1,5 +1,5 @@
 import { Table, Badge, Button, Popconfirm, Tooltip, Tag, Empty } from 'antd';
-import { LockClosedIcon, LockOpenIcon, PencilIcon, KeyIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import { LockClosedIcon, LockOpenIcon, KeyIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
 import type { User } from '../types';
 
@@ -169,7 +169,6 @@ const ListPage = ({
         pageSizeOptions: ['5', '10', '20', '50'],
         style: { marginBottom: 0 }
       } : false}
-      className="flex-1 flex flex-col"
     />
   );
 };

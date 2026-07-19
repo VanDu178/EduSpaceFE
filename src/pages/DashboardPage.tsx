@@ -52,7 +52,7 @@ const DashboardPage = () => {
         <Navbar user={user} onLogout={handleLogout} />
 
         {/* Nội dung các phân hệ route con */}
-        <main className="p-5 flex-1  overflow-y-auto">
+        <main className="p-5 flex-1 flex flex-col overflow-y-auto">
           <Outlet />
         </main>
       </div>

@@ -7,36 +7,36 @@
    -------------------------------------------------------------------------- */
 
 /* Đồng bộ Font-Family */
-.ant-table, 
-.ant-table-cell, 
-.ant-btn, 
-.ant-input, 
-.ant-select, 
-.ant-modal, 
-.ant-tag, 
-.ant-badge, 
-.ant-popover, 
+.ant-table,
+.ant-table-cell,
+.ant-btn,
+.ant-input,
+.ant-select,
+.ant-modal,
+.ant-tag,
+.ant-badge,
+.ant-popover,
 .ant-tooltip {
   font-family: -apple-system, system-ui, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol !important;
 }
 
 /* Đồng bộ kích thước chữ (Font-Size 13px) */
-.ant-table, 
-.ant-table-cell, 
-.ant-btn, 
-.ant-input, 
-.ant-select-selector, 
-.ant-modal-content, 
+.ant-table,
+.ant-table-cell,
+.ant-btn,
+.ant-input,
+.ant-select-selector,
+.ant-modal-content,
 .ant-tag {
   font-size: 13px !important;
 }
 
 /* Đồng bộ độ dày chữ (Font-Weight 400) */
-.ant-table-row, 
-.ant-table-cell, 
-.ant-btn, 
-.ant-input, 
-.ant-select-selection-item, 
+.ant-table-row,
+.ant-table-cell,
+.ant-btn,
+.ant-input,
+.ant-select-selection-item,
 .ant-tag {
   font-weight: 400 !important;
 }
@@ -46,23 +46,75 @@
    -------------------------------------------------------------------------- */
 
 /* Tiêu đề cột (Header) của bảng */
-.ant-table-thead > tr > th {
-  font-weight: 600 !important;      /* Giữ tiêu đề cột hơi đậm nhẹ để phân biệt */
-  background-color: #f8fafc !important; /* Nền xám sáng phẳng sang trọng */
-  color: #475569 !important;           /* Màu chữ xám tối */
+.ant-table-thead>tr>th {
+  font-weight: 600 !important;
+  /* Giữ tiêu đề cột hơi đậm nhẹ để phân biệt */
+  background-color: #f8fafc !important;
+  /* Nền xám sáng phẳng sang trọng */
+  color: #475569 !important;
+  /* Màu chữ xám tối */
   border-bottom: 1px solid #e2e8f0 !important;
 }
 
 /* Dòng dữ liệu (Table Rows & Cells) */
-.ant-table-tbody > tr > td {
-  color: #334155 !important;           /* Màu chữ nội dung */
-  border-bottom: 1px solid #f1f5f9 !important; /* Đường viền ngang mỏng */
+.ant-table-tbody>tr>td {
+  color: #334155 !important;
+  /* Màu chữ nội dung */
+  border-bottom: 1px solid #f1f5f9 !important;
+  /* Đường viền ngang mỏng */
 }
 
 /* Hiệu ứng hover trên từng dòng của bảng */
-.ant-table-tbody > tr.ant-table-row:hover > td {
-  background-color: #f8fafc !important; /* Hover sáng nhẹ tinh tế */
+.ant-table-tbody>tr.ant-table-row:hover>td {
+  background-color: #f8fafc !important;
+  /* Hover sáng nhẹ tinh tế */
 }
+
+
+/* Đẩy pagination luôn về cuối mà không gây scroll */
+.ant-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.ant-spin-nested-loading {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.ant-spin-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.ant-table {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: auto;
+}
+
+.ant-table-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ant-table-content {
+  flex: 1;
+}
+
+/* Tự động đẩy pagination xuống cuối cùng của flex container */
+.ant-table-pagination.ant-pagination {
+  margin-top: auto !important;
+  padding: 16px 0 0 0 !important;
+}
+
+
+
 
 /* --------------------------------------------------------------------------
    3. Cấu hình chi tiết cho component Input (Ô nhập liệu / Tìm kiếm)
@@ -72,14 +124,17 @@
 .ant-input-affix-wrapper {
   font-size: 13px !important;
   font-family: -apple-system, system-ui, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol !important;
-  border-color: #e2e8f0 !important;    /* Viền mỏng màu slate */
+  border-color: #e2e8f0 !important;
+  /* Viền mỏng màu slate */
   background-color: #ffffff !important;
-  border-radius: 8px !important;       /* Bo góc mềm mại */
+  border-radius: 8px !important;
+  /* Bo góc mềm mại */
 }
 
 /* Trạng thái focus của Input Wrapper */
 .ant-input-affix-wrapper-focused {
-  border-color: #3b82f6 !important;    /* Đổi viền sang xanh dương khi focus */
+  border-color: #3b82f6 !important;
+  /* Đổi viền sang xanh dương khi focus */
 }
 
 /* Input text gốc bên trong wrapper */
@@ -92,7 +147,8 @@
    4. Cấu hình chi tiết cho component Button (Nút bấm)
    -------------------------------------------------------------------------- */
 .ant-btn {
-  border-radius: 8px !important;       /* Bo góc cho nút bấm */
+  border-radius: 8px !important;
+  /* Bo góc cho nút bấm */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -102,7 +158,8 @@
    5. Cấu hình chi tiết cho component Select (Hộp chọn danh sách)
    -------------------------------------------------------------------------- */
 .ant-select .ant-select-selector {
-  border-radius: 8px !important;       /* Bo góc cho hộp chọn */
+  border-radius: 8px !important;
+  /* Bo góc cho hộp chọn */
   border-color: #e2e8f0 !important;
 }
 
@@ -110,5 +167,6 @@
    6. Cấu hình chi tiết cho component Tag (Nhãn phân loại)
    -------------------------------------------------------------------------- */
 .ant-tag {
-  border-radius: 9999px !important;    /* Bo góc tròn trịa dạng viên thuốc */
+  border-radius: 9999px !important;
+  /* Bo góc tròn trịa dạng viên thuốc */
 }

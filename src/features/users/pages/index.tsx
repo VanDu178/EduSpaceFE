@@ -115,7 +115,7 @@ const UserListPage = () => {
   const isUpdateLoading = updateUserMutation.isPending;
 
   return (
-    <div className="space-y-6 flex flex-col overflow-hidden">
+    <div className="space-y-6 flex flex-col flex-1 h-full overflow-hidden">
       <div className="flex items-center justify-between mb-2 shrink-0">
         <h2 className="text-xl font-bold text-slate-800">Danh sách người dùng</h2>
         <Button
@@ -135,7 +135,7 @@ const UserListPage = () => {
       </div>
 
       {/* Table list wrapper */}
-      <div className="flex-1 min-h-0 bg-white overflow-hidden flex flex-col">
+      <div className=" bg-white overflow-hidden flex flex-col flex-1">
         <ListPage
           users={users}
           isLoading={isLoading}
