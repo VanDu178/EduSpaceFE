@@ -22,9 +22,9 @@ const FormUpdate = ({
   useEffect(() => {
     if (isOpen && user) {
       form.setFieldsValue({
-        name: user.name,
-        email: user.email,
-        role: user.role || 'client',
+        name: user?.name,
+        email: user?.email,
+        role: user?.role || 'client',
       });
     }
   }, [isOpen, user, form]);

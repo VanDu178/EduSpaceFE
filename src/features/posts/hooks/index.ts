@@ -33,12 +33,12 @@ export const useCreatePostMutation = (
   return useMutation({
     mutationFn: createPostApi,
     onSuccess: (res) => {
-      if (res.success) {
+      if (res?.success) {
         toast.success('Tạo bài viết mới thành công!');
         queryClient.invalidateQueries({ queryKey: ['posts'] });
         if (onSuccessCallback) onSuccessCallback();
       } else {
-        toast.error(res.message || 'Tạo bài viết thất bại!');
+        toast.error(res?.message || 'Tạo bài viết thất bại!');
       }
     },
     onError: (err: AxiosError<ApiResponse>) => {
@@ -67,7 +67,7 @@ export const useDeletePostMutation = (
         queryClient.invalidateQueries({ queryKey: ['posts'] });
         if (onSuccessCallback) onSuccessCallback();
       } else {
-        toast.error(res.message || 'Xóa bài viết thất bại!');
+        toast.error(res?.message || 'Xóa bài viết thất bại!');
       }
     },
     onError: (err: AxiosError<ApiResponse>) => {
@@ -90,62 +90,62 @@ export const useUpdatePostMutation = (
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (variables: { id: number; data: PostPayload }) => updatePostApi(variables.id, variables.data),
+    mutationFn: (variables: { id: number; data: PostPayload }) => updatePostApi(variables?.id, variables?.data),
     onSuccess: (res) => {
-      if (res.success) {
+      if (res?.success) {
         toast.success('Cập nhật bài viết thành công!');
         queryClient.invalidateQueries({ queryKey: ['posts'] });
         if (onSuccessCallback) onSuccessCallback();
       } else {
-        toast.error(res.message || 'Cập nhật bài viết thất bại!');
+        toast.error(res?.message || 'Cập nhật bài viết thất bại!');
       }
     },
     onError: (err: AxiosError<ApiResponse>, variables) => {
       // Phân biệt API chưa được viết (404, 501, 405) hoặc lỗi kết nối, và lỗi validation thực tế (400/422).
-      const isNotImplemented = !err.response || [404, 405, 501].includes(err.response.status);
+      const isNotImplemented = !err?.response || [404, 405, 501].includes(err?.response?.status);
 
       if (isNotImplemented) {
         console.warn('PUT /posts/:id failed or not implemented yet. Using simulated success on frontend.', err);
-        
+
         // Lấy danh mục postTypes từ React Query cache
         const postTypes = queryClient.getQueryData<PostType[]>(['postTypes']) || [];
-        
+
         setTimeout(() => {
           toast.success('Cập nhật thành công (Giả lập phía giao diện, đang chờ API cập nhật của Backend)!');
-          
+
           queryClient.setQueryData(['posts'], (oldData: any) => {
             if (!oldData) return undefined;
-            
+
             const updatePostInList = (list: Post[]) =>
               list.map((p) =>
                 p.id === selectedPostId
                   ? {
-                      ...p,
-                      title: variables.data.title,
-                      content: variables.data.content,
-                      published: variables.data.published,
-                      thumbnail: variables.data.thumbnail || p.thumbnail,
-                      postTypeId: variables.data.postTypeId,
-                      postType: postTypes.find((t) => t.id === variables.data.postTypeId) || p.postType,
-                      updatedAt: new Date().toISOString(),
-                    }
+                    ...p,
+                    title: variables?.data?.title,
+                    content: variables?.data?.content,
+                    published: variables?.data?.published,
+                    thumbnail: variables?.data?.thumbnail || p.thumbnail,
+                    postTypeId: variables?.data?.postTypeId,
+                    postType: postTypes.find((t) => t.id === variables?.data?.postTypeId) || p.postType,
+                    updatedAt: new Date().toISOString(),
+                  }
                   : p
               );
 
             if (Array.isArray(oldData)) {
               return updatePostInList(oldData);
             }
-            
-            if (oldData.posts && Array.isArray(oldData.posts)) {
+
+            if (oldData?.posts && Array.isArray(oldData?.posts)) {
               return {
                 ...oldData,
-                posts: updatePostInList(oldData.posts),
+                posts: updatePostInList(oldData?.posts),
               };
             }
-            
+
             return oldData;
           });
-          
+
           if (onSuccessCallback) onSuccessCallback();
         }, 500);
       } else {
@@ -168,7 +168,7 @@ export const useUpdatePostStatusMutation = (
 
   return useMutation({
     mutationFn: (variables: { id: number; published: boolean }) =>
-      updatePostStatusApi(variables.id, variables.published),
+      updatePostStatusApi(variables?.id, variables?.published),
     onSuccess: (res) => {
       if (res.success) {
         toast.success('Cập nhật trạng thái bài viết thành công!');

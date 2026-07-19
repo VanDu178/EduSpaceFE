@@ -18,8 +18,8 @@ const FilterBar = ({
   const filterOptions = [
     { value: 'ALL', label: 'Tất cả thể loại' },
     ...postTypes.map((type) => ({
-      value: type.code,
-      label: type.name,
+      value: type?.code,
+      label: type?.name,
     }))
   ];
 
@@ -45,7 +45,7 @@ const FilterBar = ({
         {/* Select Filter */}
         <div className="w-full sm:w-[180px]">
           <Select
-            value={params.postType || 'ALL'}
+            value={params?.postType || 'ALL'}
             onChange={(value) =>
               setParams((prev) => ({
                 ...prev,
@@ -60,7 +60,7 @@ const FilterBar = ({
         {/* Select Status */}
         <div className="w-full sm:w-[160px]">
           <Select
-            value={params.published || 'ALL'}
+            value={params?.published || 'ALL'}
             onChange={(value) =>
               setParams((prev) => ({
                 ...prev,
@@ -76,7 +76,7 @@ const FilterBar = ({
         <div className="w-full sm:w-[320px]">
           <Input
             placeholder="Tìm kiếm theo tiêu đề bài viết..."
-            value={params.keyword || ''}
+            value={params?.keyword || ''}
             onChange={(e) =>
               setParams((prev) => ({
                 ...prev,

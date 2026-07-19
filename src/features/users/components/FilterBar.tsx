@@ -30,7 +30,7 @@ const FilterBar = ({
         {/* Role Select Filter */}
         <div className="w-full sm:w-[180px]">
           <Select
-            value={params.role || 'ALL'}
+            value={params?.role || 'ALL'}
             onChange={(value) =>
               setParams((prev) => ({
                 ...prev,
@@ -46,7 +46,7 @@ const FilterBar = ({
         {/* Status Select Filter */}
         <div className="w-full sm:w-[180px]">
           <Select
-            value={params.status || 'ALL'}
+            value={params?.status || 'ALL'}
             onChange={(value) =>
               setParams((prev) => ({
                 ...prev,
@@ -63,7 +63,7 @@ const FilterBar = ({
         <div className="w-full sm:w-[280px]">
           <Input
             placeholder="Tìm theo tên hoặc email người dùng..."
-            value={params.keyword || ''}
+            value={params?.keyword || ''}
             onChange={(e) =>
               setParams((prev) => ({
                 ...prev,

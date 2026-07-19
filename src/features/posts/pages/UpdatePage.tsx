@@ -17,7 +17,7 @@ const UpdatePage = () => {
   const { data, isLoading } = usePostsQuery({ limit: 1000 });
   const { data: postTypes = [], isLoading: isLoadingTypes } = usePostTypesQuery();
   const posts = data?.posts || [];
-  const post = posts.find((p) => p.id === Number(id));
+  const post = posts.find((p) => p?.id === Number(id));
 
   const updateMutation = useUpdatePostMutation(
     Number(id),

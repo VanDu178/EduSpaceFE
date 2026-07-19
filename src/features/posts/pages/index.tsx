@@ -17,11 +17,11 @@ const Index = () => {
 
   // React Query Custom Hooks
   const { data, isLoading, error } = usePostsQuery({
-    page: params.page,
-    limit: params.limit,
-    keyword: params.keyword || undefined,
-    postType: params.postType !== 'ALL' ? params.postType : undefined,
-    published: params.published !== 'ALL' ? params.published : undefined,
+    page: params?.page,
+    limit: params?.limit,
+    keyword: params?.keyword || undefined,
+    postType: params?.postType !== 'ALL' ? params?.postType : undefined,
+    published: params?.published !== 'ALL' ? params?.published : undefined,
   });
   const { data: postTypes = [] } = usePostTypesQuery();
   const deleteMutation = useDeletePostMutation();
@@ -97,9 +97,9 @@ const Index = () => {
           updatingStatusId={updateStatusMutation.variables?.id}
           isLoading={isLoading}
           pagination={{
-            current: params.page || 1,
-            pageSize: params.limit || 10,
-            total: data?.pagination.total || 0,
+            current: params?.page || 1,
+            pageSize: params?.limit || 10,
+            total: data?.pagination?.total || 0,
             onChange: (p, ps) => {
               setParams((prev) => ({
                 ...prev,

@@ -40,11 +40,11 @@ export const useRegisterMutation = (
   return useMutation({
     mutationFn: (payload: RegisterPayload) => registerApi(payload),
     onSuccess: (res) => {
-      if (res.success) {
+      if (res?.success) {
         toast.success('Đăng ký tài khoản quản trị thành công! Hãy đăng nhập.');
         if (onSuccessCallback) onSuccessCallback();
       } else {
-        const errMsg = res.message || 'Đăng ký thất bại!';
+        const errMsg = res?.message || 'Đăng ký thất bại!';
         if (onErrorCallback) onErrorCallback({ response: { data: { message: errMsg } } } as AxiosError<ApiResponse>);
       }
     },

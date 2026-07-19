@@ -5,10 +5,10 @@ import type { ApiResponse } from '../../../types/api';
 // API lấy danh sách thể loại bài viết
 export const fetchPostTypesApi = async (): Promise<PostType[]> => {
   const response = await api.get('/post-types');
-  if (response.data.success) {
-    return response.data.data;
+  if (response?.data?.success) {
+    return response?.data?.data;
   }
-  throw new Error(response.data.message || 'Không thể lấy danh sách thể loại');
+  throw new Error(response?.data?.message || 'Không thể lấy danh sách thể loại');
 };
 
 // API tạo mới thể loại (gọi từ Postman/mô phỏng nếu cần)

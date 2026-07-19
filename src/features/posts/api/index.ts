@@ -5,22 +5,22 @@ import type { ApiResponse, PaginatedData } from '../../../types/api';
 // Hàm gọi API lấy danh sách bài viết
 export const fetchPostsApi = async (params?: Params): Promise<PaginatedData<{ posts: Post[] }>> => {
   const response = await api.get('/posts', { params });
-  if (response.data.success) {
-    return response.data.data;
+  if (response?.data?.success) {
+    return response?.data?.data;
   }
-  throw new Error(response.data.message || 'Không thể lấy danh sách bài viết');
+  throw new Error(response?.data?.message || 'Không thể lấy danh sách bài viết');
 };
 
 // Hàm gọi API tạo bài viết mới
 export const createPostApi = async (newPost: PostPayload): Promise<ApiResponse<{ post: Post }>> => {
   const response = await api.post('/posts', newPost);
-  return response.data;
+  return response?.data;
 };
 
 // Hàm gọi API xóa bài viết
 export const deletePostApi = async (id: number): Promise<ApiResponse<null>> => {
   const response = await api.delete(`/posts/${id}`);
-  return response.data;
+  return response?.data;
 };
 
 // Hàm gọi API cập nhật bài viết (RESTful PUT)
@@ -29,7 +29,7 @@ export const updatePostApi = async (
   updatedPost: PostPayload
 ): Promise<ApiResponse<{ post: Post }>> => {
   const response = await api.put(`/posts/${id}`, updatedPost);
-  return response.data;
+  return response?.data;
 };
 
 // Hàm gọi API cập nhật trạng thái bài viết
@@ -38,15 +38,15 @@ export const updatePostStatusApi = async (
   published: boolean
 ): Promise<ApiResponse<{ post: Post }>> => {
   const response = await api.patch(`/posts/${id}/status`, { published });
-  return response.data;
+  return response?.data;
 };
 
 // Hàm gọi API lấy chi tiết bài viết
 export const fetchPostByIdApi = async (id: number): Promise<{ post: Post }> => {
   const response = await api.get(`/posts/${id}`);
-  if (response.data.success) {
-    return response.data.data;
+  if (response?.data?.success) {
+    return response?.data?.data;
   }
-  throw new Error(response.data.message || 'Không thể lấy thông tin chi tiết bài viết');
+  throw new Error(response?.data?.message || 'Không thể lấy thông tin chi tiết bài viết');
 };
 

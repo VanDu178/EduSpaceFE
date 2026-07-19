@@ -25,9 +25,9 @@ const Register = () => {
 
   const onFinish = (values: RegisterFormValues) => {
     registerMutation.mutate({
-      email: values.email,
-      password: values.password,
-      name: values.name
+      email: values?.email,
+      password: values?.password,
+      name: values?.name
     });
   };
 
@@ -57,9 +57,9 @@ const Register = () => {
             name="name"
             rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
           >
-            <Input 
-              prefix={<UserIcon className="h-5 w-5 text-slate-400" />} 
-              placeholder="Họ và tên" 
+            <Input
+              prefix={<UserIcon className="h-5 w-5 text-slate-400" />}
+              placeholder="Họ và tên"
               className="bg-slate-800/50 border-slate-700 text-slate-200 placeholder-slate-500 hover:border-blue-500 focus:border-blue-500 rounded-lg"
             />
           </Form.Item>
@@ -71,9 +71,9 @@ const Register = () => {
               { type: 'email', message: 'Email không hợp lệ!' }
             ]}
           >
-            <Input 
-              prefix={<EnvelopeIcon className="h-5 w-5 text-slate-400" />} 
-              placeholder="Email quản trị" 
+            <Input
+              prefix={<EnvelopeIcon className="h-5 w-5 text-slate-400" />}
+              placeholder="Email quản trị"
               className="bg-slate-800/50 border-slate-700 text-slate-200 placeholder-slate-500 hover:border-blue-500 focus:border-blue-500 rounded-lg"
             />
           </Form.Item>

@@ -63,11 +63,11 @@ const FormCreate = ({
 
   const onFinish = (values: any) => {
     onSubmit({
-      title: values.title,
-      summary: values.summary,
-      content: values.content,
-      postTypeId: values.postTypeId,
-      published: values.published || false,
+      title: values?.title,
+      summary: values?.summary,
+      content: values?.content,
+      postTypeId: values?.postTypeId,
+      published: values?.published || false,
       thumbnail: thumbnail,
     });
   };

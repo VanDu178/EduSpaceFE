@@ -48,13 +48,13 @@ const FormUpdate = ({
   useEffect(() => {
     if (initialData) {
       form.setFieldsValue({
-        title: initialData.title,
-        summary: initialData.summary || '',
-        content: initialData.content || '',
-        postTypeId: initialData.postTypeId,
-        published: initialData.published || false,
+        title: initialData?.title,
+        summary: initialData?.summary || '',
+        content: initialData?.content || '',
+        postTypeId: initialData?.postTypeId,
+        published: initialData?.published || false,
       });
-      setThumbnail(initialData.thumbnail || null);
+      setThumbnail(initialData?.thumbnail || null);
     }
   }, [initialData, form]);
 
@@ -78,11 +78,11 @@ const FormUpdate = ({
 
   const onFinish = (values: any) => {
     onSubmit({
-      title: values.title,
-      summary: values.summary,
-      content: values.content,
-      postTypeId: values.postTypeId,
-      published: values.published || false,
+      title: values?.title,
+      summary: values?.summary,
+      content: values?.content,
+      postTypeId: values?.postTypeId,
+      published: values?.published || false,
       thumbnail: thumbnail,
     });
   };

@@ -91,7 +91,7 @@ const ListPage = ({
       width: 120,
       align: 'center',
       render: (_, record) => {
-        const isLocked = record.status === 'locked';
+        const isLocked = record?.status === 'locked';
         return (
           <Badge
             status={isLocked ? 'error' : 'processing'}
@@ -107,8 +107,8 @@ const ListPage = ({
       width: 180,
       align: 'center',
       render: (_, record) => {
-        const isLocked = record.status === 'locked';
-        const isSelf = record.id === currentUserId;
+        const isLocked = record?.status === 'locked';
+        const isSelf = record?.id === currentUserId;
 
         return (
           <div className="flex items-center justify-center space-x-2">
@@ -123,7 +123,7 @@ const ListPage = ({
 
             <Popconfirm
               title="Đặt lại mật khẩu"
-              description={`Bạn có chắc chắn muốn đặt lại mật khẩu của "${record.name || record.email}"? Mật khẩu mới sẽ được sinh ngẫu nhiên.`}
+              description={`Bạn có chắc chắn muốn đặt lại mật khẩu của "${record?.name || record?.email}"? Mật khẩu mới sẽ được sinh ngẫu nhiên.`}
               onConfirm={() => onResetPassword(record)}
               okText="Đồng ý"
               cancelText="Hủy"
@@ -153,8 +153,8 @@ const ListPage = ({
             ) : (
               <Popconfirm
                 title={isLocked ? 'Mở khóa' : 'Khóa'}
-                description={`Bạn có chắc chắn muốn ${isLocked ? 'mở khóa' : 'khóa'} tài khoản của "${record.name || record.email}"?`}
-                onConfirm={() => onToggleLock(record.id, record.status || 'active')}
+                description={`Bạn có chắc chắn muốn ${isLocked ? 'mở khóa' : 'khóa'} tài khoản của "${record?.name || record?.email}"?`}
+                onConfirm={() => onToggleLock(record?.id, record?.status || 'active')}
                 okText="Đồng ý"
                 cancelText="Hủy"
                 okButtonProps={{ danger: !isLocked }}
