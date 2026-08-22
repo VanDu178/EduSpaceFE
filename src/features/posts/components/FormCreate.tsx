@@ -100,7 +100,7 @@ const FormCreate = ({
             <Button
 
               onClick={() => setIsPreviewOpen(true)}
-              className="px-4 h-9.5 rounded-lg border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-1.5 "
+              className="px-4 h-9.5 rounded-lg border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 hover:text-sky-600 flex items-center gap-1.5 "
             >
               <span className="flex items-center gap-1.5">
                 <EyeIcon className="h-4 w-4" />
@@ -111,7 +111,7 @@ const FormCreate = ({
               type="primary"
               htmlType="submit"
               loading={isSaving}
-              className="px-4 h-9.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 border-none text-sm font-semibold flex items-center gap-1.5 animate-pulse-subtle"
+              className="px-4 h-9.5 rounded-lg bg-sky-600 hover:bg-sky-700 border-none text-sm font-semibold flex items-center gap-1.5 animate-pulse-subtle"
             >
               <span className="flex items-center gap-1.5">
                 <PaperAirplaneIcon className="h-4 w-4" />
@@ -137,7 +137,7 @@ const FormCreate = ({
                   >
                     <Input
                       placeholder="Nhập tiêu đề..."
-                      className="text-2xl font-bold border-0 border-b border-slate-100 rounded-none hover:border-slate-200 focus:border-indigo-500  focus:ring-0 px-0 pb-3 transition-colors bg-transparent placeholder:text-slate-300 [&_.ant-input]:text-2xl [&_.ant-input]:font-bold"
+                      className="text-2xl font-bold border-0 border-b border-slate-100 rounded-none hover:border-slate-200 focus:border-sky-500  focus:ring-0 px-0 pb-3 transition-colors bg-transparent placeholder:text-slate-300 [&_.ant-input]:text-2xl [&_.ant-input]:font-bold"
                     />
                   </Form.Item>
                 </div>
@@ -191,7 +191,7 @@ const FormCreate = ({
                         handleFile(file);
                         return false;
                       }}
-                      className="!border-dashed !border-slate-200 hover:!border-indigo-500 !bg-slate-50/30 hover:!bg-slate-50 !rounded-xl  transition-all duration-200 flex flex-col items-center justify-center text-center"
+                      className="!border-dashed !border-slate-200 hover:!border-sky-500 !bg-slate-50/30 hover:!bg-slate-50 !rounded-xl  transition-all duration-200 flex flex-col items-center justify-center text-center"
                     >
                       <div className="flex flex-col items-center justify-center ">
                         <ArrowUpTrayIcon className="h-6 w-6 text-slate-400 mb-2" />
@@ -240,7 +240,7 @@ const FormCreate = ({
                     <TextArea
                       rows={4}
                       placeholder="Mô tả tóm tắt nội dung..."
-                      className="px-4 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 text-slate-800 text-sm placeholder-slate-400"
+                      className="px-4 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 text-slate-800 text-sm placeholder-slate-400"
                     />
                   </Form.Item>
                 </div>
@@ -253,7 +253,7 @@ const FormCreate = ({
                   </div>
                   <Form.Item name="published" valuePropName="checked" className="mb-0">
                     <Switch
-                      className="bg-slate-200 [&.ant-switch-checked]:bg-indigo-600"
+                      className="bg-slate-200 [&.ant-switch-checked]:bg-sky-600"
                     />
                   </Form.Item>
                 </div>
@@ -299,7 +299,7 @@ const FormCreate = ({
 
             {/* Mô tả ngắn */}
             {summary ? (
-              <div className="bg-slate-50/70 border-l-4 border-indigo-500 p-4 rounded-r-xl">
+              <div className="bg-slate-50/70 border-l-4 border-sky-500 p-4 rounded-r-xl">
                 <p className="text-slate-600 italic text-sm leading-relaxed whitespace-pre-wrap">
                   {summary}
                 </p>

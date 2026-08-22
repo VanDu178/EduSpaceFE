@@ -73,7 +73,7 @@ const ListPage = ({
       render: (role) => {
         if (role === 'admin') {
           return (
-            <Tag color="blue" className="font-semibold px-2.5 py-0.5 rounded-full border-none">
+            <Tag color="cyan" className="font-semibold px-2.5 py-0.5 rounded-full border-none">
               Quản trị viên
             </Tag>
           );
@@ -116,14 +116,14 @@ const ListPage = ({
               <Button
                 type="text"
                 onClick={() => onEdit(record)}
-                className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center"
+                className="text-slate-500 hover:text-sky-600 hover:bg-sky-50 rounded-lg flex items-center justify-center"
                 icon={<PencilSquareIcon className="h-4 w-4" />}
               />
             </Tooltip>
 
             <Popconfirm
               title="Đặt lại mật khẩu"
-              description={`Bạn có chắc chắn muốn đặt lại mật khẩu của "${record?.name || record?.email}"? Mật khẩu mới sẽ được sinh ngẫu nhiên.`}
+              description={`Đặt lại mật khẩu ngẫu nhiên cho "${record?.name || record?.email}" và gửi tới email người dùng?`}
               onConfirm={() => onResetPassword(record)}
               okText="Đồng ý"
               cancelText="Hủy"
@@ -164,7 +164,7 @@ const ListPage = ({
                   <Button
                     type="text"
                     danger={!isLocked}
-                    className={isLocked ? 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center' : 'text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg flex items-center justify-center'}
+                    className={isLocked ? 'text-slate-500 hover:text-sky-600 hover:bg-sky-50 rounded-lg flex items-center justify-center' : 'text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg flex items-center justify-center'}
                     icon={isLocked ? <LockOpenIcon className="h-4 w-4" /> : <LockClosedIcon className="h-4 w-4" />}
                   />
                 </Tooltip>

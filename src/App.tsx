@@ -1,7 +1,7 @@
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ConfigProvider } from 'antd';
 import Login from './features/auth/pages/Login';
-import Register from './features/auth/pages/Register';
 import DashboardPage from './pages/DashboardPage';
 import ListPage from './features/posts/pages';
 import CreatePage from './features/posts/pages/CreatePage';
@@ -12,16 +12,21 @@ import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {
   return (
-    <>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#0ea5e9',
+          colorLink: '#0284c7',
+          colorLinkHover: '#0ea5e9',
+          borderRadius: 8,
+        },
+      }}
+    >
       <Toaster position="top-right" reverseOrder={false} />
       <BrowserRouter>
         <Routes>
           {/* Route đăng nhập công khai */}
           <Route path="/login" element={<Login />} />
-
-          {/* Route đăng ký công khai */}
-          <Route path="/register" element={<Register />} />
-
           {/* Route quản trị được bảo vệ dạng lồng nhau (Nested Routes) */}
           <Route
             path="/admin"
@@ -48,7 +53,7 @@ const App = () => {
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </BrowserRouter>
-    </>
+    </ConfigProvider>
   );
 };
 

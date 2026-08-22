@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { fetchUsersApi, createUserApi, updateUserApi, resetPasswordApi, toggleUserStatusApi } from '../api';
 import type { User, UserParams } from '../types';
 import type { PaginatedData } from '../../../types/api';
@@ -18,6 +19,10 @@ export const useCreateUserMutation = () => {
     mutationFn: createUserApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Tạo tài khoản người dùng thành công!');
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Lỗi khi tạo tài khoản');
     }
   });
 };
@@ -29,6 +34,10 @@ export const useUpdateUserMutation = () => {
     mutationFn: ({ id, data }: { id: number; data: Partial<User> }) => updateUserApi(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Cập nhật thông tin tài khoản thành công!');
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Lỗi khi cập nhật tài khoản');
     }
   });
 };
@@ -40,6 +49,10 @@ export const useResetPasswordMutation = () => {
     mutationFn: (id: number) => resetPasswordApi(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Đặt lại mật khẩu thành công!');
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Không thể đặt lại mật khẩu');
     }
   });
 };
@@ -49,8 +62,12 @@ export const useToggleUserStatusMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }: { id: number; status: 'active' | 'locked' }) => toggleUserStatusApi(id, status),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success(variables.status === 'locked' ? 'Khóa tài khoản thành công!' : 'Mở khóa tài khoản thành công!');
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Lỗi khi cập nhật trạng thái tài khoản');
     }
   });
 };

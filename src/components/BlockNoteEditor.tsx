@@ -81,7 +81,7 @@ const BlockNoteEditor = ({
   };
 
   return (
-    <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/30 hover:border-slate-200 focus-within:border-indigo-500 transition-colors">
+    <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/30 hover:border-slate-200 focus-within:border-sky-500 transition-colors">
       <BlockNoteView
         editor={editor}
         theme="light"

@@ -72,7 +72,7 @@ const FilterBar = ({
               }))
             }
             prefix={<MagnifyingGlassIcon className="h-5 w-5 text-slate-400 mr-1.5" />}
-            className="w-full px-4 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-slate-700 text-sm"
+            className="w-full px-4 border-slate-200 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 text-slate-700 text-sm"
           />
         </div>
 

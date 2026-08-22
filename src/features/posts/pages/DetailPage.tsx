@@ -77,7 +77,7 @@ const DetailPage = () => {
 
                   {/* Summary Block */}
                   {post.summary && (
-                    <div className="bg-slate-50/70 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                    <div className="bg-slate-50/70 border-l-4 border-sky-500 p-4 rounded-r-xl">
                       <p className="text-slate-600 italic text-sm md:text-base leading-relaxed">
                         {post.summary}
                       </p>

@@ -60,7 +60,7 @@ const Index = () => {
           onClick={() => {
             navigate('/admin/posts/create');
           }}
-          className="px-5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-sm font-semibold flex items-center justify-center cursor-pointer"
+          className="px-5 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-600 border-none text-sm font-semibold flex items-center justify-center cursor-pointer"
         >
           <span className='flex items-center gap-2'>
             <PlusIcon className="h-5 w-5" />

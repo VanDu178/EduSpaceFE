@@ -133,8 +133,8 @@
 
 /* Trạng thái focus của Input Wrapper */
 .ant-input-affix-wrapper-focused {
-  border-color: #3b82f6 !important;
-  /* Đổi viền sang xanh dương khi focus */
+  border-color: #0ea5e9 !important;
+  /* Đổi viền sang xanh Sky khi focus */
 }
 
 /* Input text gốc bên trong wrapper */

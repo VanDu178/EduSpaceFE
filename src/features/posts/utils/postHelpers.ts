@@ -8,7 +8,7 @@ export const getPostTypeStyles = (code?: string): string => {
     case 'BACKEND':
     case 'BAITAP':
     case 'BAI_TAP':
-      return 'blue';
+      return 'cyan';
     case 'UIUX':
     case 'PROJECT_LOG':
     case 'PROJECTLOG':

@@ -1,6 +1,6 @@
-# EduSpace Frontend (EduSpaceFE)
+# TradeVerse Frontend (TradeVerseFE)
 
-Dự án Frontend cung cấp giao diện người dùng cho hệ thống quản lý học tập/không gian giáo dục **EduSpace**. Giao diện được thiết kế hiện đại, tương thích tốt trên nhiều kích thước màn hình.
+Dự án Frontend cung cấp giao diện người dùng cho hệ thống **TradeVerse**. Giao diện được thiết kế hiện đại, tương thích tốt trên nhiều kích thước màn hình.
 
 ## 🛠 Công nghệ sử dụng
 - **Framework:** React.js v19 (Vite làm công cụ đóng gói & phát triển siêu tốc)

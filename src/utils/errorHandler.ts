@@ -10,7 +10,7 @@ interface HandleErrorOptions {
 }
 
 /**
- * Hàm xử lý lỗi API chung cho Frontend (EduSpaceFE).
+ * Hàm xử lý lỗi API chung cho Frontend (TradeVerseFE).
  * 
  * Quy trình xử lý:
  * 1. Nếu có callback `customHandler`, ưu tiên chuyển giao xử lý cho callback đó và dừng lại.

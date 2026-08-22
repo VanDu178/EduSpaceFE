@@ -61,7 +61,7 @@ const PostTable = ({
       key: 'title',
       width: 250,
       render: (text) => (
-        <span className="font-semibold text-slate-800 line-clamp-2 hover:text-blue-600 transition-colors duration-150">
+        <span className="font-semibold text-slate-800 line-clamp-2 hover:text-sky-600 transition-colors duration-150">
           {text}
         </span>
       ),
@@ -129,7 +129,7 @@ const PostTable = ({
               type="text"
               icon={<PencilSquareIcon className="h-4 w-4" />}
               onClick={() => onEdit(record.id)}
-              className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center"
+              className="text-slate-500 hover:text-sky-600 hover:bg-sky-50 rounded-lg flex items-center justify-center"
             />
           </Tooltip>
 

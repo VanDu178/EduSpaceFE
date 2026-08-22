@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpenIcon, DocumentTextIcon, UsersIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, UsersIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'antd';
 
 interface SidebarProps {
@@ -9,7 +9,7 @@ interface SidebarProps {
 
 const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
   const location = useLocation();
-  
+
   // Xác định active menu dựa trên đường dẫn URL hiện tại
   const isPostsActive = location.pathname.includes('/admin/posts');
   const isUsersActive = location.pathname.includes('/admin/users');
@@ -32,12 +32,10 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
       {/* Brand logo section */}
       <div className={`h-16 flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-6'} border-b border-slate-100 bg-white transition-all duration-300`}>
         <div className="flex items-center space-x-3 overflow-hidden">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
-            <BookOpenIcon className="h-5 w-5 text-white" />
-          </div>
+          <img src="/logo.png" alt="TradeVerse Logo" className="w-15 h-15 object-contain shrink-0" />
           <div className={`flex flex-col transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
-            <h1 className="text-lg font-bold text-slate-800 tracking-wide whitespace-nowrap">EduSpace</h1>
-            <p className="text-[10px] text-blue-600 font-bold tracking-wider uppercase whitespace-nowrap">Management</p>
+            <h1 className="text-lg font-bold text-slate-800 tracking-wide whitespace-nowrap">TradeVerse</h1>
+            <p className="text-[10px] text-sky-600 font-bold tracking-wider uppercase whitespace-nowrap">Trang quản trị</p>
           </div>
         </div>
       </div>
@@ -47,20 +45,17 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
         <Tooltip title={isCollapsed ? "Bài viết" : ""} placement="right">
           <Link
             to="/admin/posts"
-            className={`flex items-center transition-all duration-200 group relative ${
-              isCollapsed
-                ? `justify-center w-12 h-12 mx-auto rounded-xl ${isPostsActive ? 'bg-blue-50/70 text-blue-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
-                : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${
-                    isPostsActive
-                      ? 'bg-blue-50/70 text-blue-600 border-blue-500 pl-3 font-semibold'
-                      : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
-                  }`
-            }`}
+            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
+              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isPostsActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
+              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isPostsActive
+                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
+                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
+              }`
+              }`}
           >
             <DocumentTextIcon
-              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${
-                isPostsActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'
-              }`}
+              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isPostsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
+                }`}
             />
             <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
               Bài viết
@@ -71,20 +66,17 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
         <Tooltip title={isCollapsed ? "Danh sách người dùng" : ""} placement="right">
           <Link
             to="/admin/users"
-            className={`flex items-center transition-all duration-200 group relative ${
-              isCollapsed
-                ? `justify-center w-12 h-12 mx-auto rounded-xl ${isUsersActive ? 'bg-blue-50/70 text-blue-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
-                : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${
-                    isUsersActive
-                      ? 'bg-blue-50/70 text-blue-600 border-blue-500 pl-3 font-semibold'
-                      : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
-                  }`
-            }`}
+            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
+              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isUsersActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
+              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isUsersActive
+                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
+                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
+              }`
+              }`}
           >
             <UsersIcon
-              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${
-                isUsersActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'
-              }`}
+              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isUsersActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
+                }`}
             />
             <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
               Danh sách người dùng
