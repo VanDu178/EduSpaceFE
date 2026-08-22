@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Select, Button, Space, Tag, Modal, Switch, Upload, message } from 'antd';
+import { Form, Input, Select, Button, Space, Tag, Modal, Switch, Upload, message, Spin } from 'antd';
 import {
   ArrowLeftIcon,
   ArrowUpTrayIcon,
@@ -13,6 +13,7 @@ import type { FormInstance } from 'antd';
 import type { BlogType } from '../../blogTypes';
 import type { BlogPayload } from '../types';
 import { getBlogTypeStyles } from '../utils';
+import { uploadSingleFileApi } from '../../../services/uploadService';
 
 interface FormCreateProps {
   form: FormInstance;
@@ -63,6 +64,7 @@ const FormCreate = ({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
   const [isSlugTouched, setIsSlugTouched] = useState(false);
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
 
   // Watch form values for preview and slug auto-generation
   const title = Form.useWatch('title', form);
@@ -83,7 +85,7 @@ const FormCreate = ({
     }
   }, [title, isSlugTouched, form]);
 
-  const handleBannerUpload = (file: File) => {
+  const handleBannerUpload = async (file: File) => {
     const isImage = file.type.startsWith('image/');
     if (!isImage) {
       message.error('Vui lòng chọn file hình ảnh hợp lệ (PNG, JPG, WEBP, GIF)!');
@@ -94,13 +96,20 @@ const FormCreate = ({
       message.error('Dung lượng ảnh bìa không được vượt quá 5MB!');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setBannerUrl(e.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+
+    setIsUploadingBanner(true);
+    const hideLoading = message.loading('Đang tải ảnh lên Supabase Storage...', 0);
+    try {
+      const res = await uploadSingleFileApi(file, 'blogs');
+      setBannerUrl(res.url);
+      message.success('Tải ảnh bìa lên Supabase thành công!');
+    } catch (err: any) {
+      console.error('Lỗi upload banner:', err);
+      message.error(err.response?.data?.message || 'Không thể tải ảnh lên Supabase Storage!');
+    } finally {
+      hideLoading();
+      setIsUploadingBanner(false);
+    }
   };
 
   const onFinish = (values: any) => {
@@ -324,17 +333,20 @@ const FormCreate = ({
                   <Upload.Dragger
                     accept="image/png,image/jpeg,image/webp,image/gif"
                     showUploadList={false}
+                    disabled={isUploadingBanner}
                     beforeUpload={(file) => {
                       handleBannerUpload(file);
                       return false;
                     }}
                     className="!border-dashed !border-slate-200 hover:!border-sky-500 !bg-slate-50/50 hover:!bg-slate-50 !rounded-lg transition-all"
                   >
-                    <div className="flex flex-col items-center py-2">
-                      <ArrowUpTrayIcon className="h-5 w-5 text-slate-400 mb-1" />
-                      <span className="text-xs font-medium text-slate-600">Tải ảnh bìa</span>
-                      <span className="text-[10px] text-slate-400">PNG, JPG, WEBP, GIF (Tối đa 5MB)</span>
-                    </div>
+                    <Spin spinning={isUploadingBanner} tip="Đang tải lên...">
+                      <div className="flex flex-col items-center py-2">
+                        <ArrowUpTrayIcon className="h-5 w-5 text-slate-400 mb-1" />
+                        <span className="text-xs font-medium text-slate-600">Tải ảnh bìa</span>
+                        <span className="text-[10px] text-slate-400">PNG, JPG, WEBP, GIF (Tối đa 5MB)</span>
+                      </div>
+                    </Spin>
                   </Upload.Dragger>
                 )}
               </div>
