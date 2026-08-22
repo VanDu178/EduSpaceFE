@@ -4,6 +4,7 @@ export type { BlogType };
 // Interface bài blog đầy đủ đồng bộ với database backend
 export interface Blog {
   id: number;
+  code?: string;
   title: string;
   slug?: string;
   blogTypeId: number;
@@ -18,6 +19,12 @@ export interface Blog {
   createdBy?: number | null;
   status: string; // 'draft' | 'published' | 'archived'
   blogType?: BlogType;
+  creator?: {
+    id: number;
+    code?: string;
+    name: string;
+    email?: string;
+  } | null;
 }
 
 // Interface dữ liệu khi tạo/cập nhật bài blog

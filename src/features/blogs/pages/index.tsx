@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from 'antd';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { ListPage, FilterBar } from '../components';
-import { useBlogsQuery, useDeleteBlogMutation, useUpdateBlogStatusMutation } from '../hooks';
+import {
+  useBlogsQuery,
+  useDeleteBlogMutation,
+  useUpdateBlogStatusMutation,
+  useUpdateBlogAccessMutation,
+} from '../hooks';
 import { useBlogTypesQuery } from '../../blogTypes';
 import type { Params } from '../types';
 import { DEFAULT_PARAMS } from '../constants';
@@ -21,10 +26,12 @@ const Index = () => {
     keyword: params?.keyword || undefined,
     blogType: params?.blogType !== 'ALL' ? params?.blogType : undefined,
     status: params?.status !== 'ALL' ? params?.status : undefined,
+    isPremium: params?.isPremium !== 'ALL' ? params?.isPremium : undefined,
   });
   const { data: blogTypes = [] } = useBlogTypesQuery();
   const deleteMutation = useDeleteBlogMutation();
   const updateStatusMutation = useUpdateBlogStatusMutation();
+  const updateAccessMutation = useUpdateBlogAccessMutation();
 
   const blogs = data?.blogs || [];
 
@@ -46,6 +53,11 @@ const Index = () => {
   // Kích hoạt cập nhật trạng thái
   const handleUpdateStatusClick = (id: number, status: string) => {
     updateStatusMutation.mutate({ id, status });
+  };
+
+  // Kích hoạt cập nhật quyền truy cập (Miễn phí / Trả phí)
+  const handleUpdateAccessClick = (id: number, isPremium: boolean) => {
+    updateAccessMutation.mutate({ id, isPremium });
   };
 
   return (
@@ -84,6 +96,9 @@ const Index = () => {
           onUpdateStatus={handleUpdateStatusClick}
           isUpdatingStatus={updateStatusMutation.isPending}
           updatingStatusId={updateStatusMutation.variables?.id}
+          onUpdateAccess={handleUpdateAccessClick}
+          isUpdatingAccess={updateAccessMutation.isPending}
+          updatingAccessId={updateAccessMutation.variables?.id}
           isLoading={isLoading}
           pagination={{
             current: params?.page || 1,

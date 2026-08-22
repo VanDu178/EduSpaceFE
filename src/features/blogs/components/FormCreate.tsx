@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Select, Button, Space, Tag, Modal, Switch, Upload, message, Spin } from 'antd';
+import { Form, Input, Select, Button, Switch, Upload, message, Spin } from 'antd';
 import {
   ArrowLeftIcon,
   ArrowUpTrayIcon,
   TrashIcon,
   EyeIcon,
   PaperAirplaneIcon,
-  LinkIcon,
 } from '@heroicons/react/24/outline';
 import TiptapEditor from '../../../components/TiptapEditor';
 import type { FormInstance } from 'antd';
 import type { BlogType } from '../../blogTypes';
 import type { BlogPayload } from '../types';
-import { getBlogTypeStyles } from '../utils';
+import ModalPreview from './ModalPreview';
 import { uploadSingleFileApi } from '../../../services/uploadService';
 
 interface FormCreateProps {
@@ -198,8 +197,7 @@ const FormCreate = ({
               <div>
                 <div className="mb-1">
                   <span className="text-[10px] font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                    <LinkIcon className="h-3 w-3 text-slate-400" />
-                    ĐƯỜNG DẪN (SLUG) <span className="text-sm text-rose-500 font-bold ml-0.5">*</span>
+                    SLUG<span className="text-sm text-rose-500 font-bold ml-0.5">*</span>
                   </span>
                 </div>
                 <Form.Item
@@ -357,80 +355,18 @@ const FormCreate = ({
       </Form>
 
       {/* Live Preview Modal */}
-      <Modal
-        title={null}
+      <ModalPreview
         open={isPreviewOpen}
         onCancel={() => setIsPreviewOpen(false)}
-        footer={null}
-        width={860}
-        centered
-        styles={{ body: { padding: '20px', backgroundColor: '#ffffff', maxHeight: '85vh', overflowY: 'auto' } }}
-        className="preview-modal rounded-xl overflow-hidden"
-      >
-        <div className="max-w-2xl mx-auto space-y-5">
-          {/* Banner Image Preview */}
-          {bannerUrl && (
-            <div className="w-full h-48 rounded-lg overflow-hidden border border-slate-100">
-              <img src={bannerUrl} alt="Cover" className="w-full h-full object-cover" />
-            </div>
-          )}
-
-          {/* Meta header */}
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <Space>
-              <Tag color={getBlogTypeStyles(selectedBlogType?.code)} className="font-semibold px-2.5 py-0.5 rounded-full border-none text-xs">
-                {selectedBlogType?.name || 'Chưa chọn thể loại'}
-              </Tag>
-              {isPremium && (
-                <Tag color="gold" className="font-semibold px-2.5 py-0.5 rounded-full border-none text-xs flex items-center gap-1">
-                  ★ VIP Premium
-                </Tag>
-              )}
-              <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${status === 'published'
-                  ? 'bg-emerald-50 text-emerald-800'
-                  : status === 'archived'
-                    ? 'bg-slate-100 text-slate-700'
-                    : 'bg-amber-50 text-amber-800'
-                  }`}
-              >
-                {status === 'published' ? 'Đã xuất bản' : status === 'archived' ? 'Lưu trữ' : 'Bản nháp'}
-              </span>
-            </Space>
-          </div>
-
-          {/* Title */}
-          <h1 className="text-2xl font-extrabold text-slate-800 leading-tight">
-            {title || <span className="text-slate-300 italic">Tiêu đề chưa nhập...</span>}
-          </h1>
-
-          {/* Slug */}
-          <div className="text-xs font-mono text-slate-400">
-            URL: /blogs/{slug || 'duong-dan-bai-viet'}
-          </div>
-
-          {/* Summary Excerpt */}
-          {summary ? (
-            <div className="bg-slate-50 border-l-3 border-sky-500 p-3 rounded-r-lg">
-              <p className="text-slate-600 italic text-xs leading-relaxed whitespace-pre-wrap">{summary}</p>
-            </div>
-          ) : (
-            <div className="bg-slate-50/50 border-l-3 border-slate-200 p-2.5 rounded-r-lg">
-              <p className="text-slate-300 italic text-xs">Chưa có mô tả ngắn...</p>
-            </div>
-          )}
-
-          <hr className="border-slate-100" />
-
-          {/* Content Body */}
-          <div
-            className="text-slate-700 text-sm leading-relaxed space-y-3 break-words prose max-w-none [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_h1]:text-xl [&_h1]:font-bold [&_h2]:text-lg [&_h2]:font-bold [&_h3]:text-base [&_h3]:font-bold [&_p]:leading-relaxed"
-            dangerouslySetInnerHTML={{
-              __html: contentHtml || '<p class="text-slate-400 italic">Nội dung chi tiết chưa nhập...</p>',
-            }}
-          />
-        </div>
-      </Modal>
+        title={title}
+        slug={slug}
+        summary={summary}
+        contentHtml={contentHtml}
+        bannerUrl={bannerUrl}
+        selectedBlogType={selectedBlogType}
+        isPremium={isPremium}
+        status={status}
+      />
     </>
   );
 };

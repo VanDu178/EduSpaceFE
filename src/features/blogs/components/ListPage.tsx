@@ -1,8 +1,9 @@
-import { Table, Tag, Button, Popconfirm, Empty, Image, Select, Tooltip } from 'antd';
+import { Table, Button, Popconfirm, Empty, Image, Select, Switch, Tooltip } from 'antd';
 import { PencilSquareIcon, TrashIcon, PhotoIcon, EyeIcon } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
 import type { Blog } from '../types';
-import { getBlogTypeStyles } from '../utils';
+import { getStatusTagConfig, getAccessTagConfig, getBlogTypeTagConfig } from '../utils';
+import CopyButton from '../../../components/CopyButton';
 
 interface BlogTableProps {
   blogs: Blog[];
@@ -12,6 +13,9 @@ interface BlogTableProps {
   onUpdateStatus: (id: number, status: string) => void;
   isUpdatingStatus?: boolean;
   updatingStatusId?: number;
+  onUpdateAccess: (id: number, isPremium: boolean) => void;
+  isUpdatingAccess?: boolean;
+  updatingAccessId?: number;
   isLoading: boolean;
   pagination?: {
     current: number;
@@ -29,11 +33,39 @@ const BlogTable = ({
   onUpdateStatus,
   isUpdatingStatus,
   updatingStatusId,
+  onUpdateAccess,
+  isUpdatingAccess,
+  updatingAccessId,
   isLoading,
   pagination,
 }: BlogTableProps) => {
 
   const columns: ColumnsType<Blog> = [
+    {
+      title: 'Mã',
+      dataIndex: 'code',
+      key: 'code',
+      width: 140,
+      fixed: 'left',
+      align: 'left',
+      render: (code, record) => (
+        <div className="flex items-center gap-1">
+          <span
+            onClick={() => onViewDetail(record.id)}
+            className="font-mono text-xs font-semibold text-slate-700 hover:text-sky-600 hover:underline hover:decoration-sky-600 transition-colors duration-150 cursor-pointer"
+          >
+            {code || '—'}
+          </span>
+          {code && (
+            <CopyButton
+              text={code}
+              tooltipText="Sao chép mã bài viết"
+              successMessage="Đã sao chép mã bài viết!"
+            />
+          )}
+        </div>
+      ),
+    },
     {
       title: 'Hình ảnh',
       key: 'thumbnail',
@@ -90,13 +122,46 @@ const BlogTable = ({
       key: 'blogType',
       width: 150,
       render: (name, record) => {
-        const color = getBlogTypeStyles(record.blogType?.code);
+        const typeConfig = getBlogTypeTagConfig(record.blogType?.code);
         return (
-          <Tag color={color} className="font-semibold px-2.5 py-0.5 rounded-full border-none">
-            {name}
-          </Tag>
+          <span className={`text-xs font-bold ${typeConfig.textClass}`}>
+            {name || '—'}
+          </span>
         );
       },
+    },
+    {
+      title: 'Quyền truy cập',
+      align: 'center',
+      key: 'isPremium',
+      width: 150,
+      render: (_, record) => {
+        const accessConfig = getAccessTagConfig(record.isPremium);
+        return (
+          <div className="flex items-center justify-center gap-2">
+            <Switch
+              size="small"
+              checked={Boolean(record.isPremium)}
+              loading={isUpdatingAccess && updatingAccessId === record.id}
+              disabled={isUpdatingAccess && updatingAccessId === record.id}
+              onChange={(checked) => onUpdateAccess(record.id, checked)}
+            />
+            <span className={`text-xs font-bold ${accessConfig.textClass}`}>
+              {accessConfig.label}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      title: 'Tác giả',
+      key: 'author',
+      width: 150,
+      render: (_, record) => (
+        <span className="text-slate-700 font-medium text-xs">
+          {record.creator?.name || '—'}
+        </span>
+      ),
     },
     {
       title: 'Trạng thái',
@@ -112,18 +177,42 @@ const BlogTable = ({
           onChange={(value) => onUpdateStatus(record.id, value)}
           className="w-36 text-xs"
           options={[
-            { value: 'draft', label: 'Bản nháp' },
-            { value: 'published', label: 'Đã xuất bản' },
-            { value: 'archived', label: 'Lưu trữ' },
+            {
+              value: 'draft',
+              label: (
+                <span className={`text-xs font-bold ${getStatusTagConfig('draft').textClass}`}>
+                  {getStatusTagConfig('draft').label}
+                </span>
+              ),
+            },
+            {
+              value: 'published',
+              label: (
+                <span className={`text-xs font-bold ${getStatusTagConfig('published').textClass}`}>
+                  {getStatusTagConfig('published').label}
+                </span>
+              ),
+            },
+            {
+              value: 'archived',
+              label: (
+                <span className={`text-xs font-bold ${getStatusTagConfig('archived').textClass}`}>
+                  {getStatusTagConfig('archived').label}
+                </span>
+              ),
+            },
           ]}
         />
       ),
     },
+
+
     {
       title: 'Hành động',
       key: 'actions',
       width: 140,
       align: 'center',
+      fixed: 'right',
       render: (_, record) => (
         <div className="flex items-center justify-center gap-1">
           <Tooltip title="Xem chi tiết">
@@ -181,7 +270,7 @@ const BlogTable = ({
       columns={columns}
       rowKey="id"
       loading={isLoading}
-      scroll={{ y: 'calc(100vh - 316px)' }}
+      scroll={{ x: 'max-content', y: 'calc(100vh - 316px)' }}
       pagination={pagination ? {
         current: pagination.current,
         pageSize: pagination.pageSize,

@@ -1,7 +1,8 @@
-import { Table, Badge, Button, Popconfirm, Tooltip, Tag, Empty } from 'antd';
+import { Table, Button, Popconfirm, Tooltip, Empty } from 'antd';
 import { LockClosedIcon, LockOpenIcon, KeyIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
 import type { User } from '../types';
+import CopyButton from '../../../components/CopyButton';
 
 interface ListPageProps {
   users: User[];
@@ -46,6 +47,27 @@ const ListPage = ({
 
   const columns: ColumnsType<User> = [
     {
+      title: 'Mã',
+      dataIndex: 'code',
+      key: 'code',
+      width: 140,
+      align: 'left',
+      render: (code) => (
+        <div className="flex items-center gap-1">
+          <span className="font-mono text-xs font-semibold text-slate-700 block text-left">
+            {code || '—'}
+          </span>
+          {code && (
+            <CopyButton
+              text={code}
+              tooltipText="Sao chép mã người dùng"
+              successMessage="Đã sao chép mã người dùng!"
+            />
+          )}
+        </div>
+      ),
+    },
+    {
       title: 'Họ và Tên',
       dataIndex: 'name',
       key: 'name',
@@ -62,7 +84,18 @@ const ListPage = ({
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
-      render: (email) => <span className="text-slate-500 font-medium">{email}</span>,
+      render: (email) => (
+        <div className="flex items-center gap-1">
+          <span className="text-slate-500 font-medium">{email}</span>
+          {email && (
+            <CopyButton
+              text={email}
+              tooltipText="Sao chép email"
+              successMessage="Đã sao chép email!"
+            />
+          )}
+        </div>
+      ),
     },
     {
       title: 'Vai trò',
@@ -71,17 +104,11 @@ const ListPage = ({
       key: 'role',
       width: 150,
       render: (role) => {
-        if (role === 'admin') {
-          return (
-            <Tag color="cyan" className="font-semibold px-2.5 py-0.5 rounded-full border-none">
-              Quản trị viên
-            </Tag>
-          );
-        }
+        const isAdmin = role === 'admin';
         return (
-          <Tag color="default" className="font-semibold px-2.5 py-0.5 rounded-full border-none bg-slate-100 text-slate-600">
-            Khách hàng
-          </Tag>
+          <span className={`font-semibold ${isAdmin ? 'text-sky-600' : 'text-slate-600'}`}>
+            {isAdmin ? 'Quản trị viên' : 'Khách hàng'}
+          </span>
         );
       },
     },
@@ -93,11 +120,9 @@ const ListPage = ({
       render: (_, record) => {
         const isLocked = record?.status === 'locked';
         return (
-          <Badge
-            status={isLocked ? 'error' : 'processing'}
-            text={isLocked ? 'Bị khóa' : 'Hoạt động'}
-            className="font-semibold text-xs text-slate-600"
-          />
+          <span className={`font-semibold ${isLocked ? 'text-rose-600' : 'text-emerald-600'}`}>
+            {isLocked ? 'Bị khóa' : 'Hoạt động'}
+          </span>
         );
       },
     },
@@ -106,6 +131,7 @@ const ListPage = ({
       key: 'action',
       width: 180,
       align: 'center',
+      fixed: "right",
       render: (_, record) => {
         const isLocked = record?.status === 'locked';
         const isSelf = record?.id === currentUserId;

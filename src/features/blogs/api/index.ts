@@ -41,6 +41,16 @@ export const updateBlogStatusApi = async (
   return response?.data;
 };
 
+// API cập nhật quyền truy cập bài blog (isPremium: true/false)
+export const updateBlogAccessApi = async (
+  id: number,
+  isPremium: boolean
+): Promise<ApiResponse<{ blog: Blog }>> => {
+  const response = await api.patch(`/blogs/${id}/access`, { isPremium });
+  return response?.data;
+};
+
+
 // API lấy chi tiết bài blog theo ID hoặc Slug
 export const fetchBlogByIdApi = async (idOrSlug: string | number): Promise<{ blog: Blog }> => {
   const response = await api.get(`/blogs/${idOrSlug}`);

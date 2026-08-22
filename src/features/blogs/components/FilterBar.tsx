@@ -30,6 +30,12 @@ const FilterBar = ({
     { value: 'archived', label: 'Lưu trữ' },
   ];
 
+  const accessOptions = [
+    { value: 'ALL', label: 'Tất cả quyền' },
+    { value: 'false', label: 'Miễn phí' },
+    { value: 'true', label: 'Trả phí' },
+  ];
+
   return (
     <div className="flex flex-wrap justify-between items-center gap-3">
       {/* Advanced Filter Label */}
@@ -40,9 +46,9 @@ const FilterBar = ({
         <FunnelIcon className="h-5 w-5" />
         <span>Bộ lọc</span>
       </span>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
         {/* Select Category Filter */}
-        <div className="w-full sm:w-[180px]">
+        <div className="w-full sm:w-[170px]">
           <Select
             value={params?.blogType || 'ALL'}
             onChange={(value) =>
@@ -53,6 +59,21 @@ const FilterBar = ({
               }))
             }
             options={filterOptions}
+            className="w-full"
+          />
+        </div>
+        {/* Select Access Rights Filter */}
+        <div className="w-full sm:w-[150px]">
+          <Select
+            value={params?.isPremium || 'ALL'}
+            onChange={(value) =>
+              setParams((prev) => ({
+                ...prev,
+                isPremium: value,
+                page: 1,
+              }))
+            }
+            options={accessOptions}
             className="w-full"
           />
         </div>
@@ -72,7 +93,7 @@ const FilterBar = ({
           />
         </div>
         {/* Search input */}
-        <div className="w-full sm:w-[320px]">
+        <div className="w-full sm:w-[280px]">
           <Input
             placeholder="Tìm kiếm theo tiêu đề..."
             value={params?.keyword || ''}

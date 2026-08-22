@@ -29,6 +29,10 @@ Tài liệu này quy định các nguyên tắc thiết kế mã nguồn, giao d
 *   **Đặt tên nhãn (labels), tiêu đề nút bấm và biểu mẫu ở dạng chung (generic):**
     *   Để giao diện nhất quán, sạch sẽ và dễ dàng tái sử dụng mã nguồn (copy-paste module), hãy đặt các tiêu đề nút, tiêu đề biểu mẫu, tiêu đề bảng ở dạng chung, không lồng tên module vào.
     *   *Ví dụ:* Sử dụng nút "Thêm mới", "Cập nhật", không dùng "Thêm bài viết", "Cập nhật học viên". Tiêu đề của Form/Modal chỉ nên ghi ngắn gọn "Thêm mới" hoặc "Cập nhật" thay vì "Thêm mới lớp học", "Cập nhật thông tin giáo viên". Tiêu đề cột thao tác trong bảng nên là "Thao tác" hoặc "Hành động" thay vì "Thao tác bài viết".
+*   **Quy chuẩn Nút/Icon Sao chép (Copy Action):**
+    *   Tất cả các thao tác sao chép văn bản, mã (code), email trên toàn bộ các trang (pages/components) BẮT BUỘC phải dùng hàm helper `copyToClipboard` từ `src/utils/copy.ts` hoặc component `CopyButton` từ `src/components/CopyButton.tsx`.
+    *   Icon sao chép BẮT BUỘC phải dùng `DocumentDuplicateIcon` từ `@heroicons/react/24/outline`.
+    *   Kích thước icon copy BẮT BUỘC là `h-4 w-4` (class Tailwind `h-4 w-4`).
 
 ---
 

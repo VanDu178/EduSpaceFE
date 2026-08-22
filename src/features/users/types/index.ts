@@ -6,6 +6,7 @@ export type UserStatus = 'active' | 'locked';
 // Interface thông tin người dùng / quản trị viên
 export interface User {
   id: number;
+  code?: string;
   email: string;
   name: string | null;
   role?: UserRole;

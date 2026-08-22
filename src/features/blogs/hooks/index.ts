@@ -6,6 +6,7 @@ import {
   deleteBlogApi,
   updateBlogApi,
   updateBlogStatusApi,
+  updateBlogAccessApi,
   fetchBlogByIdApi,
 } from '../api';
 import type { Blog, BlogPayload, Params } from '../types';
@@ -126,16 +127,16 @@ export const useUpdateBlogMutation = (
               list.map((b) =>
                 b.id === selectedBlogId
                   ? {
-                      ...b,
-                      title: variables?.data?.title,
-                      content: variables?.data?.content,
-                      status: variables?.data?.status || b.status,
-                      bannerUrl: variables?.data?.bannerUrl || b.bannerUrl,
-                      thumbnailUrl: variables?.data?.thumbnailUrl || b.thumbnailUrl,
-                      blogTypeId: variables?.data?.blogTypeId,
-                      blogType: blogTypes.find((t) => t.id === variables?.data?.blogTypeId) || b.blogType,
-                      updatedAt: new Date().toISOString(),
-                    }
+                    ...b,
+                    title: variables?.data?.title,
+                    content: variables?.data?.content,
+                    status: variables?.data?.status || b.status,
+                    bannerUrl: variables?.data?.bannerUrl || b.bannerUrl,
+                    thumbnailUrl: variables?.data?.thumbnailUrl || b.thumbnailUrl,
+                    blogTypeId: variables?.data?.blogTypeId,
+                    blogType: blogTypes.find((t) => t.id === variables?.data?.blogTypeId) || b.blogType,
+                    updatedAt: new Date().toISOString(),
+                  }
                   : b
               );
 
@@ -195,3 +196,34 @@ export const useUpdateBlogStatusMutation = (
     },
   });
 };
+
+// Custom hook mutation cập nhật quyền truy cập bài blog (isPremium: boolean)
+export const useUpdateBlogAccessMutation = (
+  onSuccessCallback?: () => void,
+  onErrorCallback?: (error: AxiosError<ApiResponse>) => void
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (variables: { id: number; isPremium: boolean }) =>
+      updateBlogAccessApi(variables?.id, variables?.isPremium),
+    onSuccess: (res) => {
+      if (res?.success) {
+        toast.success('Cập nhật quyền truy cập bài viết thành công!');
+        queryClient.invalidateQueries({ queryKey: ['blogs'] });
+        if (onSuccessCallback) onSuccessCallback();
+      } else {
+        toast.error(res?.message || 'Cập nhật quyền truy cập thất bại!');
+      }
+    },
+    onError: (err: AxiosError<ApiResponse>) => {
+      console.error('Update blog access error:', err);
+      if (onErrorCallback) {
+        onErrorCallback(err);
+      } else {
+        handleApiError(err);
+      }
+    },
+  });
+};
+
