@@ -3,10 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import Login from './features/auth/pages/Login';
 import DashboardPage from './pages/DashboardPage';
-import ListPage from './features/posts/pages';
-import CreatePage from './features/posts/pages/CreatePage';
-import UpdatePage from './features/posts/pages/UpdatePage';
-import DetailPage from './features/posts/pages/DetailPage';
+import ListPage from './features/blogs/pages';
+import CreatePage from './features/blogs/pages/CreatePage';
+import UpdatePage from './features/blogs/pages/UpdatePage';
+import DetailPage from './features/blogs/pages/DetailPage';
 import UserListPage from './features/users/pages';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -36,14 +36,17 @@ const App = () => {
               </PrivateRoute>
             }
           >
-            {/* Mặc định chuyển hướng sang /admin/posts */}
-            <Route index element={<Navigate to="posts" replace />} />
+            {/* Mặc định chuyển hướng sang /admin/blogs */}
+            <Route index element={<Navigate to="blogs" replace />} />
 
-            {/* Các phân hệ route con quản lý bài viết */}
-            <Route path="posts" element={<ListPage />} />
-            <Route path="posts/create" element={<CreatePage />} />
-            <Route path="posts/:id" element={<DetailPage />} />
-            <Route path="posts/:id/edit" element={<UpdatePage />} />
+            {/* Điều hướng bài blog */}
+            <Route path="blogs" element={<ListPage />} />
+            <Route path="blogs/create" element={<CreatePage />} />
+            <Route path="blogs/:id" element={<DetailPage />} />
+            <Route path="blogs/:id/edit" element={<UpdatePage />} />
+
+            {/* Fallback route cũ /admin/posts chuyển sang /admin/blogs */}
+            <Route path="posts/*" element={<Navigate to="/admin/blogs" replace />} />
 
             {/* Phân hệ route con quản lý người dùng */}
             <Route path="users" element={<UserListPage />} />

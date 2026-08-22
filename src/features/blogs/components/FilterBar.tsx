@@ -2,22 +2,22 @@ import { Input, Select } from 'antd';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import type React from 'react';
 import type { Params } from '../types';
-import type { PostType } from '../../postTypes';
+import type { BlogType } from '../../blogTypes';
 
 interface FilterBarProps {
   params: Params;
   setParams: React.Dispatch<React.SetStateAction<Params>>;
-  postTypes: PostType[];
+  blogTypes: BlogType[];
 }
 
 const FilterBar = ({
   params,
   setParams,
-  postTypes
+  blogTypes
 }: FilterBarProps) => {
   const filterOptions = [
     { value: 'ALL', label: 'Tất cả thể loại' },
-    ...postTypes.map((type) => ({
+    ...blogTypes.map((type) => ({
       value: type?.code,
       label: type?.name,
     }))
@@ -25,31 +25,30 @@ const FilterBar = ({
 
   const statusOptions = [
     { value: 'ALL', label: 'Tất cả trạng thái' },
-    { value: 'true', label: 'Đã xuất bản' },
-    { value: 'false', label: 'Bản nháp' },
+    { value: 'published', label: 'Đã xuất bản' },
+    { value: 'draft', label: 'Bản nháp' },
+    { value: 'archived', label: 'Lưu trữ' },
   ];
 
   return (
     <div className="flex flex-wrap justify-between items-center gap-3">
-      {/* Advanced Filter Button */}
+      {/* Advanced Filter Label */}
       <span
-        className="h-11 rounded-xl flex gap-2 items-center justify-center border-slate-200 text-slate-500 "
+        className="h-11 rounded-xl flex gap-2 items-center justify-center border-slate-200 text-slate-500"
         title="Bộ lọc nâng cao"
       >
         <FunnelIcon className="h-5 w-5" />
-        <span>
-          Bộ lọc
-        </span>
+        <span>Bộ lọc</span>
       </span>
-      <div className='flex items-center gap-2'>
-        {/* Select Filter */}
+      <div className="flex items-center gap-2">
+        {/* Select Category Filter */}
         <div className="w-full sm:w-[180px]">
           <Select
-            value={params?.postType || 'ALL'}
+            value={params?.blogType || 'ALL'}
             onChange={(value) =>
               setParams((prev) => ({
                 ...prev,
-                postType: value,
+                blogType: value,
                 page: 1,
               }))
             }
@@ -57,14 +56,14 @@ const FilterBar = ({
             className="w-full"
           />
         </div>
-        {/* Select Status */}
+        {/* Select Status Filter */}
         <div className="w-full sm:w-[160px]">
           <Select
-            value={params?.published || 'ALL'}
+            value={params?.status || 'ALL'}
             onChange={(value) =>
               setParams((prev) => ({
                 ...prev,
-                published: value,
+                status: value,
                 page: 1,
               }))
             }
@@ -75,7 +74,7 @@ const FilterBar = ({
         {/* Search input */}
         <div className="w-full sm:w-[320px]">
           <Input
-            placeholder="Tìm kiếm theo tiêu đề bài viết..."
+            placeholder="Tìm kiếm theo tiêu đề..."
             value={params?.keyword || ''}
             onChange={(e) =>
               setParams((prev) => ({

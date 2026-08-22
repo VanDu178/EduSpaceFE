@@ -1,15 +1,15 @@
-import { Table, Tag, Button, Popconfirm, Empty, Image, Switch, Tooltip } from 'antd';
+import { Table, Tag, Button, Popconfirm, Empty, Image, Select, Tooltip } from 'antd';
 import { PencilSquareIcon, TrashIcon, PhotoIcon, EyeIcon } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
-import type { Post } from '../types';
-import { getPostTypeStyles } from '../utils';
+import type { Blog } from '../types';
+import { getBlogTypeStyles } from '../utils';
 
-interface PostTableProps {
-  posts: Post[];
+interface BlogTableProps {
+  blogs: Blog[];
   onViewDetail: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
-  onUpdateStatus: (id: number, published: boolean) => void;
+  onUpdateStatus: (id: number, status: string) => void;
   isUpdatingStatus?: boolean;
   updatingStatusId?: number;
   isLoading: boolean;
@@ -21,8 +21,8 @@ interface PostTableProps {
   };
 }
 
-const PostTable = ({
-  posts,
+const BlogTable = ({
+  blogs,
   onViewDetail,
   onEdit,
   onDelete,
@@ -31,18 +31,19 @@ const PostTable = ({
   updatingStatusId,
   isLoading,
   pagination,
-}: PostTableProps) => {
+}: BlogTableProps) => {
 
-  const columns: ColumnsType<Post> = [
+  const columns: ColumnsType<Blog> = [
     {
       title: 'Hình ảnh',
       key: 'thumbnail',
       width: 90,
       render: (_, record) => {
-        if (record?.thumbnail) {
+        const imageUrl = record?.bannerUrl || record?.thumbnailUrl;
+        if (imageUrl) {
           return (
             <Image
-              src={record?.thumbnail}
+              src={imageUrl}
               alt={record?.title}
               className="w-12 h-12 rounded-lg object-cover border border-slate-100"
             />
@@ -61,9 +62,11 @@ const PostTable = ({
       key: 'title',
       width: 250,
       render: (text) => (
-        <span className="font-semibold text-slate-800 line-clamp-2 hover:text-sky-600 transition-colors duration-150">
-          {text}
-        </span>
+        <Tooltip title={text} placement="topLeft">
+          <span className="font-semibold text-slate-800 line-clamp-2 hover:text-sky-600 transition-colors duration-150 cursor-pointer">
+            {text}
+          </span>
+        </Tooltip>
       ),
     },
     {
@@ -72,22 +75,25 @@ const PostTable = ({
       render: (_, record) => {
         const text = record?.summary || '';
         return (
-          <span className="text-slate-500 line-clamp-2">
-            {text.length > 80 ? `${text.substring(0, 80)}...` : text || 'Không có mô tả'}
-          </span>
+          <Tooltip title={text || 'Không có mô tả'} placement="topLeft">
+            <span className="text-slate-500 line-clamp-2 cursor-pointer">
+              {text.length > 80 ? `${text.substring(0, 80)}...` : text || 'Không có mô tả'}
+            </span>
+          </Tooltip>
         );
       },
     },
     {
       title: 'Thể loại',
-      dataIndex: ['postType', 'name'],
-      key: 'postType',
+      align: 'center',
+      dataIndex: ['blogType', 'name'],
+      key: 'blogType',
       width: 150,
       render: (name, record) => {
-        const color = getPostTypeStyles(record.postType?.code);
+        const color = getBlogTypeStyles(record.blogType?.code);
         return (
           <Tag color={color} className="font-semibold px-2.5 py-0.5 rounded-full border-none">
-            {name || 'Chung'}
+            {name}
           </Tag>
         );
       },
@@ -95,16 +101,21 @@ const PostTable = ({
     {
       title: 'Trạng thái',
       align: "center",
-      dataIndex: 'published',
-      key: 'published',
-      width: 150,
-      render: (published, record) => (
-        <Switch
-          checked={published}
+      dataIndex: 'status',
+      key: 'status',
+      width: 160,
+      render: (status, record) => (
+        <Select
+          value={status || 'draft'}
           loading={isUpdatingStatus && updatingStatusId === record.id}
-          onChange={(checked) => onUpdateStatus(record.id, checked)}
-          checkedChildren="Đã xuất bản"
-          unCheckedChildren="Bản nháp"
+          disabled={isUpdatingStatus && updatingStatusId === record.id}
+          onChange={(value) => onUpdateStatus(record.id, value)}
+          className="w-36 text-xs"
+          options={[
+            { value: 'draft', label: 'Bản nháp' },
+            { value: 'published', label: 'Đã xuất bản' },
+            { value: 'archived', label: 'Lưu trữ' },
+          ]}
         />
       ),
     },
@@ -114,7 +125,7 @@ const PostTable = ({
       width: 140,
       align: 'center',
       render: (_, record) => (
-        <div >
+        <div className="flex items-center justify-center gap-1">
           <Tooltip title="Xem chi tiết">
             <Button
               type="text"
@@ -156,18 +167,17 @@ const PostTable = ({
     },
   ];
 
-  // Nếu không có dữ liệu, ẩn Table hoàn toàn và hiển thị giao diện trống
-  if (!isLoading && posts.length === 0) {
+  if (!isLoading && blogs.length === 0) {
     return (
       <div className="py-16 flex items-center justify-center flex-1">
-        <Empty description="Không có bài viết nào" />
+        <Empty description="Không có dữ liệu" />
       </div>
     );
   }
 
   return (
     <Table
-      dataSource={posts}
+      dataSource={blogs}
       columns={columns}
       rowKey="id"
       loading={isLoading}
@@ -179,10 +189,11 @@ const PostTable = ({
         onChange: pagination.onChange,
         showSizeChanger: true,
         pageSizeOptions: ['5', '10', '20', '50'],
+        showTotal: (total) => `Tổng cộng: ${total} dòng dữ liệu`,
         style: { marginBottom: 0 }
       } : false}
     />
   );
 };
 
-export default PostTable;
+export default BlogTable;

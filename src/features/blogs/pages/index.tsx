@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from 'antd';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { ListPage, FilterBar } from '../components';
-import { usePostsQuery, useDeletePostMutation, useUpdatePostStatusMutation } from '../hooks';
-import { usePostTypesQuery } from '../../postTypes';
+import { useBlogsQuery, useDeleteBlogMutation, useUpdateBlogStatusMutation } from '../hooks';
+import { useBlogTypesQuery } from '../../blogTypes';
 import type { Params } from '../types';
-
 import { DEFAULT_PARAMS } from '../constants';
 
 const Index = () => {
@@ -16,49 +15,47 @@ const Index = () => {
   const [params, setParams] = useState<Params>(DEFAULT_PARAMS);
 
   // React Query Custom Hooks
-  const { data, isLoading, error } = usePostsQuery({
+  const { data, isLoading } = useBlogsQuery({
     page: params?.page,
     limit: params?.limit,
     keyword: params?.keyword || undefined,
-    postType: params?.postType !== 'ALL' ? params?.postType : undefined,
-    published: params?.published !== 'ALL' ? params?.published : undefined,
+    blogType: params?.blogType !== 'ALL' ? params?.blogType : undefined,
+    status: params?.status !== 'ALL' ? params?.status : undefined,
   });
-  const { data: postTypes = [] } = usePostTypesQuery();
-  const deleteMutation = useDeletePostMutation();
-  const updateStatusMutation = useUpdatePostStatusMutation();
+  const { data: blogTypes = [] } = useBlogTypesQuery();
+  const deleteMutation = useDeleteBlogMutation();
+  const updateStatusMutation = useUpdateBlogStatusMutation();
 
-  const posts = data?.posts || [];
+  const blogs = data?.blogs || [];
 
-  // Kích hoạt chế độ Edit bài viết
+  // Kích hoạt chế độ Edit
   const handleEditClick = (id: number) => {
-    navigate(`/admin/posts/${id}/edit`);
+    navigate(`/admin/blogs/${id}/edit`);
   };
 
-  // Kích hoạt chế độ Xem chi tiết bài viết
+  // Kích hoạt chế độ Xem chi tiết
   const handleViewDetailClick = (id: number) => {
-    navigate(`/admin/posts/${id}`);
+    navigate(`/admin/blogs/${id}`);
   };
 
-  // Kích hoạt chế độ Delete bài viết
+  // Kích hoạt chế độ Delete
   const handleDeleteClick = (id: number) => {
     deleteMutation.mutate(id);
   };
 
-  // Kích hoạt cập nhật trạng thái bài viết
-  const handleUpdateStatusClick = (id: number, published: boolean) => {
-    updateStatusMutation.mutate({ id, published });
+  // Kích hoạt cập nhật trạng thái
+  const handleUpdateStatusClick = (id: number, status: string) => {
+    updateStatusMutation.mutate({ id, status });
   };
-
-
 
   return (
     <div className="space-y-6 flex flex-1 flex-col h-full">
       <div className="flex items-center justify-between mb-2 shrink-0">
-        <h2 className="text-xl font-bold text-slate-800">Danh sách bài viết</h2>
+        <h2 className="text-xl font-bold text-slate-800">Danh sách</h2>
         <Button
           type="primary"
           onClick={() => {
-            navigate('/admin/posts/create');
+            navigate('/admin/blogs/create');
           }}
           className="px-5 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-600 border-none text-sm font-semibold flex items-center justify-center cursor-pointer"
         >
@@ -68,27 +65,19 @@ const Index = () => {
           </span>
         </Button>
       </div>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium shrink-0">
-          Có lỗi xảy ra khi tải dữ liệu bài viết: {(error as Error).message}
-        </div>
-      )}
-
-
       {/* Toolbar */}
       <div className="shrink-0">
         <FilterBar
           params={params}
           setParams={setParams}
-          postTypes={postTypes}
+          blogTypes={blogTypes}
         />
       </div>
 
       {/* Table list wrapper */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <ListPage
-          posts={posts}
+          blogs={blogs}
           onViewDetail={handleViewDetailClick}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}

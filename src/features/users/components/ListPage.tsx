@@ -190,6 +190,7 @@ const ListPage = ({
         onChange: pagination.onChange,
         showSizeChanger: true,
         pageSizeOptions: ['5', '10', '20', '50'],
+        showTotal: (total) => `Tổng cộng: ${total} dòng dữ liệu`,
         style: { marginBottom: 0 }
       } : false}
     />

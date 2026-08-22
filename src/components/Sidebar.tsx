@@ -11,7 +11,7 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
   const location = useLocation();
 
   // Xác định active menu dựa trên đường dẫn URL hiện tại
-  const isPostsActive = location.pathname.includes('/admin/posts');
+  const isBlogsActive = location.pathname.includes('/admin/blogs') || location.pathname.includes('/admin/posts');
   const isUsersActive = location.pathname.includes('/admin/users');
 
   return (
@@ -42,19 +42,19 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
 
       {/* Navigation menu */}
       <nav className={`flex-1 ${isCollapsed ? 'px-2' : 'px-4'} py-6 space-y-1.5 overflow-y-auto transition-all duration-300`}>
-        <Tooltip title={isCollapsed ? "Bài viết" : ""} placement="right">
+        <Tooltip title={isCollapsed ? "Danh sách bài viết" : ""} placement="right">
           <Link
-            to="/admin/posts"
+            to="/admin/blogs"
             className={`flex items-center transition-all duration-200 group relative ${isCollapsed
-              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isPostsActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
-              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isPostsActive
+              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isBlogsActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
+              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isBlogsActive
                 ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
                 : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
               }`
               }`}
           >
             <DocumentTextIcon
-              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isPostsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
+              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isBlogsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
                 }`}
             />
             <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
