@@ -8,6 +8,7 @@ import CreatePage from './features/blogs/pages/CreatePage';
 import UpdatePage from './features/blogs/pages/UpdatePage';
 import DetailPage from './features/blogs/pages/DetailPage';
 import UserListPage from './features/users/pages';
+import { MembershipPlanListPage } from './features/membershipPlans';
 import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {
@@ -50,6 +51,9 @@ const App = () => {
 
             {/* Phân hệ route con quản lý người dùng */}
             <Route path="users" element={<UserListPage />} />
+
+            {/* Phân hệ route con quản lý gói hội viên */}
+            <Route path="membership-plans" element={<MembershipPlanListPage />} />
           </Route>
 
           {/* Redirect mặc định về /admin nếu gõ sai route */}
