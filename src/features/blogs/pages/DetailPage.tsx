@@ -4,6 +4,7 @@ import { useBlogQuery } from '../hooks';
 import { getStatusTagConfig, getAccessTagConfig, getBlogTypeTagConfig } from '../utils';
 import { useNavigate, useParams } from 'react-router-dom';
 import CopyButton from '../../../components/CopyButton';
+import { formatDate } from '../../../utils/format';
 
 const DetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -12,23 +13,6 @@ const DetailPage = () => {
   // Gọi API lấy chi tiết bài blog theo ID hoặc Slug
   const { data, isLoading } = useBlogQuery(id);
   const blog = data?.blog;
-
-  // Định dạng ngày tháng hiển thị đẹp mắt
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'N/A';
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    } catch {
-      return dateStr;
-    }
-  };
 
   const imageUrl = blog?.bannerUrl || blog?.thumbnailUrl;
 
@@ -180,7 +164,7 @@ const DetailPage = () => {
                       <span>Ngày tạo</span>
                     </div>
                     <div className="text-slate-800 text-sm font-semibold pl-[22px]">
-                      {formatDate(blog.createdAt)}
+                      {formatDate(blog.createdAt, true)}
                     </div>
                   </div>
 
@@ -191,7 +175,7 @@ const DetailPage = () => {
                       <span>Cập nhật cuối</span>
                     </div>
                     <div className="text-slate-800 text-sm font-semibold pl-[22px]">
-                      {formatDate(blog.updatedAt)}
+                      {formatDate(blog.updatedAt, true)}
                     </div>
                   </div>
                 </div>

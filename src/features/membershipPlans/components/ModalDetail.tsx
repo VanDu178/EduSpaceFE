@@ -1,8 +1,8 @@
 import { Drawer, Button } from 'antd';
 import type { MembershipPlan } from '../types';
 import CopyButton from '../../../components/CopyButton';
-import { formatCurrency } from '../../../utils/format';
-import { CheckCircleIcon } from '@heroicons/react/24/outline';
+import { formatCurrency, formatDate } from '../../../utils/format';
+import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface ModalDetailProps {
   isOpen: boolean;
@@ -13,22 +13,8 @@ interface ModalDetailProps {
 const ModalDetail = ({ isOpen, onClose, plan }: ModalDetailProps) => {
   if (!plan) return null;
 
-  const formatDate = (dateStr: string | null | undefined) => {
-    if (!dateStr) return '—';
-    try {
-      return new Date(dateStr).toLocaleString('vi-VN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
   const featuresList = Array.isArray(plan.features) ? plan.features : [];
+  const unavailableFeaturesList = Array.isArray(plan.unavailableFeatures) ? plan.unavailableFeatures : [];
 
   return (
     <Drawer
@@ -72,8 +58,8 @@ const ModalDetail = ({ isOpen, onClose, plan }: ModalDetailProps) => {
 
           {/* Hàng 2: Ngày tạo, Ngày cập nhật */}
           <div className="flex items-center justify-between text-xs text-slate-400 pt-0.5">
-            <span>Ngày tạo: <span className="text-slate-600 font-medium">{formatDate(plan.createdAt)}</span></span>
-            <span>Ngày cập nhật: <span className="text-slate-600 font-medium">{formatDate(plan.updatedAt)}</span></span>
+            <span>Ngày tạo: <span className="text-slate-600 font-medium">{formatDate(plan.createdAt, true, '—')}</span></span>
+            <span>Ngày cập nhật: <span className="text-slate-600 font-medium">{formatDate(plan.updatedAt, true, '—')}</span></span>
           </div>
         </div>
 
@@ -109,7 +95,7 @@ const ModalDetail = ({ isOpen, onClose, plan }: ModalDetailProps) => {
           <div>
             <button
               type="button"
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-600 text-white font-bold text-sm text-center border-none cursor-pointer"
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-600 text-white font-bold text-sm text-center border-none"
             >
               {plan.buttonText || 'Đăng ký ngay'}
             </button>
@@ -131,6 +117,21 @@ const ModalDetail = ({ isOpen, onClose, plan }: ModalDetailProps) => {
               <p className="text-xs text-slate-400 italic">Chưa có quyền lợi nào được thiết lập.</p>
             )}
           </div>
+
+          {/* Unavailable Features List */}
+          {unavailableFeaturesList.length > 0 && (
+            <div className="space-y-3 pt-3 border-t border-slate-200/60">
+              <h4 className="font-bold text-slate-400 text-xs uppercase tracking-wider">Chưa hỗ trợ / Bị giới hạn:</h4>
+              <ul className="space-y-2.5">
+                {unavailableFeaturesList.map((item, index) => (
+                  <li key={index} className="flex items-start space-x-2 text-xs text-slate-400">
+                    <XMarkIcon className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
+                    <span className="leading-relaxed line-through decoration-slate-300">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </Drawer>

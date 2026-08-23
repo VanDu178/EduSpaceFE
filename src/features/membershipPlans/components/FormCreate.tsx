@@ -24,6 +24,7 @@ const FormCreate = ({ isOpen, onClose, onSave, isLoading }: FormCreateProps) => 
         isActive: true,
         buttonText: 'Đăng ký ngay',
         features: [],
+        unavailableFeatures: [],
       });
     }
   }, [isOpen, form]);
@@ -35,10 +36,14 @@ const FormCreate = ({ isOpen, onClose, onSave, isLoading }: FormCreateProps) => 
       const cleanedFeatures = Array.isArray(values.features)
         ? values.features.map((f: string) => f?.trim()).filter(Boolean)
         : [];
+      const cleanedUnavailableFeatures = Array.isArray(values.unavailableFeatures)
+        ? values.unavailableFeatures.map((f: string) => f?.trim()).filter(Boolean)
+        : [];
 
       onSave({
         ...values,
         features: cleanedFeatures.length > 0 ? cleanedFeatures : null,
+        unavailableFeatures: cleanedUnavailableFeatures.length > 0 ? cleanedUnavailableFeatures : null,
       });
     } catch (error) {
       console.error('Validation failed:', error);
@@ -195,6 +200,44 @@ const FormCreate = ({ isOpen, onClose, onSave, isLoading }: FormCreateProps) => 
                   className="rounded-xl mt-2 border-slate-300 text-slate-600 hover:text-sky-600 hover:border-sky-400"
                 >
                   Thêm quyền lợi
+                </Button>
+              </div>
+            )}
+          </Form.List>
+        </div>
+
+        {/* Dynamic list unavailable features */}
+        <div className="border-t border-slate-100 pt-3">
+          <label className="block font-semibold text-slate-700 mb-2">Tính năng chưa tiếp cận (bị giới hạn)</label>
+          <Form.List name="unavailableFeatures">
+            {(fields, { add, remove }) => (
+              <div className="space-y-2">
+                {fields.map(({ key, name, ...restField }) => (
+                  <div key={key} className="!flex !items-start space-x-2 !mb-0">
+                    <Form.Item
+                      {...restField}
+                      name={[name]}
+                      className="flex-1 mb-0"
+                    >
+                      <Input placeholder="Nhập tính năng chưa hỗ trợ..." className="rounded-xl py-1.5" />
+                    </Form.Item>
+                    <Button
+                      type="text"
+                      danger
+                      onClick={() => remove(name)}
+                      icon={<TrashIcon className="h-4 w-4" />}
+                      className="w-9 h-9 hover:bg-rose-50 rounded-lg flex items-center justify-center shrink-0"
+                    />
+                  </div>
+                ))}
+                <Button
+                  type="dashed"
+                  onClick={() => add('')}
+                  block
+                  icon={<PlusIcon className="h-4 w-4 inline" />}
+                  className="rounded-xl mt-2 border-slate-300 text-slate-600 hover:text-rose-600 hover:border-rose-300"
+                >
+                  Thêm tính năng chưa hỗ trợ
                 </Button>
               </div>
             )}

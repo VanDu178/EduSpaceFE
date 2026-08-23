@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { DocumentTextIcon, UsersIcon, SparklesIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, UsersIcon, SparklesIcon, CreditCardIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'antd';
 
 interface SidebarProps {
@@ -14,6 +14,7 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
   const isBlogsActive = location.pathname.includes('/admin/blogs') || location.pathname.includes('/admin/posts');
   const isUsersActive = location.pathname.includes('/admin/users');
   const isMembershipPlansActive = location.pathname.includes('/admin/membership-plans');
+  const isSubscriptionsActive = location.pathname.includes('/admin/subscriptions');
 
   return (
     <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white border-r border-slate-200/80 text-slate-500 flex flex-col h-screen fixed left-0 top-0 z-20 transition-all duration-300`}>
@@ -102,6 +103,27 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
             />
             <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
               Gói hội viên
+            </span>
+          </Link>
+        </Tooltip>
+
+        <Tooltip title={isCollapsed ? "Lịch sử thanh toán" : ""} placement="right">
+          <Link
+            to="/admin/subscriptions"
+            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
+              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isSubscriptionsActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
+              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isSubscriptionsActive
+                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
+                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
+              }`
+              }`}
+          >
+            <CreditCardIcon
+              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isSubscriptionsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
+                }`}
+            />
+            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
+              Lịch sử thanh toán
             </span>
           </Link>
         </Tooltip>

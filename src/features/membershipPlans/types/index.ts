@@ -8,6 +8,7 @@ export interface MembershipPlan {
   popularBadge: string | null;
   buttonText: string | null;
   features: string[] | null;
+  unavailableFeatures: string[] | null;
   sortOrder: number;
   isActive: boolean;
   createdAt: string;
@@ -22,6 +23,7 @@ export interface MembershipPlanPayload {
   popularBadge?: string | null;
   buttonText?: string | null;
   features?: string[] | null;
+  unavailableFeatures?: string[] | null;
   sortOrder?: number;
   isActive?: boolean;
 }
