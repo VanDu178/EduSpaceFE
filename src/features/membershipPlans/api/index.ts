@@ -46,15 +46,6 @@ export const updateMembershipPlanApi = async (
   return response?.data;
 };
 
-// API Cập nhật thứ tự hiển thị (sortOrder)
-export const updateMembershipPlanSortOrderApi = async (
-  id: number,
-  sortOrder: number
-): Promise<ApiResponse<MembershipPlan>> => {
-  const response = await api.patch(`/membership-plans/${id}/sort-order`, { sortOrder });
-  return response?.data;
-};
-
 // API Đổi trạng thái kích hoạt/ẩn gói (isActive)
 export const toggleMembershipPlanStatusApi = async (
   id: number

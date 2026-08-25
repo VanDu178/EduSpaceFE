@@ -1,4 +1,4 @@
-import { Table, Switch, Tag, Popconfirm, Button, Tooltip, InputNumber, Empty } from 'antd';
+import { Table, Switch, Tag, Popconfirm, Button, Tooltip, Empty } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { MembershipPlan } from '../types';
 import CopyButton from '../../../components/CopyButton';
@@ -12,7 +12,6 @@ interface ListPageProps {
   onEdit: (plan: MembershipPlan) => void;
   onDelete: (id: number) => void;
   onToggleStatus: (id: number) => void;
-  onUpdateSortOrder: (id: number, sortOrder: number) => void;
   pagination?: {
     current: number;
     pageSize: number;
@@ -28,7 +27,6 @@ const ListPage = ({
   onEdit,
   onDelete,
   onToggleStatus,
-  onUpdateSortOrder,
   pagination,
 }: ListPageProps) => {
   if (!isLoading && plans.length === 0) {
@@ -41,7 +39,7 @@ const ListPage = ({
 
   const columns: ColumnsType<MembershipPlan> = [
     {
-      title: 'Mã gói',
+      title: 'Mã',
       dataIndex: 'code',
       key: 'code',
       width: 140,
@@ -61,7 +59,7 @@ const ListPage = ({
       ),
     },
     {
-      title: 'Tên gói',
+      title: 'Tên',
       dataIndex: 'name',
       key: 'name',
       width: 220,
@@ -75,7 +73,7 @@ const ListPage = ({
       ),
     },
     {
-      title: 'Giá tháng',
+      title: 'Giá theo tháng',
       dataIndex: 'monthlyPrice',
       key: 'monthlyPrice',
       width: 130,
@@ -85,7 +83,7 @@ const ListPage = ({
       ),
     },
     {
-      title: 'Giá năm',
+      title: 'Giá theo năm',
       dataIndex: 'yearlyPrice',
       key: 'yearlyPrice',
       width: 130,
@@ -95,7 +93,22 @@ const ListPage = ({
       ),
     },
     {
-      title: 'Badge nổi bật',
+      title: '% Giảm năm',
+      dataIndex: 'yearlyDiscountPercent',
+      key: 'yearlyDiscountPercent',
+      width: 110,
+      align: 'center',
+      render: (percent: number) =>
+        percent > 0 ? (
+          <Tag color="green" className="rounded-full px-2.5 py-0.5 !border-none font-semibold text-xs">
+            -{percent}%
+          </Tag>
+        ) : (
+          <span className="text-slate-400 text-xs">0%</span>
+        ),
+    },
+    {
+      title: 'Nhãn nổi bật',
       dataIndex: 'popularBadge',
       key: 'popularBadge',
       width: 130,
@@ -105,34 +118,29 @@ const ListPage = ({
             {badge}
           </Tag>
         ) : (
-          <span className="text-slate-300 text-xs">—</span>
+          <span className="text-slate-400 text-xs italic">Không có nhãn</span>
         ),
     },
     {
-      title: 'Thứ tự',
-      dataIndex: 'sortOrder',
-      key: 'sortOrder',
+      title: "Tên nút bấm (CTA)",
+      dataIndex: "buttonText",
+      key: "buttonText",
+      width: 150,
+      align: "left",
+      render: (buttonText: string) => (
+        <span className="font-medium text-slate-800 text-sm">{buttonText}</span>
+      ),
+    },
+    {
+      title: 'Cấp độ gói',
+      dataIndex: 'tierLevel',
+      key: 'tierLevel',
       width: 100,
-      render: (sortOrder: number, record: MembershipPlan) => (
-        <InputNumber
-          min={0}
-          max={999}
-          size="small"
-          defaultValue={sortOrder}
-          className="w-16 rounded-lg text-center"
-          onBlur={(e) => {
-            const val = Number(e.target.value);
-            if (!isNaN(val) && val !== sortOrder) {
-              onUpdateSortOrder(record.id, val);
-            }
-          }}
-          onPressEnter={(e: any) => {
-            const val = Number(e.target.value);
-            if (!isNaN(val) && val !== sortOrder) {
-              onUpdateSortOrder(record.id, val);
-            }
-          }}
-        />
+      align: 'center',
+      render: (tierLevel: number) => (
+        <Tag color="purple" className="rounded-full px-2.5 py-0.5 font-semibold text-xs !border-none">
+          Tier {tierLevel ?? 1}
+        </Tag>
       ),
     },
     {
@@ -213,7 +221,7 @@ const ListPage = ({
         dataSource={plans}
         rowKey="id"
         loading={isLoading}
-        scroll={{ x: 'max-content', y: 'calc(100vh - 316px)' }}
+        scroll={{ x: 'max-content', y: 'calc(100vh - 386px)' }}
         pagination={
           pagination
             ? {

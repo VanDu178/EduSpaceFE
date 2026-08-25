@@ -8,7 +8,7 @@ interface ModalPreviewProps {
   slug?: string;
   summary?: string;
   contentHtml?: string;
-  bannerUrl?: string;
+  bannerUrl?: string | null;
   selectedBlogType?: {
     code?: string;
     name?: string;
@@ -21,7 +21,7 @@ const ModalPreview = ({
   open,
   onCancel,
   title,
-  slug,
+  slug: _slug,
   summary,
   contentHtml,
   bannerUrl,

@@ -164,7 +164,7 @@ const DetailPage = () => {
                       <span>Ngày tạo</span>
                     </div>
                     <div className="text-slate-800 text-sm font-semibold pl-[22px]">
-                      {formatDate(blog.createdAt, true)}
+                      {formatDate(blog.createdAt, false)}
                     </div>
                   </div>
 
@@ -175,7 +175,7 @@ const DetailPage = () => {
                       <span>Cập nhật cuối</span>
                     </div>
                     <div className="text-slate-800 text-sm font-semibold pl-[22px]">
-                      {formatDate(blog.updatedAt, true)}
+                      {formatDate(blog.updatedAt, false)}
                     </div>
                   </div>
                 </div>

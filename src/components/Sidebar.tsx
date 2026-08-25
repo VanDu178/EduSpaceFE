@@ -133,3 +133,4 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
 };
 
 export default Sidebar;
+

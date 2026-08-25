@@ -71,8 +71,16 @@ const ModalDetail = ({ open, data, loading, onClose }: ModalDetailProps) => {
                 <span>Thông tin người dùng</span>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-slate-800">{data.user?.name || 'Chưa cập nhật'}</p>
-                <p className="text-xs text-slate-500">{data.user?.email || 'N/A'}</p>
+                {data.user?.name ? (
+                  <p className="text-sm font-semibold text-slate-800">{data.user.name}</p>
+                ) : (
+                  <p className="text-sm text-slate-400 italic">Chưa cập nhật</p>
+                )}
+                {data.user?.email ? (
+                  <p className="text-xs text-slate-500">{data.user.email}</p>
+                ) : (
+                  <p className="text-xs text-slate-400 italic">N/A</p>
+                )}
                 {data.user?.code && (
                   <p className="text-xs text-slate-400 font-mono">Mã: {data.user.code}</p>
                 )}
@@ -86,8 +94,14 @@ const ModalDetail = ({ open, data, loading, onClose }: ModalDetailProps) => {
                 <span>Gói hội viên</span>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-slate-800">{data.plan?.name || 'Gói không xác định'}</p>
-                <p className="text-xs text-slate-500 font-mono">Mã: {data.plan?.code || 'N/A'}</p>
+                {data.plan?.name ? (
+                  <p className="text-sm font-semibold text-slate-800">{data.plan.name}</p>
+                ) : (
+                  <p className="text-sm text-slate-400 italic">Gói không xác định</p>
+                )}
+                <p className="text-xs text-slate-500 font-mono">
+                  Mã: {data.plan?.code ? data.plan.code : <span className="text-slate-400 italic font-sans">N/A</span>}
+                </p>
                 <p className="text-xs text-sky-600 font-medium">
                   Chu kỳ: {BILLING_CYCLE_LABELS[data.billingCycle] || data.billingCycle}
                 </p>
@@ -114,17 +128,23 @@ const ModalDetail = ({ open, data, loading, onClose }: ModalDetailProps) => {
 
               <div className="flex justify-between items-center py-1 border-b border-slate-100">
                 <span className="text-slate-500 text-xs">Phương thức thanh toán:</span>
-                <span className="font-medium text-slate-700 text-xs">
-                  {data.paymentMethod
-                    ? PAYMENT_METHOD_LABELS[data.paymentMethod] || data.paymentMethod
-                    : 'Chưa xác định'}
-                </span>
+                {data.paymentMethod ? (
+                  <span className="font-medium text-slate-700 text-xs">
+                    {PAYMENT_METHOD_LABELS[data.paymentMethod] || data.paymentMethod}
+                  </span>
+                ) : (
+                  <span className="text-slate-400 text-xs italic">Chưa xác định</span>
+                )}
               </div>
 
               <div className="flex justify-between items-center py-1 border-b border-slate-100">
                 <span className="text-slate-500 text-xs">Mã giao dịch (Ref):</span>
                 <span className="font-mono font-medium text-slate-700 text-xs flex items-center space-x-1">
-                  <span>{data.paymentRef || 'N/A'}</span>
+                  {data.paymentRef ? (
+                    <span>{data.paymentRef}</span>
+                  ) : (
+                    <span className="text-slate-400 italic font-sans">N/A</span>
+                  )}
                   {data.paymentRef && <CopyButton text={data.paymentRef} />}
                 </span>
               </div>
@@ -171,7 +191,7 @@ const ModalDetail = ({ open, data, loading, onClose }: ModalDetailProps) => {
                   <span>Thông tin hủy đơn</span>
                 </div>
                 <p className="text-xs text-rose-700">
-                  <span className="font-medium">Thời gian hủy:</span> {formatDate(data.cancelledAt, true)}
+                  <span className="font-medium">Thời gian hủy:</span> {formatDate(data.cancelledAt, false)}
                 </p>
                 <p className="text-xs text-rose-700 mt-0.5">
                   <span className="font-medium">Lý do:</span> {data.cancelReason || 'Không ghi rõ'}

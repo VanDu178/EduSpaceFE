@@ -33,6 +33,29 @@ Tài liệu này quy định các nguyên tắc thiết kế mã nguồn, giao d
     *   Tất cả các thao tác sao chép văn bản, mã (code), email trên toàn bộ các trang (pages/components) BẮT BUỘC phải dùng hàm helper `copyToClipboard` từ `src/utils/copy.ts` hoặc component `CopyButton` từ `src/components/CopyButton.tsx`.
     *   Icon sao chép BẮT BUỘC phải dùng `DocumentDuplicateIcon` từ `@heroicons/react/24/outline`.
     *   Kích thước icon copy BẮT BUỘC là `h-4 w-4` (class Tailwind `h-4 w-4`).
+*   **Quy chuẩn Hiển thị Văn bản Thay thế / Trống (Empty / Fallback Text):**
+    *   Tất cả văn bản đại diện cho dữ liệu rỗng/chưa có (ví dụ: "Không có mô tả", "Chưa cập nhật", "Chưa xác định", "N/A", "—", v.v.) trong giao diện Admin Frontend BẮT BUỘC phải định dạng bằng chữ in nghiêng (`italic`) và có màu xám nhạt (`text-slate-400`).
+    *   *Ví dụ:* `<span className="text-slate-400 text-xs italic">Không có mô tả</span>` hoặc `<span className="text-slate-400 italic">Chưa cập nhật</span>`.
+*   **Quy chuẩn Thiết kế Thanh Lọc & Tìm Kiếm (FilterBar):**
+    *   *Khung chứa (Container):* Đường viền mờ `border border-slate-200/80 rounded-2xl bg-white p-3.5 sm:p-4 mb-4`. Tuyệt đối không dùng bóng đổ (`shadow`).
+    *   *Ô tìm kiếm (Search Input):* Sử dụng `<Input />` Ant Design kết hợp icon `MagnifyingGlassIcon` (`h-4 w-4 text-slate-400`). Class tiêu chuẩn: `className="w-full sm:w-72 md:w-80 rounded-xl py-2 px-3 text-sm border-slate-200 hover:border-sky-400 focus:border-sky-500"`. Đặt placeholder dạng generic (ví dụ: *"Tìm kiếm..."*, *"Tìm kiếm theo tên, mã..."*). Có nút xóa (allowClear / reset).
+    *   *Bộ lọc Select:* Dùng `<Select />` Ant Design bọc class `className="w-40 sm:w-48 text-sm"`. Đặt nhãn mặc định generic (ví dụ: *"Tất cả trạng thái"*, *"Tất cả loại"*).
+    *   *Bố cục (Layout & Responsiveness):* Bắt buộc sử dụng `flex flex-wrap items-center justify-between gap-3` để co giãn mượt mà trên mọi màn hình (mobile, tablet, desktop).
+*   **Quy chuẩn Thiết kế Bảng & Danh Sách Dữ Liệu (ListPage / Table):**
+    *   *Bọc Bảng (Table Wrapper):* Sử dụng `<Table />` Ant Design bọc trong container phẳng `border border-slate-200/80 rounded-2xl bg-white overflow-hidden`. Khai báo `rowKey="id"` và cấu hình `scroll={{ x: 'max-content' }}` để cuộn ngang mượt mà.
+    *   *Căn lề & Định dạng Cột (Column Alignment):*
+        *   Cột Mã / STT / Định danh: Căn trái (`align: 'left'`) hoặc giữa (`align: 'center'`), phông chữ đơn cách `font-mono text-xs font-semibold text-slate-700`, width `100 - 140px`.
+        *   Cột Tên / Tiêu đề / Nội dung chính: Căn trái (`align: 'left'`), chữ đậm nhẹ `font-semibold text-slate-800`.
+        *   Cột Trạng thái / Cấp độ / Phân loại: Căn giữa (`align: 'center'`), dùng `<Tag />` bo tròn `rounded-full px-2.5 py-0.5 font-semibold text-xs !border-none` với màu sắc phân biệt (`emerald` cho Active, `rose` cho Locked/Hidden, `sky`/`cyan` cho Badge/Type, `purple` cho Tier).
+        *   Cột Số tiền / Giá cả: Căn phải (`align: 'right'`), phông chữ `font-bold text-slate-800 text-sm`, định dạng qua `formatCurrency`.
+        *   Cột Thao tác / Hành động: Căn giữa (`align: 'center'`), cố định bên phải `fixed: 'right'`, tiêu đề chung (`"Thao tác"` hoặc `"Hành động"`).
+    *   *Cột Thao Tác (Action Icons & Switch):*
+        *   Sắp xếp nằm ngang `flex items-center justify-center space-x-1.5`.
+        *   Nút Switch trạng thái nhanh: Sử dụng `<Switch size="small" />`.
+        *   Icon Xem chi tiết: Dùng `EyeIcon` (`h-4 w-4 text-sky-600 hover:text-sky-700 p-1.5 hover:bg-sky-50 rounded-lg transition-colors`).
+        *   Icon Cập nhật/Sửa: Dùng `PencilSquareIcon` (`h-4 w-4 text-amber-600 hover:text-amber-700 p-1.5 hover:bg-amber-50 rounded-lg transition-colors`).
+        *   Icon Xóa: Dùng `TrashIcon` (`h-4 w-4 text-rose-600 hover:text-rose-700 p-1.5 hover:bg-rose-50 rounded-lg transition-colors`), BẮT BUỘC bọc trong `<Popconfirm title="Xác nhận xóa" description="Bạn có chắc chắn muốn xóa bản ghi này?" okText="Xóa" cancelText="Hủy" okButtonProps={{ danger: true }}>`.
+    *   *Trạng thái Trống (Empty State):* Khi danh sách trống (`!isLoading && data.length === 0`), hiển thị `<Empty description="Không có dữ liệu" className="py-12" />`.
 
 ---
 

@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Drawer, Form, Input, InputNumber, Select, Switch, Button } from 'antd';
-import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import type { MembershipPlan, MembershipPlanPayload } from '../types';
 import { BADGE_OPTIONS } from '../constants';
+import FeatureSelectionSection from './FeatureSelectionSection';
 
 interface FormUpdateProps {
   isOpen: boolean;
@@ -14,43 +14,58 @@ interface FormUpdateProps {
 
 const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProps) => {
   const [form] = Form.useForm();
+  const [planFeatures, setPlanFeatures] = useState<{ featureId: number; isAvailable: boolean }[]>([]);
 
   useEffect(() => {
     if (isOpen && plan) {
-      const parsedFeatures = Array.isArray(plan.features) ? plan.features : [];
-      const parsedUnavailableFeatures = Array.isArray(plan.unavailableFeatures) ? plan.unavailableFeatures : [];
-
       form.setFieldsValue({
         name: plan.name,
         tagLine: plan.tagLine || '',
         monthlyPrice: Number(plan.monthlyPrice) || 0,
+        yearlyDiscountPercent: Number(plan.yearlyDiscountPercent) || 0,
         yearlyPrice: Number(plan.yearlyPrice) || 0,
         popularBadge: plan.popularBadge || '',
         buttonText: plan.buttonText || '',
-        sortOrder: plan.sortOrder || 0,
+        tierLevel: plan.tierLevel ?? 1,
         isActive: plan.isActive,
-        features: parsedFeatures,
-        unavailableFeatures: parsedUnavailableFeatures,
       });
+
+      if (plan.planFeatures) {
+        setPlanFeatures(
+          plan.planFeatures.map((pf) => ({
+            featureId: pf.featureId,
+            isAvailable: pf.isAvailable,
+          }))
+        );
+      }
     } else {
       form.resetFields();
+      setPlanFeatures([]);
     }
   }, [isOpen, plan, form]);
+
+  const handleValuesChange = (changedValues: any, allValues: any) => {
+    if ('monthlyPrice' in changedValues || 'yearlyDiscountPercent' in changedValues) {
+      const monthly = Number(allValues.monthlyPrice) || 0;
+      const discount = Number(allValues.yearlyDiscountPercent) || 0;
+      const computedYearly = Math.round(monthly * 12 * (1 - discount / 100));
+      form.setFieldValue('yearlyPrice', computedYearly);
+    }
+  };
+
+  const handleFeatureChange = (
+    pf: { featureId: number; isAvailable: boolean }[]
+  ) => {
+    setPlanFeatures(pf);
+  };
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      const cleanedFeatures = Array.isArray(values.features)
-        ? values.features.map((f: string) => f?.trim()).filter(Boolean)
-        : [];
-      const cleanedUnavailableFeatures = Array.isArray(values.unavailableFeatures)
-        ? values.unavailableFeatures.map((f: string) => f?.trim()).filter(Boolean)
-        : [];
 
       onSave({
         ...values,
-        features: cleanedFeatures.length > 0 ? cleanedFeatures : null,
-        unavailableFeatures: cleanedUnavailableFeatures.length > 0 ? cleanedUnavailableFeatures : null,
+        planFeatures: planFeatures.length > 0 ? planFeatures : undefined,
       });
     } catch (error) {
       console.error('Validation failed:', error);
@@ -61,7 +76,7 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProp
     <Drawer
       title={<span className="text-lg font-bold text-slate-800">Cập nhật</span>}
       placement="right"
-      width={560}
+      width={600}
       open={isOpen}
       onClose={onClose}
       destroyOnClose
@@ -84,12 +99,13 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProp
       <Form
         form={form}
         layout="vertical"
+        onValuesChange={handleValuesChange}
         className="space-y-3"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
           <Form.Item
             name="name"
-            label={<span className="font-semibold text-slate-700">Tên gói</span>}
+            label={<span className="font-semibold text-slate-700">Tên</span>}
             rules={[{ required: true, message: 'Vui lòng nhập tên!' }]}
             className="md:col-span-2"
           >
@@ -98,7 +114,7 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProp
 
           <Form.Item
             name="tagLine"
-            label={<span className="font-semibold text-slate-700">Khẩu hiệu / Tagline</span>}
+            label={<span className="font-semibold text-slate-700">Khẩu hiệu</span>}
             className="md:col-span-2"
           >
             <Input.TextArea
@@ -125,9 +141,24 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProp
           </Form.Item>
 
           <Form.Item
+            name="yearlyDiscountPercent"
+            label={<span className="font-semibold text-slate-700">% Giảm giá gói năm</span>}
+          >
+            <InputNumber<number>
+              min={0}
+              max={100}
+              className="w-full rounded-xl"
+              addonAfter="%"
+              placeholder="0"
+            />
+          </Form.Item>
+
+          <Form.Item
             name="yearlyPrice"
             label={<span className="font-semibold text-slate-700">Giá theo năm</span>}
+            tooltip="Tự động tính theo công thức: Giá theo tháng × 12 × (100% - % Giảm giá)"
             rules={[{ required: true, message: 'Vui lòng nhập giá năm!' }]}
+            className="md:col-span-2"
           >
             <InputNumber<number | string>
               min={0}
@@ -137,6 +168,7 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProp
               className="w-full rounded-xl"
               addonAfter="VND"
               placeholder="0"
+              disabled
             />
           </Form.Item>
 
@@ -159,97 +191,30 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProp
             <Input placeholder="Ví dụ: Đăng ký ngay, Bắt đầu thử nghiệm..." className="rounded-xl py-2" />
           </Form.Item>
 
-          <Form.Item
-            name="sortOrder"
-            label={<span className="font-semibold text-slate-700">Thứ tự hiển thị</span>}
-          >
-            <InputNumber min={0} className="w-full rounded-xl py-0.5" />
-          </Form.Item>
+          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+            <Form.Item
+              name="tierLevel"
+              label={<span className="font-semibold text-slate-700">Cấp độ gói</span>}
+              rules={[{ required: true, message: 'Vui lòng nhập cấp độ gói!' }]}
+            >
+              <InputNumber min={1} className="w-full rounded-xl py-0.5" placeholder="1" />
+            </Form.Item>
 
-          <Form.Item
-            name="isActive"
-            valuePropName="checked"
-            label={<span className="font-semibold text-slate-700">Trạng thái kích hoạt</span>}
-          >
-            <Switch className="bg-slate-300" />
-          </Form.Item>
+            <Form.Item
+              name="isActive"
+              valuePropName="checked"
+              label={<span className="font-semibold text-slate-700">Kích hoạt ngay</span>}
+            >
+              <Switch className="bg-slate-300" />
+            </Form.Item>
+          </div>
         </div>
 
-        {/* Dynamic list features */}
-        <div className="border-t border-slate-100 pt-3">
-          <label className="block font-semibold text-slate-700 mb-2">Danh sách quyền lợi</label>
-          <Form.List name="features">
-            {(fields, { add, remove }) => (
-              <div className="space-y-2">
-                {fields.map(({ key, name, ...restField }) => (
-                  <div key={key} className="flex !items-start space-x-2">
-                    <Form.Item
-                      {...restField}
-                      name={[name]}
-                      className="flex-1 mb-0"
-                    >
-                      <Input placeholder="Nhập quyền lợi..." className="rounded-xl py-1.5" />
-                    </Form.Item>
-                    <Button
-                      type="text"
-                      danger
-                      onClick={() => remove(name)}
-                      icon={<TrashIcon className="h-4 w-4" />}
-                      className="w-9 h-9 hover:bg-rose-50 rounded-lg flex items-center justify-center shrink-0"
-                    />
-                  </div>
-                ))}
-                <Button
-                  type="dashed"
-                  onClick={() => add('')}
-                  block
-                  icon={<PlusIcon className="h-4 w-4 inline" />}
-                  className="rounded-xl mt-2 border-slate-300 text-slate-600 hover:text-sky-600 hover:border-sky-400"
-                >
-                  Thêm quyền lợi
-                </Button>
-              </div>
-            )}
-          </Form.List>
-        </div>
-
-        {/* Dynamic list unavailable features */}
-        <div className="border-t border-slate-100 pt-3">
-          <label className="block font-semibold text-slate-700 mb-2">Tính năng chưa tiếp cận (bị giới hạn)</label>
-          <Form.List name="unavailableFeatures">
-            {(fields, { add, remove }) => (
-              <div className="space-y-2">
-                {fields.map(({ key, name, ...restField }) => (
-                  <div key={key} className="flex !items-start space-x-2">
-                    <Form.Item
-                      {...restField}
-                      name={[name]}
-                      className="flex-1 mb-0"
-                    >
-                      <Input placeholder="Nhập tính năng chưa hỗ trợ..." className="rounded-xl py-1.5" />
-                    </Form.Item>
-                    <Button
-                      type="text"
-                      danger
-                      onClick={() => remove(name)}
-                      icon={<TrashIcon className="h-4 w-4" />}
-                      className="w-9 h-9 hover:bg-rose-50 rounded-lg flex items-center justify-center shrink-0"
-                    />
-                  </div>
-                ))}
-                <Button
-                  type="dashed"
-                  onClick={() => add('')}
-                  block
-                  icon={<PlusIcon className="h-4 w-4 inline" />}
-                  className="rounded-xl mt-2 border-slate-300 text-slate-600 hover:text-rose-600 hover:border-rose-300"
-                >
-                  Thêm tính năng chưa hỗ trợ
-                </Button>
-              </div>
-            )}
-          </Form.List>
-        </div>
+        {/* Dynamic Feature Switch Selection Section */}
+        <FeatureSelectionSection
+          initialPlanFeatures={plan?.planFeatures}
+          onChange={handleFeatureChange}
+        />
       </Form>
     </Drawer>
   );

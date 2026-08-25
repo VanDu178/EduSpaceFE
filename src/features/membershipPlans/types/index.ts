@@ -1,3 +1,12 @@
+import type { Feature } from '../../features/types';
+
+export interface PlanFeatureItem {
+  planId?: number;
+  featureId: number;
+  isAvailable: boolean;
+  feature?: Feature;
+}
+
 export interface MembershipPlan {
   id: number;
   code: string;
@@ -5,12 +14,12 @@ export interface MembershipPlan {
   tagLine: string | null;
   monthlyPrice: number;
   yearlyPrice: number;
+  yearlyDiscountPercent: number;
   popularBadge: string | null;
   buttonText: string | null;
-  features: string[] | null;
-  unavailableFeatures: string[] | null;
-  sortOrder: number;
+  tierLevel: number;
   isActive: boolean;
+  planFeatures?: PlanFeatureItem[];
   createdAt: string;
   updatedAt: string;
 }
@@ -20,11 +29,11 @@ export interface MembershipPlanPayload {
   tagLine?: string | null;
   monthlyPrice?: number;
   yearlyPrice?: number;
+  yearlyDiscountPercent?: number;
   popularBadge?: string | null;
   buttonText?: string | null;
-  features?: string[] | null;
-  unavailableFeatures?: string[] | null;
-  sortOrder?: number;
+  planFeatures?: { featureId: number; isAvailable: boolean }[];
+  tierLevel?: number;
   isActive?: boolean;
 }
 

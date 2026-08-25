@@ -5,7 +5,6 @@ import {
   fetchMembershipPlanByIdApi,
   createMembershipPlanApi,
   updateMembershipPlanApi,
-  updateMembershipPlanSortOrderApi,
   toggleMembershipPlanStatusApi,
   deleteMembershipPlanApi,
 } from '../api';
@@ -90,35 +89,6 @@ export const useUpdateMembershipPlanMutation = (
   });
 };
 
-// Custom hook mutation cập nhật thứ tự hiển thị
-export const useUpdateSortOrderMutation = (
-  onSuccessCallback?: () => void,
-  onErrorCallback?: (error: AxiosError<ApiResponse>) => void
-) => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (variables: { id: number; sortOrder: number }) =>
-      updateMembershipPlanSortOrderApi(variables.id, variables.sortOrder),
-    onSuccess: (res) => {
-      if (res?.success) {
-        toast.success(res.message || 'Cập nhật thứ tự hiển thị thành công!');
-        queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
-        if (onSuccessCallback) onSuccessCallback();
-      } else {
-        toast.error(res?.message || 'Cập nhật thứ tự thất bại!');
-      }
-    },
-    onError: (err: AxiosError<ApiResponse>) => {
-      console.error('Update sort order error:', err);
-      if (onErrorCallback) {
-        onErrorCallback(err);
-      } else {
-        handleApiError(err);
-      }
-    },
-  });
-};
 
 // Custom hook mutation kích hoạt / ẩn gói hội viên
 export const useToggleMembershipPlanStatusMutation = (

@@ -9,6 +9,7 @@ import UpdatePage from './features/blogs/pages/UpdatePage';
 import DetailPage from './features/blogs/pages/DetailPage';
 import UserListPage from './features/users/pages';
 import { MembershipPlanListPage } from './features/membershipPlans';
+import { FeatureListPage } from './features/features';
 import { SubscriptionListPage } from './features/subscriptions';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -56,6 +57,9 @@ const App = () => {
             {/* Phân hệ route con quản lý gói hội viên */}
             <Route path="membership-plans" element={<MembershipPlanListPage />} />
 
+            {/* Phân hệ route con quản lý tính năng */}
+            <Route path="features" element={<FeatureListPage />} />
+
             {/* Phân hệ route con quản lý lịch sử thanh toán */}
             <Route path="subscriptions" element={<SubscriptionListPage />} />
           </Route>
@@ -69,3 +73,4 @@ const App = () => {
 };
 
 export default App;
+

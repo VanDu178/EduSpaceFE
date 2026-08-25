@@ -63,8 +63,16 @@ const ListPage = ({
       width: 220,
       render: (_, record) => (
         <div className="flex flex-col">
-          <span className="font-semibold text-slate-800 text-xs">{record.user?.name || 'N/A'}</span>
-          <span className="text-[11px] text-slate-400">{record.user?.email || 'N/A'}</span>
+          {record.user?.name ? (
+            <span className="font-semibold text-slate-800 text-xs">{record.user.name}</span>
+          ) : (
+            <span className="text-slate-400 text-xs italic">N/A</span>
+          )}
+          {record.user?.email ? (
+            <span className="text-[11px] text-slate-400">{record.user.email}</span>
+          ) : (
+            <span className="text-[11px] text-slate-400 italic">N/A</span>
+          )}
         </div>
       ),
     },
@@ -79,7 +87,11 @@ const ListPage = ({
           className="font-semibold text-slate-800 text-xs hover:text-sky-600 hover:underline cursor-pointer border-none bg-transparent p-0 text-left"
           title="Xem chi tiết gói hội viên"
         >
-          {record.plan?.name || 'Gói khác'}
+          {record.plan?.name ? (
+            record.plan.name
+          ) : (
+            <span className="text-slate-400 text-xs italic font-normal">Gói khác</span>
+          )}
         </button>
       ),
     },
@@ -114,11 +126,13 @@ const ListPage = ({
       width: 220,
       render: (_, record) => (
         <div className="flex flex-col">
-          <span className="text-xs text-slate-700 font-medium">
-            {record.paymentMethod
-              ? PAYMENT_METHOD_LABELS[record.paymentMethod] || record.paymentMethod
-              : 'Chưa xác định'}
-          </span>
+          {record.paymentMethod ? (
+            <span className="text-xs text-slate-700 font-medium">
+              {PAYMENT_METHOD_LABELS[record.paymentMethod] || record.paymentMethod}
+            </span>
+          ) : (
+            <span className="text-xs text-slate-400 italic">Chưa xác định</span>
+          )}
           {record.paymentRef && (
             <span className="text-[11px] text-slate-400 font-mono flex items-center space-x-1">
               <span>{record.paymentRef}</span>

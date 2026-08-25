@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Button } from 'antd';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { ListPage, FilterBar, FormCreate, FormUpdate, ModalDetail } from '../components';
+import MembershipSubNav from '../../../components/MembershipSubNav';
 import {
   useMembershipPlansQuery,
   useCreateMembershipPlanMutation,
   useUpdateMembershipPlanMutation,
-  useUpdateSortOrderMutation,
   useToggleMembershipPlanStatusMutation,
   useDeleteMembershipPlanMutation,
 } from '../hooks';
@@ -27,7 +27,6 @@ const MembershipPlanPage = () => {
 
   const { mutate: createPlan, isPending: isCreateLoading } = useCreateMembershipPlanMutation();
   const { mutate: updatePlan, isPending: isUpdateLoading } = useUpdateMembershipPlanMutation();
-  const { mutate: updateSortOrder, isPending: isSortOrderLoading } = useUpdateSortOrderMutation();
   const { mutate: toggleStatus, isPending: isToggleLoading } = useToggleMembershipPlanStatusMutation();
   const { mutate: deletePlan, isPending: isDeleteLoading } = useDeleteMembershipPlanMutation();
 
@@ -69,10 +68,6 @@ const MembershipPlanPage = () => {
     toggleStatus(id);
   };
 
-  const handleUpdateSortOrder = (id: number, sortOrder: number) => {
-    updateSortOrder({ id, sortOrder });
-  };
-
   const handleDeletePlan = (id: number) => {
     deletePlan(id);
   };
@@ -80,7 +75,6 @@ const MembershipPlanPage = () => {
   // Toast chỉ báo trạng thái đang xử lý
   useLoadingToast(isCreateLoading, 'Đang tạo gói hội viên mới...');
   useLoadingToast(isUpdateLoading, 'Đang cập nhật gói hội viên...');
-  useLoadingToast(isSortOrderLoading, 'Đang cập nhật thứ tự...');
   useLoadingToast(isToggleLoading, 'Đang cập nhật trạng thái...');
   useLoadingToast(isDeleteLoading, 'Đang xóa gói hội viên...');
 
@@ -114,10 +108,16 @@ const MembershipPlanPage = () => {
         </Button>
       </div>
 
+      {/* Sub Navigation (Tabs) */}
+      <div className="shrink-0">
+        <MembershipSubNav />
+      </div>
+
       {/* Toolbar / Filter */}
       <div className="shrink-0">
         <FilterBar params={params} setParams={setParams} />
       </div>
+
 
       {/* Table Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -128,7 +128,6 @@ const MembershipPlanPage = () => {
           onEdit={handleOpenEdit}
           onDelete={handleDeletePlan}
           onToggleStatus={handleToggleStatus}
-          onUpdateSortOrder={handleUpdateSortOrder}
         />
       </div>
 

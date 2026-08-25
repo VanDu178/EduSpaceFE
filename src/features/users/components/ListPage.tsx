@@ -54,9 +54,13 @@ const ListPage = ({
       align: 'left',
       render: (code) => (
         <div className="flex items-center gap-1">
-          <span className="font-mono text-xs font-semibold text-slate-700 block text-left">
-            {code || '—'}
-          </span>
+          {code ? (
+            <span className="font-mono text-xs font-semibold text-slate-700 block text-left">
+              {code}
+            </span>
+          ) : (
+            <span className="text-slate-400 text-xs italic">—</span>
+          )}
           {code && (
             <CopyButton
               text={code}
@@ -76,7 +80,11 @@ const ListPage = ({
           <div className="w-8 h-8 bg-yellow-300 text-yellow-800 text-white rounded-full flex items-center justify-center text-slate-500 font-bold text-xs border border-slate-200/80">
             {name ? name.charAt(0).toUpperCase() : 'U'}
           </div>
-          <span className="font-semibold text-slate-800">{name || 'Người dùng ẩn danh'}</span>
+          {name ? (
+            <span className="font-semibold text-slate-800">{name}</span>
+          ) : (
+            <span className="text-slate-400 italic">Người dùng ẩn danh</span>
+          )}
         </div>
       ),
     },

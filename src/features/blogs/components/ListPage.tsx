@@ -105,13 +105,15 @@ const BlogTable = ({
       title: 'Mô tả ngắn',
       key: 'summary',
       render: (_, record) => {
-        const text = record?.summary || '';
-        return (
-          <Tooltip title={text || 'Không có mô tả'} placement="topLeft">
-            <span className="text-slate-500 line-clamp-2 cursor-pointer">
-              {text.length > 80 ? `${text.substring(0, 80)}...` : text || 'Không có mô tả'}
+        const text = record?.summary;
+        return text ? (
+          <Tooltip title={text} placement="topLeft">
+            <span className="text-slate-600 line-clamp-2 cursor-pointer">
+              {text.length > 80 ? `${text.substring(0, 80)}...` : text}
             </span>
           </Tooltip>
+        ) : (
+          <span className="text-slate-400 text-xs italic">Không có mô tả</span>
         );
       },
     },
@@ -122,11 +124,13 @@ const BlogTable = ({
       key: 'blogType',
       width: 150,
       render: (name, record) => {
-        const typeConfig = getBlogTypeTagConfig(record.blogType?.code);
-        return (
+        const typeConfig = getBlogTypeTagConfig(record?.blogType?.code);
+        return name ? (
           <span className={`text-xs font-bold ${typeConfig.textClass}`}>
-            {name || '—'}
+            {name}
           </span>
+        ) : (
+          <span className="text-slate-400 text-xs italic">Chưa phân loại</span>
         );
       },
     },
