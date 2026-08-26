@@ -56,7 +56,7 @@ const ModalDetail = ({ isOpen, onClose, plan }: ModalDetailProps) => {
 
             <div className="flex items-center space-x-1">
               <span className="text-xs text-slate-400">Cấp độ gói:</span>
-              <span className="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-bold text-purple-700">
                 Tier {plan.tierLevel ?? 1}
               </span>
             </div>

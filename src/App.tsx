@@ -11,6 +11,8 @@ import UserListPage from './features/users/pages';
 import { MembershipPlanListPage } from './features/membershipPlans';
 import { FeatureListPage } from './features/features';
 import { SubscriptionListPage } from './features/subscriptions';
+import { PaymentAccountListPage } from './features/paymentAccounts';
+import { VietqrBankListPage } from './features/vietqrBanks';
 import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {
@@ -62,6 +64,12 @@ const App = () => {
 
             {/* Phân hệ route con quản lý lịch sử thanh toán */}
             <Route path="subscriptions" element={<SubscriptionListPage />} />
+
+            {/* Phân hệ route con quản lý tài khoản thanh toán */}
+            <Route path="payment-accounts" element={<PaymentAccountListPage />} />
+
+            {/* Phân hệ route con quản lý ngân hàng VietQR */}
+            <Route path="vietqr-banks" element={<VietqrBankListPage />} />
           </Route>
 
           {/* Redirect mặc định về /admin nếu gõ sai route */}

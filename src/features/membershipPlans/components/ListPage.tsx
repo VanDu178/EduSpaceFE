@@ -100,9 +100,9 @@ const ListPage = ({
       align: 'center',
       render: (percent: number) =>
         percent > 0 ? (
-          <Tag color="green" className="rounded-full px-2.5 py-0.5 !border-none font-semibold text-xs">
+          <span className="text-red-600 font-semibold text-xs">
             -{percent}%
-          </Tag>
+          </span>
         ) : (
           <span className="text-slate-400 text-xs">0%</span>
         ),
@@ -138,9 +138,9 @@ const ListPage = ({
       width: 100,
       align: 'center',
       render: (tierLevel: number) => (
-        <Tag color="purple" className="rounded-full px-2.5 py-0.5 font-semibold text-xs !border-none">
+        <span className="text-violet-600 font-semibold text-xs">
           Tier {tierLevel ?? 1}
-        </Tag>
+        </span>
       ),
     },
     {
@@ -148,8 +148,9 @@ const ListPage = ({
       dataIndex: 'isActive',
       key: 'isActive',
       width: 120,
+      align: "left",
       render: (isActive: boolean, record: MembershipPlan) => (
-        <div className="flex items-center justify-center !space-x-2">
+        <div className="flex items-center !space-x-2">
           <Switch
             checked={isActive}
             onChange={() => onToggleStatus(record.id)}

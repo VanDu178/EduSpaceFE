@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { DocumentTextIcon, UsersIcon, SparklesIcon, CreditCardIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, UsersIcon, SparklesIcon, CreditCardIcon, BanknotesIcon, BuildingLibraryIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'antd';
 
 interface SidebarProps {
@@ -15,6 +15,8 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
   const isUsersActive = location.pathname.includes('/admin/users');
   const isMembershipPlansActive = location.pathname.includes('/admin/membership-plans');
   const isSubscriptionsActive = location.pathname.includes('/admin/subscriptions');
+  const isPaymentAccountsActive = location.pathname.includes('/admin/payment-accounts');
+  const isVietqrBanksActive = location.pathname.includes('/admin/vietqr-banks');
 
   return (
     <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white border-r border-slate-200/80 text-slate-500 flex flex-col h-screen fixed left-0 top-0 z-20 transition-all duration-300`}>
@@ -124,6 +126,48 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
             />
             <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
               Lịch sử thanh toán
+            </span>
+          </Link>
+        </Tooltip>
+
+        <Tooltip title={isCollapsed ? "Tài khoản thanh toán" : ""} placement="right">
+          <Link
+            to="/admin/payment-accounts"
+            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
+              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isPaymentAccountsActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
+              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isPaymentAccountsActive
+                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
+                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
+              }`
+              }`}
+          >
+            <BanknotesIcon
+              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isPaymentAccountsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
+                }`}
+            />
+            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
+              Tài khoản thanh toán
+            </span>
+          </Link>
+        </Tooltip>
+
+        <Tooltip title={isCollapsed ? "Ngân hàng VietQR" : ""} placement="right">
+          <Link
+            to="/admin/vietqr-banks"
+            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
+              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isVietqrBanksActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
+              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isVietqrBanksActive
+                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
+                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
+              }`
+              }`}
+          >
+            <BuildingLibraryIcon
+              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isVietqrBanksActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
+                }`}
+            />
+            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
+              Ngân hàng VietQR
             </span>
           </Link>
         </Tooltip>
