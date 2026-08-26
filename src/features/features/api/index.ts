@@ -1,5 +1,5 @@
 import api from '../../../services/api';
-import type { Feature, FeaturePayload } from '../types';
+import type { Feature, FeaturePayload, SystemFeatureCode } from '../types';
 import type { ApiResponse } from '../../../types/api';
 
 // API Lấy danh sách tất cả các tính năng (Features)
@@ -39,5 +39,14 @@ export const updateFeatureSortOrderApi = async (id: number, sortOrder: number): 
 export const deleteFeatureApi = async (id: number): Promise<ApiResponse<null>> => {
   const response = await api.delete(`/features/${id}`);
   return response?.data;
+};
+
+// API Lấy danh sách mã tính năng hệ thống chuẩn
+export const fetchSystemFeatureCodesApi = async (): Promise<SystemFeatureCode[]> => {
+  const response = await api.get('/features/system-codes');
+  if (response?.data?.success) {
+    return response.data.data.systemCodes;
+  }
+  throw new Error(response?.data?.message || 'Không thể lấy danh sách mã tính năng hệ thống');
 };
 

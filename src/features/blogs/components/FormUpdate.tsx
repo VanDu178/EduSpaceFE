@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Select, Button, Switch, Upload, message, Spin } from 'antd';
+import { Form, Input, Select, Button, Switch, Upload, message, Spin, Tooltip } from 'antd';
 import {
   ArrowLeftIcon,
   ArrowUpTrayIcon,
   TrashIcon,
   EyeIcon,
   PaperAirplaneIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import TiptapEditor from '../../../components/TiptapEditor';
 import type { FormInstance } from 'antd';
@@ -13,6 +14,7 @@ import type { BlogType } from '../../blogTypes';
 import type { Blog, BlogPayload } from '../types';
 import ModalPreview from './ModalPreview';
 import { uploadSingleFileApi } from '../../../services/uploadService';
+import { BLOG_STATUS_OPTIONS } from '../constants';
 
 interface FormUpdateProps {
   form: FormInstance;
@@ -26,20 +28,7 @@ interface FormUpdateProps {
 const { Option } = Select;
 const { TextArea } = Input;
 
-const StatusOptions = [
-  {
-    value: 'draft',
-    label: 'Bản nháp',
-  },
-  {
-    value: 'published',
-    label: 'Đã xuất bản',
-  },
-  {
-    value: 'archived',
-    label: 'Lưu trữ',
-  },
-];
+
 
 const generateSlug = (text: string): string => {
   if (!text) return '';
@@ -106,6 +95,12 @@ const FormUpdate = ({
     }
   }, [title, isSlugTouched, form]);
 
+  const handleSyncSlug = () => {
+    setIsSlugTouched(false);
+    const generated = generateSlug(title || '');
+    form.setFieldValue('slug', generated);
+  };
+
   const handleBannerUpload = async (file: File) => {
     const isImage = file.type.startsWith('image/');
     if (!isImage) {
@@ -135,9 +130,10 @@ const FormUpdate = ({
 
 
   const onFinish = (values: any) => {
+    const finalSlug = generateSlug(values.slug || values.title);
     onSubmit({
       title: values.title,
-      slug: values.slug || generateSlug(values.title),
+      slug: finalSlug,
       blogTypeId: Number(values.blogTypeId),
       bannerUrl: bannerUrl || null,
       thumbnailUrl: bannerUrl || null,
@@ -225,12 +221,30 @@ const FormUpdate = ({
                 >
                   <Input
                     prefix={<span className="text-slate-400 text-xs font-mono select-none">/blogs/</span>}
+                    suffix={
+                      <Tooltip title="Tạo lại slug từ tiêu đề">
+                        <button
+                          type="button"
+                          onClick={handleSyncSlug}
+                          className="p-1 text-slate-400 hover:text-sky-600 hover:bg-slate-100 rounded transition-colors flex items-center justify-center"
+                        >
+                          <ArrowPathIcon className="h-3.5 w-3.5" />
+                        </button>
+                      </Tooltip>
+                    }
                     placeholder="duong-dan-bai-viet"
                     onChange={(e) => {
                       if (!e.target.value.trim()) {
                         setIsSlugTouched(false);
                       } else {
                         setIsSlugTouched(true);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const val = e.target.value;
+                      if (val.trim()) {
+                        const cleaned = generateSlug(val);
+                        form.setFieldValue('slug', cleaned);
                       }
                     }}
                     className="rounded-lg border-slate-200 focus:border-sky-500 text-slate-700 text-xs font-mono h-9"
@@ -285,7 +299,7 @@ const FormUpdate = ({
                   <label className="text-xs font-medium text-slate-600 mb-1 block">Trạng thái xuất bản</label>
                   <Form.Item name="status" className="mb-0">
                     <Select className="w-full h-9 text-xs">
-                      {StatusOptions.map((option) => (
+                      {BLOG_STATUS_OPTIONS.map((option) => (
                         <Option key={option.value} value={option.value}>
                           <span className="text-slate-700 text-xs font-medium">{option.label}</span>
                         </Option>

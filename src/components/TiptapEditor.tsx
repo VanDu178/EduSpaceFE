@@ -41,9 +41,27 @@ import {
   UndoOutlined,
   RedoOutlined,
   FontColorsOutlined,
+  ScissorOutlined,
 } from '@ant-design/icons';
+import { ReadMore } from './ReadMoreExtension';
 
 const lowlight = createLowlight(common);
+
+const preprocessContent = (content: string) => {
+  if (!content) return content;
+  return content.replace(
+    /<!--\s*(more|teaser)\s*-->/gi,
+    '<div data-type="read-more" class="read-more-divider"></div>'
+  );
+};
+
+const postprocessContent = (html: string) => {
+  if (!html) return html;
+  return html.replace(
+    /<div[^>]*data-type="read-more"[^>]*>[\s\S]*?<\/div>/gi,
+    '<!--more-->'
+  );
+};
 
 interface TiptapEditorProps {
   value?: string;
@@ -105,12 +123,14 @@ const TiptapEditor = ({
       CodeBlockLowlight.configure({
         lowlight,
       }),
+      ReadMore,
     ],
-    content: value,
+    content: preprocessContent(value),
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
+      const rawHtml = editor.getHTML();
+      const processedHtml = postprocessContent(rawHtml);
       if (onChange) {
-        onChange(html);
+        onChange(processedHtml);
       }
     },
     editorProps: {
@@ -123,8 +143,13 @@ const TiptapEditor = ({
 
   // Synchronize value from parent if updated externally
   useEffect(() => {
-    if (editor && value !== undefined && editor.getHTML() !== value) {
-      editor.commands.setContent(value);
+    if (editor && value !== undefined) {
+      const processedInput = preprocessContent(value);
+      const currentOutput = postprocessContent(editor.getHTML());
+      const valueOutput = postprocessContent(value);
+      if (currentOutput !== valueOutput) {
+        editor.commands.setContent(processedInput);
+      }
     }
   }, [value, editor]);
 
@@ -160,9 +185,9 @@ const TiptapEditor = ({
   const highlightColors = ['#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8', '#fed7aa', '#e2e8f0'];
 
   return (
-    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+    <div className="border border-slate-200 rounded-xl bg-white">
       {/* Toolbar */}
-      <div className="bg-slate-50/80 border-b border-slate-200/80 p-2 flex flex-wrap items-center gap-1">
+      <div className="sticky top-[-16px] z-20 bg-slate-50/95 backdrop-blur-md border-b border-slate-200/80 p-2 flex flex-wrap items-center gap-1 rounded-t-xl">
         {/* Undo / Redo */}
         <Tooltip title="Hoàn tác (Undo)">
           <Button
@@ -403,6 +428,17 @@ const TiptapEditor = ({
             onClick={() => editor.chain().focus().setHorizontalRule().run()}
           />
         </Tooltip>
+        <Tooltip title="Chèn đường ngắt xem thử bài viết">
+          <Button
+            type={editor.isActive('readMore') ? 'primary' : 'text'}
+            size="small"
+            icon={<ScissorOutlined />}
+            onClick={() => editor.chain().focus().setReadMore().run()}
+            className="text-amber-600 hover:text-amber-700 font-medium"
+          >
+            Ngắt Teaser
+          </Button>
+        </Tooltip>
 
         <div className="w-[1px] h-5 bg-slate-200 mx-1" />
 
@@ -463,7 +499,7 @@ const TiptapEditor = ({
       </div>
 
       {/* Editor Content Area */}
-      <div className="relative bg-white min-h-[380px]">
+      <div className="relative bg-white min-h-[380px] rounded-b-xl">
         {editor.isEmpty && (
           <div
             onClick={() => editor.chain().focus().run()}

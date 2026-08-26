@@ -6,6 +6,26 @@ export interface BlogBadgeConfig {
   textClass: string;
 }
 
+export interface StatusOption {
+  value: string;
+  label: string;
+}
+
+export const BLOG_STATUS_OPTIONS: StatusOption[] = [
+  {
+    value: 'draft',
+    label: 'Bản nháp',
+  },
+  {
+    value: 'published',
+    label: 'Đã xuất bản',
+  },
+  {
+    value: 'archived',
+    label: 'Lưu trữ',
+  },
+];
+
 
 export const DEFAULT_PARAMS: Params = {
   page: 1,

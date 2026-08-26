@@ -71,13 +71,10 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, feature }: FormUpdateP
       >
         <Form.Item
           name="code"
-          label={<span className="font-semibold text-slate-700">Mã</span>}
-          rules={[
-            { required: true, message: 'Vui lòng nhập mã tính năng!' },
-            { pattern: /^[A-Z0-9_]+$/, message: 'Mã tính năng chỉ gồm chữ in hoa, số và dấu gạch dưới' }
-          ]}
+          label={<span className="font-semibold text-slate-700">Mã (Code hệ thống)</span>}
+          tooltip="Mã hệ thống cố định (chỉ đọc) để bảo vệ logic phân quyền Backend."
         >
-          <Input placeholder="READ_PREMIUM_BLOGS..." className="rounded-xl py-2 uppercase font-mono" />
+          <Input disabled className="rounded-xl py-2 font-mono bg-slate-100 text-slate-500 cursor-not-allowed" />
         </Form.Item>
 
         <Form.Item

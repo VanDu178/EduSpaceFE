@@ -51,9 +51,9 @@ export const updateBlogAccessApi = async (
 };
 
 
-// API lấy chi tiết bài blog theo ID hoặc Slug
-export const fetchBlogByIdApi = async (idOrSlug: string | number): Promise<{ blog: Blog }> => {
-  const response = await api.get(`/blogs/${idOrSlug}`);
+// API lấy chi tiết bài blog theo ID
+export const fetchBlogByIdApi = async (id: number | string): Promise<{ blog: Blog }> => {
+  const response = await api.get(`/blogs/id/${id}`);
   if (response?.data?.success) {
     return response?.data?.data;
   }

@@ -22,3 +22,10 @@ export interface FeaturePayload {
   sortOrder?: number;
   isActive?: boolean;
 }
+
+export interface SystemFeatureCode {
+  code: string;
+  name: string;
+  description: string;
+  isCreated: boolean;
+}

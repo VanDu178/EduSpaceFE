@@ -30,7 +30,7 @@ export interface Blog {
 // Interface dữ liệu khi tạo/cập nhật bài blog
 export interface BlogPayload {
   title: string;
-  slug?: string;
+  slug: string;
   blogTypeId: number;
   bannerUrl?: string | null;
   thumbnailUrl?: string | null;

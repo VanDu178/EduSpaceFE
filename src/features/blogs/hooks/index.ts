@@ -23,12 +23,12 @@ export const useBlogsQuery = (params?: Params) => {
   });
 };
 
-// Custom hook truy vấn chi tiết bài blog theo ID hoặc Slug
-export const useBlogQuery = (idOrSlug: string | number | undefined) => {
+// Custom hook truy vấn chi tiết bài blog theo ID (Admin)
+export const useBlogQuery = (id: number | string | undefined) => {
   return useQuery<{ blog: Blog }>({
-    queryKey: ['blog', idOrSlug],
-    queryFn: () => fetchBlogByIdApi(idOrSlug!),
-    enabled: Boolean(idOrSlug),
+    queryKey: ['blog', id],
+    queryFn: () => fetchBlogByIdApi(id!),
+    enabled: Boolean(id),
   });
 };
 
