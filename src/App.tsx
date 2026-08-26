@@ -13,6 +13,7 @@ import { FeatureListPage } from './features/features';
 import { SubscriptionListPage } from './features/subscriptions';
 import { PaymentAccountListPage } from './features/paymentAccounts';
 import { VietqrBankListPage } from './features/vietqrBanks';
+import { PaymentTransactionPage } from './features/paymentTransactions';
 import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {
@@ -64,6 +65,9 @@ const App = () => {
 
             {/* Phân hệ route con quản lý lịch sử thanh toán */}
             <Route path="subscriptions" element={<SubscriptionListPage />} />
+
+            {/* Phân hệ route con quản lý giao dịch thanh toán VietQR */}
+            <Route path="payment-transactions" element={<PaymentTransactionPage />} />
 
             {/* Phân hệ route con quản lý tài khoản thanh toán */}
             <Route path="payment-accounts" element={<PaymentAccountListPage />} />

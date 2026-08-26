@@ -1,8 +1,6 @@
 import { Table, Button, Tooltip, Empty, Switch, Popconfirm, Image } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline';
-import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import type { PaymentAccount } from '../types';
 import type { VietqrBank } from '../../vietqrBanks/types';
 import CopyButton from '../../../components/CopyButton';

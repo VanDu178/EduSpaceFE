@@ -13,7 +13,7 @@ const FormDetail = ({ open, bank, onClose }: FormDetailProps) => {
 
   return (
     <Drawer
-      title={<span className="text-lg font-bold text-slate-800">Chi tiết Ngân hàng VietQR</span>}
+      title={<span className="text-lg font-bold text-slate-800">Chi tiết</span>}
       placement="right"
       width={480}
       open={open}

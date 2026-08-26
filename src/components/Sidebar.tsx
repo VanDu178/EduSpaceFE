@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { DocumentTextIcon, UsersIcon, SparklesIcon, CreditCardIcon, BanknotesIcon, BuildingLibraryIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, UsersIcon, SparklesIcon, CreditCardIcon, BanknotesIcon, BuildingLibraryIcon, ChevronLeftIcon, ChevronRightIcon, QrCodeIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'antd';
 
 interface SidebarProps {
@@ -15,6 +15,7 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
   const isUsersActive = location.pathname.includes('/admin/users');
   const isMembershipPlansActive = location.pathname.includes('/admin/membership-plans');
   const isSubscriptionsActive = location.pathname.includes('/admin/subscriptions');
+  const isPaymentTransactionsActive = location.pathname.includes('/admin/payment-transactions');
   const isPaymentAccountsActive = location.pathname.includes('/admin/payment-accounts');
   const isVietqrBanksActive = location.pathname.includes('/admin/vietqr-banks');
 
@@ -126,6 +127,27 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
             />
             <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
               Lịch sử thanh toán
+            </span>
+          </Link>
+        </Tooltip>
+
+        <Tooltip title={isCollapsed ? "Giao dịch VietQR" : ""} placement="right">
+          <Link
+            to="/admin/payment-transactions"
+            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
+              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isPaymentTransactionsActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
+              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isPaymentTransactionsActive
+                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
+                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
+              }`
+              }`}
+          >
+            <QrCodeIcon
+              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isPaymentTransactionsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
+                }`}
+            />
+            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
+              Giao dịch VietQR
             </span>
           </Link>
         </Tooltip>
