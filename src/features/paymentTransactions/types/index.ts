@@ -11,6 +11,8 @@ export interface PaymentTransaction {
   paymentMethod: string;
   transferContent: string;
   status: PaymentTransactionStatus;
+  approvalType?: 'auto' | 'manual';
+  approvedBy?: number | null;
   bankCode?: string | null;
   accountNo?: string | null;
   accountHolder?: string | null;
@@ -28,6 +30,13 @@ export interface PaymentTransaction {
     name?: string;
     avatarUrl?: string;
   };
+  approvedByUser?: {
+    id: number;
+    code?: string;
+    email: string;
+    name?: string;
+    avatarUrl?: string;
+  } | null;
   plan?: {
     id: number;
     code: string;

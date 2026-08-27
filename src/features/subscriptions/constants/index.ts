@@ -45,10 +45,13 @@ export const PAYMENT_METHOD_OPTIONS = [
 ];
 
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  vietqr: 'Chuyển khoản QR (VietQR)',
+  qr_banking: 'Chuyển khoản QR (VietQR)',
   bank_transfer: 'Chuyển khoản ngân hàng',
+  credit_card: 'Thẻ tín dụng / Ghi nợ',
+  e_wallet: 'Ví điện tử',
   momo: 'Ví MoMo',
   vnpay: 'Cổng VNPay',
-  credit_card: 'Thẻ tín dụng',
   cash: 'Tiền mặt',
   free: 'Miễn phí',
 };

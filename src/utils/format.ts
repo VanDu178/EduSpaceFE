@@ -20,13 +20,13 @@ export interface FormatDateOptions {
  * Định dạng ngày/tháng sang chuỗi hiển thị theo chuẩn Việt Nam (vi-VN)
  * @param dateStr Chuỗi ngày ISO/Date string hoặc đối tượng Date (string | Date | null | undefined)
  * @param optionsOrIncludeTime boolean (true để bao gồm giờ:phút) hoặc object tùy chọn { includeTime, fallback }
- * @param fallbackValue Chuỗi thay thế khi dateStr không hợp lệ (mặc định 'N/A')
+ * @param fallbackValue Chuỗi thay thế khi dateStr không hợp lệ (mặc định 'Chưa xác định')
  * @returns Chuỗi ngày đã định dạng (Ví dụ: "23/08/2026" hoặc "15:42 23/08/2026")
  */
 export const formatDate = (
   dateStr?: string | Date | null,
   optionsOrIncludeTime: boolean | FormatDateOptions = false,
-  fallbackValue: string = 'N/A'
+  fallbackValue: string = 'Chưa xác định'
 ): string => {
   let includeTime = false;
   let fallback = fallbackValue;
@@ -59,4 +59,5 @@ export const formatDate = (
     return fallback;
   }
 };
+
 

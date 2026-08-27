@@ -113,7 +113,20 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
               <CopyButton text={transaction.transferContent} tooltipText="Sao chép nội dung CK" successMessage="Đã sao chép nội dung chuyển khoản!" />
             </div>
           </Descriptions.Item>
-
+          <Descriptions.Item
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                Mã tham chiếu NH
+                <Tooltip title="Mã giao dịch từ phía ngân hàng (Ref No / FT No) khi nhận được tiền.">
+                  <QuestionMarkCircleIcon className="h-4 w-4 text-slate-400 hover:text-sky-600 transition-colors cursor-help" />
+                </Tooltip>
+              </span>
+            }
+          >
+            <span className="font-mono font-semibold text-slate-700">
+              {transaction.paymentRef || <span className="text-slate-400 font-sans italic font-normal">Không có</span>}
+            </span>
+          </Descriptions.Item>
           <Descriptions.Item label="Người mua">
             <div className="flex flex-col">
               {transaction.user?.name ? (
@@ -148,33 +161,68 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
               </span>
             </div>
           </Descriptions.Item>
+          {transaction.status === 'completed' && (
+            <Descriptions.Item label="Kênh duyệt">
+              {transaction.approvalType === 'manual' ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-700">
+                  Duyệt thủ công
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+                  Tự động qua Webhook VietQR
+                </span>
+              )}
+            </Descriptions.Item>
+          )}
+
+          {transaction.approvalType === 'manual' && (transaction.approvedByUser || transaction.approvedBy) && (
+            <Descriptions.Item label="Người duyệt đơn">
+              <div className="flex flex-col text-xs">
+                <span className="font-bold text-slate-800 flex items-center gap-1">
+                  {transaction.approvedByUser?.name || 'Admin'}
+                </span>
+              </div>
+            </Descriptions.Item>
+          )}
 
           <Descriptions.Item
             label={
               <span className="inline-flex items-center gap-1.5">
-                Mã tham chiếu NH
-                <Tooltip title="Mã giao dịch từ phía ngân hàng (Ref No / FT No) khi nhận được tiền.">
+                Thời gian khởi tạo
+                <Tooltip title="Thời điểm giao dịch được tạo trên hệ thống.">
                   <QuestionMarkCircleIcon className="h-4 w-4 text-slate-400 hover:text-sky-600 transition-colors cursor-help" />
                 </Tooltip>
               </span>
             }
           >
-            <span className="font-mono font-semibold text-slate-700">
-              {transaction.paymentRef || <span className="text-slate-400 font-sans italic font-normal">Chưa có</span>}
-            </span>
+            <span className="text-slate-700">{formatDate(transaction.createdAt, true)}</span>
           </Descriptions.Item>
 
-          <Descriptions.Item label="Thời gian khởi tạo">
-            <span className="text-slate-700">{formatDate(transaction.createdAt)}</span>
-          </Descriptions.Item>
-
-          <Descriptions.Item label="Thời gian hết hạn">
-            <span className="text-amber-700 font-medium">{formatDate(transaction.expiredAt)}</span>
+          <Descriptions.Item
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                Thời gian hết hạn
+                <Tooltip title="Thời điểm giao dịch hết hạn.">
+                  <QuestionMarkCircleIcon className="h-4 w-4 text-slate-400 hover:text-sky-600 transition-colors cursor-help" />
+                </Tooltip>
+              </span>
+            }
+          >
+            <span className="text-amber-700 font-medium">{formatDate(transaction.expiredAt, true)}</span>
           </Descriptions.Item>
 
           {transaction.paidAt && (
-            <Descriptions.Item label="Thời gian duyệt/xác nhận">
-              <span className="text-emerald-700 font-bold">{formatDate(transaction.paidAt)}</span>
+            <Descriptions.Item
+              label={
+                <span className="inline-flex items-center gap-1.5">
+                  Thời gian duyệt
+                  <Tooltip title="Thời điểm giao dịch được duyệt xác nhận thanh toán.">
+                    <QuestionMarkCircleIcon className="h-4 w-4 text-slate-400 hover:text-sky-600 transition-colors cursor-help" />
+                  </Tooltip>
+                </span>
+              }
+            >
+              <span className="text-emerald-700 font-bold">{formatDate(transaction.paidAt, true)}</span>
             </Descriptions.Item>
           )}
         </Descriptions>

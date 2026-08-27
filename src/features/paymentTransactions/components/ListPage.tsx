@@ -1,6 +1,6 @@
 import { Table, Popconfirm, Empty, Tooltip, Image, Button } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { CheckCircleIcon, XCircleIcon, ClockIcon, NoSymbolIcon, EyeIcon, QrCodeIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, ClockIcon, NoSymbolIcon, EyeIcon, QrCodeIcon, UserIcon, CpuChipIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import type { PaymentTransaction, PaymentTransactionStatus } from '../types';
 import CopyButton from '../../../components/CopyButton';
 import { formatCurrency, formatDate } from '../../../utils/format';
@@ -177,11 +177,12 @@ const ListPage = ({
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      width: 180,
+      width: 140,
       align: 'center',
       render: (status: PaymentTransactionStatus) => {
         const config = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
         const IconComponent = config.icon;
+
         return (
           <div
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${config.bg} ${config.color} ${config.border}`}
@@ -193,18 +194,87 @@ const ListPage = ({
       },
     },
     {
-      title: 'Thời gian',
-      key: 'time',
-      width: 160,
-      render: (_, record) => (
-        <div className="flex flex-col text-[11px] text-slate-600">
-          <span>Tạo: {formatDate(record.createdAt)}</span>
-          {record.paidAt ? (
-            <span className="text-emerald-700 font-semibold">Duyệt: {formatDate(record.paidAt)}</span>
-          ) : (
-            <span className="text-amber-700">Hạn: {formatDate(record.expiredAt)}</span>
-          )}
+      title: 'Hình thức duyệt',
+      key: 'approvalType',
+      width: 170,
+      align: 'center',
+      render: (_, record: PaymentTransaction) => {
+        if (record.status !== 'completed') {
+          return <span className="text-slate-400 text-xs italic">—</span>;
+        }
+
+        const isManual = record.approvalType === 'manual';
+        const approverName = record.approvedByUser?.name || (record.approvedBy ? `Admin #${record.approvedBy}` : 'Admin');
+
+        return (
+          <Tooltip
+            title={
+              isManual
+                ? `Đã được duyệt bằng tay bởi ${approverName}`
+                : 'Đã khớp đối soát tự động qua Webhook VietQR'
+            }
+          >
+            {isManual ? (
+              <div className="inline-flex items-center gap-2 bg-purple-50/70 border border-purple-200/80 rounded-xl px-2.5 py-1.5 min-w-[145px] cursor-help">
+                <div className="p-1 rounded-lg bg-purple-100 text-purple-700 shrink-0">
+                  <UserIcon className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex flex-col items-start text-left min-w-0 flex-1">
+                  <span className="text-xs font-bold text-slate-800 leading-tight">Thủ công</span>
+                  <span className="text-[11px] text-slate-500 font-medium truncate max-w-[95px]" title={approverName}>
+                    {approverName}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-2 bg-emerald-50/70 border border-emerald-200/80 rounded-xl px-2.5 py-1.5 min-w-[145px] cursor-help">
+                <div className="p-1 rounded-lg bg-emerald-100 text-emerald-700 shrink-0">
+                  <CpuChipIcon className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex flex-col items-start text-left min-w-0 flex-1">
+                  <span className="text-xs font-bold text-emerald-800 leading-tight">VietQR Auto</span>
+                  <span className="text-[11px] text-slate-400 font-medium italic">
+                    Tự động đối soát
+                  </span>
+                </div>
+              </div>
+            )}
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: (
+        <div className="flex items-center gap-1">
+          <span>Thời gian</span>
+          <Tooltip
+            title={
+              <div className="space-y-1 py-0.5 text-xs">
+                <div><b className="text-sky-300">Tạo:</b> Thời điểm giao dịch được tạo trên hệ thống.</div>
+                <div><b className="text-emerald-300">Duyệt:</b> Thời điểm giao dịch được duyệt xác nhận thanh toán.</div>
+                <div><b className="text-amber-300">Hạn:</b> Thời điểm giao dịch hết hạn.</div>
+              </div>
+            }
+          >
+            <QuestionMarkCircleIcon className="h-3.5 w-3.5 text-slate-400 hover:text-sky-600 transition-colors cursor-help inline-block" />
+          </Tooltip>
         </div>
+      ),
+      key: 'time',
+      width: 175,
+      render: (_, record) => (
+        <div className="flex flex-col text-[11px] text-slate-600 gap-0.5">
+          <span className="cursor-help w-fit">Tạo: {formatDate(record.createdAt, true)}</span>
+          {record.paidAt ? (
+            <span className="text-emerald-700 font-semibold cursor-help w-fit">
+              Duyệt: {formatDate(record.paidAt, true)}
+            </span>
+          ) : (
+            <span className="text-amber-700 cursor-help w-fit">
+              Hạn: {formatDate(record.expiredAt, true)}
+            </span>
+          )}
+        </div >
       ),
     },
     {
