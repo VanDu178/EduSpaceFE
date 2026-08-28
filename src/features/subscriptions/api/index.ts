@@ -23,7 +23,7 @@ export const fetchSubscriptionsApi = async (
   if (response?.data?.success) {
     return response.data.data;
   }
-  throw new Error(response?.data?.message || 'Không thể lấy danh sách lịch sử thanh toán');
+  throw new Error(response?.data?.message || 'Không thể lấy danh sách đăng ký gói dịch vụ');
 };
 
 // API Lấy chi tiết đơn đăng ký theo ID
@@ -34,7 +34,7 @@ export const fetchSubscriptionByIdApi = async (
   if (response?.data?.success) {
     return response.data.data;
   }
-  throw new Error(response?.data?.message || 'Không thể lấy thông tin chi tiết đơn thanh toán');
+  throw new Error(response?.data?.message || 'Không thể lấy thông tin chi tiết đơn đăng ký gói dịch vụ');
 };
 
 // API Tạo mới đơn đăng ký / Cấp gói hội viên (Admin/User)

@@ -88,7 +88,7 @@ const SubscriptionPage = () => {
       {/* Header section */}
       <div className="flex items-center justify-between shrink-0">
         <div>
-          <h2 className="text-xl font-bold text-slate-800">Lịch sử thanh toán</h2>
+          <h2 className="text-xl font-bold text-slate-800">Quản lý đăng ký gói dịch vụ</h2>
         </div>
         <Button
           type="primary"

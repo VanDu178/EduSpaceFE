@@ -31,7 +31,7 @@ const ListPage = ({
   if (!isLoading && subscriptions.length === 0) {
     return (
       <div className="py-16 flex items-center justify-center flex-1">
-        <Empty description="Không có lịch sử thanh toán nào" />
+        <Empty description="Chưa có dữ liệu đăng ký gói dịch vụ nào" />
       </div>
     );
   }

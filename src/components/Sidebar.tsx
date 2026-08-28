@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { DocumentTextIcon, UsersIcon, SparklesIcon, CreditCardIcon, BanknotesIcon, BuildingLibraryIcon, ChevronLeftIcon, ChevronRightIcon, QrCodeIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, UsersIcon, SparklesIcon, BanknotesIcon, BuildingLibraryIcon, ChevronLeftIcon, ChevronRightIcon, QrCodeIcon, AdjustmentsHorizontalIcon, TicketIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'antd';
 
 interface SidebarProps {
@@ -111,7 +111,7 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
           </Link>
         </Tooltip>
 
-        <Tooltip title={isCollapsed ? "Lịch sử thanh toán" : ""} placement="right">
+        <Tooltip title={isCollapsed ? "Quản lý đăng ký gói dịch vụ" : ""} placement="right">
           <Link
             to="/admin/subscriptions"
             className={`flex items-center transition-all duration-200 group relative ${isCollapsed
@@ -122,12 +122,12 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
               }`
               }`}
           >
-            <CreditCardIcon
+            <TicketIcon
               className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isSubscriptionsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
                 }`}
             />
             <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
-              Lịch sử thanh toán
+              Quản lý đăng ký gói dịch vụ
             </span>
           </Link>
         </Tooltip>

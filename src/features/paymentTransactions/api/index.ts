@@ -39,3 +39,20 @@ export const cancelPaymentTransactionApi = async (
   const response = await api.post(`/payment-transactions/cancel/${code}`);
   return response?.data;
 };
+
+// API Tải file PDF Hóa đơn (Admin)
+export const downloadInvoicePdfApi = async (code: string): Promise<void> => {
+  const response = await api.get(`/payment-transactions/${code}/pdf`, {
+    responseType: 'blob',
+  });
+  const blob = new Blob([response.data], { type: 'application/pdf' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `Invoice-TradeVerse-${code}.pdf`);
+  document.body.appendChild(link);
+  link.click();
+  link.parentNode?.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+

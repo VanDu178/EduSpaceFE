@@ -1,8 +1,9 @@
-import { Drawer, Descriptions, Image, Tooltip } from 'antd';
-import { CheckCircleIcon, XCircleIcon, ClockIcon, NoSymbolIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { Drawer, Descriptions, Image, Tooltip, Button } from 'antd';
+import { CheckCircleIcon, XCircleIcon, ClockIcon, NoSymbolIcon, QuestionMarkCircleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import type { PaymentTransaction, PaymentTransactionStatus } from '../types';
 import { formatCurrency, formatDate } from '../../../utils/format';
 import CopyButton from '../../../components/CopyButton';
+import { useDownloadInvoicePdf } from '../hooks/useDownloadInvoicePdf';
 
 interface FormDetailProps {
   open: boolean;
@@ -45,6 +46,8 @@ const STATUS_CONFIG: Record<
 };
 
 const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
+  const { downloadPdf, isDownloading } = useDownloadInvoicePdf();
+
   if (!transaction) return null;
 
   const statusConfig = STATUS_CONFIG[transaction.status] || STATUS_CONFIG.pending;
@@ -52,7 +55,7 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
 
   return (
     <Drawer
-      title={<span className="text-lg font-bold text-slate-800">Chi tiết Giao</span>}
+      title={<span className="text-lg font-bold text-slate-800">Chi tiết</span>}
       placement="right"
       width={480}
       open={open}
@@ -84,6 +87,19 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
               <StatusIcon className="w-3.5 h-3.5" />
               <span>{statusConfig.label}</span>
             </div>
+
+            {transaction.status === 'completed' && (
+              <Button
+                type="primary"
+                size="small"
+                loading={isDownloading(transaction.code)}
+                onClick={() => downloadPdf(transaction.code)}
+                icon={<ArrowDownTrayIcon className="w-3.5 h-3.5" />}
+                className="!rounded-full text-xs font-medium bg-sky-600 hover:!bg-sky-700"
+              >
+                Tải hóa đơn
+              </Button>
+            )}
           </div>
         </div>
 

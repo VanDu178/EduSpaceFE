@@ -40,7 +40,7 @@ export const useSubscriptions = (initialParams?: UserSubscriptionParams) => {
         setPagination(res.pagination);
       }
     } catch (err: any) {
-      toast.error(err.message || 'Không thể tải danh sách đăng ký thanh toán');
+      toast.error(err.message || 'Không thể tải danh sách đăng ký gói dịch vụ');
     } finally {
       setLoading(false);
     }
@@ -91,7 +91,7 @@ export const useSubscriptionDetail = (id: number | null) => {
       const result = await fetchSubscriptionByIdApi(id);
       setData(result);
     } catch (err: any) {
-      toast.error(err.message || 'Không thể lấy thông tin chi tiết đơn');
+      toast.error(err.message || 'Không thể lấy thông tin chi tiết đơn đăng ký gói dịch vụ');
       setData(null);
     } finally {
       setLoading(false);
@@ -113,11 +113,11 @@ export const useCreateSubscription = (onSuccess?: () => void) => {
     try {
       const res = await createSubscriptionApi(payload);
       if (res.success) {
-        toast.success(res.message || 'Cấp mới đơn đăng ký gói thành công');
+        toast.success(res.message || 'Cấp mới đơn đăng ký gói dịch vụ thành công');
         onSuccess?.();
         return true;
       } else {
-        toast.error(res.message || 'Không thể đăng ký gói hội viên');
+        toast.error(res.message || 'Không thể đăng ký gói dịch vụ');
         return false;
       }
     } catch (err: any) {
@@ -144,7 +144,7 @@ export const useUpdateSubscriptionStatus = (onSuccess?: () => void) => {
         onSuccess?.();
         return true;
       } else {
-        toast.error(res.message || 'Không thể cập nhật trạng thái đơn');
+        toast.error(res.message || 'Không thể cập nhật trạng thái đơn đăng ký gói');
         return false;
       }
     } catch (err: any) {

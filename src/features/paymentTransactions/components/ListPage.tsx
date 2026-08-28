@@ -1,9 +1,10 @@
 import { Table, Popconfirm, Empty, Tooltip, Image, Button } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { CheckCircleIcon, XCircleIcon, ClockIcon, NoSymbolIcon, EyeIcon, QrCodeIcon, UserIcon, CpuChipIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, ClockIcon, NoSymbolIcon, EyeIcon, QrCodeIcon, UserIcon, CpuChipIcon, QuestionMarkCircleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import type { PaymentTransaction, PaymentTransactionStatus } from '../types';
 import CopyButton from '../../../components/CopyButton';
 import { formatCurrency, formatDate } from '../../../utils/format';
+import { useDownloadInvoicePdf } from '../hooks/useDownloadInvoicePdf';
 
 interface ListPageProps {
   transactions: PaymentTransaction[];
@@ -63,6 +64,7 @@ const ListPage = ({
   onCancel,
   pagination,
 }: ListPageProps) => {
+  const { downloadPdf, isDownloading } = useDownloadInvoicePdf();
   if (!isLoading && transactions.length === 0) {
     return (
       <div className="py-16 flex items-center justify-center flex-1">
@@ -177,7 +179,7 @@ const ListPage = ({
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      width: 140,
+      width: 180,
       align: 'center',
       render: (status: PaymentTransactionStatus) => {
         const config = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
@@ -280,7 +282,7 @@ const ListPage = ({
     {
       title: 'Thao tác',
       key: 'action',
-      width: 140,
+      width: 160,
       align: 'center',
       fixed: 'right',
       render: (_, record) => (
@@ -294,6 +296,19 @@ const ListPage = ({
               className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
             />
           </Tooltip>
+
+          {record.status === 'completed' && (
+            <Tooltip title="Tải Hóa đơn">
+              <Button
+                type="text"
+                size="small"
+                loading={isDownloading(record.code)}
+                onClick={() => downloadPdf(record.code)}
+                icon={<ArrowDownTrayIcon className="h-4 w-4 text-sky-600 hover:text-sky-700 transition-colors" />}
+                className="p-1 hover:bg-sky-50 rounded-lg flex items-center justify-center"
+              />
+            </Tooltip>
+          )}
 
           {record.status === 'pending' && (
             <>
