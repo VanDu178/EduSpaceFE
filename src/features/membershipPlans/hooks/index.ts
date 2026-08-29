@@ -13,10 +13,12 @@ import type { ApiResponse } from '../../../types/api';
 import { handleApiError } from '../../../utils/errorHandler';
 import { toast } from '../../../utils/toastHelper';
 
+export const QUERY_KEY = ['membershipPlans'];
+
 // Custom hook truy vấn danh sách gói hội viên
 export const useMembershipPlansQuery = (params?: MembershipPlanParams) => {
   return useQuery<MembershipPlan[]>({
-    queryKey: ['membershipPlans', params],
+    queryKey: [...QUERY_KEY, params],
     queryFn: () => fetchMembershipPlansApi(params),
   });
 };
@@ -24,7 +26,7 @@ export const useMembershipPlansQuery = (params?: MembershipPlanParams) => {
 // Custom hook truy vấn chi tiết 1 gói hội viên
 export const useMembershipPlanQuery = (idOrCode?: string | number) => {
   return useQuery<MembershipPlan>({
-    queryKey: ['membershipPlan', idOrCode],
+    queryKey: [...QUERY_KEY, idOrCode],
     queryFn: () => fetchMembershipPlanByIdApi(idOrCode!),
     enabled: Boolean(idOrCode),
   });
@@ -42,7 +44,7 @@ export const useCreateMembershipPlanMutation = (
     onSuccess: (res) => {
       if (res?.success) {
         toast.success(res.message || 'Tạo mới gói hội viên thành công!');
-        queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
         if (onSuccessCallback) onSuccessCallback();
       } else {
         toast.error(res?.message || 'Tạo mới gói hội viên thất bại!');
@@ -72,7 +74,7 @@ export const useUpdateMembershipPlanMutation = (
     onSuccess: (res) => {
       if (res?.success) {
         toast.success(res.message || 'Cập nhật gói hội viên thành công!');
-        queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
         if (onSuccessCallback) onSuccessCallback();
       } else {
         toast.error(res?.message || 'Cập nhật gói hội viên thất bại!');
@@ -102,7 +104,7 @@ export const useToggleMembershipPlanStatusMutation = (
     onSuccess: (res) => {
       if (res?.success) {
         toast.success(res.message || 'Cập nhật trạng thái thành công!');
-        queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
         if (onSuccessCallback) onSuccessCallback();
       } else {
         toast.error(res?.message || 'Cập nhật trạng thái thất bại!');
@@ -131,7 +133,7 @@ export const useDeleteMembershipPlanMutation = (
     onSuccess: (res) => {
       if (res?.success) {
         toast.success(res.message || 'Xóa gói hội viên thành công!');
-        queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
         if (onSuccessCallback) onSuccessCallback();
       } else {
         toast.error(res?.message || 'Xóa gói hội viên thất bại!');

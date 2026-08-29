@@ -13,17 +13,16 @@ import {
   useDeletePaymentAccountMutation,
 } from '../hooks';
 
+const defaultParam: PaymentAccountQueryParams = {
+  keyword: '',
+  status: 'ALL',
+};
+
 const PaymentAccountPage = () => {
-  const [params, setParams] = useState<PaymentAccountQueryParams>({
-    keyword: '',
-    status: 'ALL',
-  });
+  const [params, setParams] = useState<PaymentAccountQueryParams>(defaultParam);
 
   // Queries
-  const { data: accounts = [], isLoading } = usePaymentAccountsQuery({
-    keyword: params.keyword?.trim() || undefined,
-    status: params.status,
-  });
+  const { data: accounts = [], isLoading } = usePaymentAccountsQuery(params);
 
   const { data: vietqrBanks = [], isLoading: isBanksLoading } = useActiveVietqrBanksQuery();
 
@@ -145,7 +144,7 @@ const PaymentAccountPage = () => {
         confirmLoading={updateMutation.isPending}
         banks={vietqrBanks}
         isBanksLoading={isBanksLoading}
-        initialValues={selectedUpdateAccount}
+        data={selectedUpdateAccount}
         onCancel={() => {
           setIsUpdateOpen(false);
           setSelectedUpdateAccount(null);

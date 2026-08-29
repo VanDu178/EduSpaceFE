@@ -6,20 +6,21 @@ import {
   useSyncVietqrBanksMutation,
   useToggleVietqrBankStatusMutation,
 } from '../hooks';
-import type { VietqrBank } from '../types';
+import type { VietqrBank, VietqrBankQueryParams } from '../types';
 import FilterBar from '../components/FilterBar';
 import ListPage from '../components/ListPage';
 import FormDetail from '../components/FormDetail';
 
+const defaultParam: VietqrBankQueryParams = {
+  keyword: '',
+  status: 'ALL',
+};
+
 const VietqrBankListPage = () => {
-  const [searchKeyword, setSearchKeyword] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [params, setParams] = useState<VietqrBankQueryParams>(defaultParam);
 
   // React Query hooks
-  const { data: banks = [], isLoading } = useVietqrBanksQuery({
-    keyword: searchKeyword || undefined,
-    status: statusFilter,
-  });
+  const { data: banks = [], isLoading } = useVietqrBanksQuery(params);
   const syncMutation = useSyncVietqrBanksMutation();
   const toggleStatusMutation = useToggleVietqrBankStatusMutation();
 
@@ -65,19 +66,7 @@ const VietqrBankListPage = () => {
 
       {/* Toolbar / Filter */}
       <div className="shrink-0">
-        <FilterBar
-          params={{ keyword: searchKeyword, status: statusFilter }}
-          setParams={(updater) => {
-            if (typeof updater === 'function') {
-              const next = updater({ keyword: searchKeyword, status: statusFilter });
-              setSearchKeyword(next.keyword || '');
-              setStatusFilter(next.status || 'ALL');
-            } else {
-              setSearchKeyword(updater.keyword || '');
-              setStatusFilter(updater.status || 'ALL');
-            }
-          }}
-        />
+        <FilterBar params={params} setParams={setParams} />
       </div>
 
       {/* Table Content */}

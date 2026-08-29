@@ -12,13 +12,15 @@ import {
 } from '../hooks/useSubscriptions';
 import type { UserSubscription, UserSubscriptionParams } from '../types';
 
+const defaultParam: UserSubscriptionParams = {
+  page: 1,
+  limit: 10,
+  status: 'all',
+  search: '',
+};
+
 const SubscriptionPage = () => {
-  const [params, setParams] = useState<UserSubscriptionParams>({
-    page: 1,
-    limit: 10,
-    status: 'all',
-    search: '',
-  });
+  const [params, setParams] = useState<UserSubscriptionParams>(defaultParam);
 
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState<boolean>(false);

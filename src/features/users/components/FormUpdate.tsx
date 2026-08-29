@@ -64,7 +64,6 @@ const FormUpdate = ({
         </Button>,
       ]}
       className="max-w-md"
-      destroyOnClose
     >
       <Form
         form={form}

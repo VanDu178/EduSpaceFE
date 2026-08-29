@@ -64,7 +64,6 @@ const FormUpdateStatus = ({
       footer={null}
       title={<span className="text-base font-semibold text-slate-800">Cập nhật</span>}
       width={480}
-      destroyOnClose
       className="top-8"
     >
       <Form

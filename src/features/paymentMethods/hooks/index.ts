@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
+import toast from 'react-hot-toast';
 import {
   fetchPaymentMethodsApi,
   fetchActivePaymentMethodsApi,
@@ -11,12 +11,12 @@ import {
 } from '../api';
 import type { PaymentMethodFilterParams, CreatePaymentMethodDto, UpdatePaymentMethodDto } from '../types';
 
-export const PAYMENT_METHODS_QUERY_KEY = ['paymentMethods'];
+export const QUERY_KEY = ['paymentMethods'];
 
 // Hook lấy danh sách cho Admin
 export const usePaymentMethodsQuery = (params?: PaymentMethodFilterParams) => {
   return useQuery({
-    queryKey: [...PAYMENT_METHODS_QUERY_KEY, params],
+    queryKey: [...QUERY_KEY, params],
     queryFn: () => fetchPaymentMethodsApi(params),
   });
 };
@@ -24,7 +24,7 @@ export const usePaymentMethodsQuery = (params?: PaymentMethodFilterParams) => {
 // Hook lấy danh sách kích hoạt cho Client Checkout
 export const useActivePaymentMethodsQuery = () => {
   return useQuery({
-    queryKey: [...PAYMENT_METHODS_QUERY_KEY, 'active'],
+    queryKey: [...QUERY_KEY, 'active'],
     queryFn: fetchActivePaymentMethodsApi,
   });
 };
@@ -36,14 +36,14 @@ export const useCreatePaymentMethodMutation = () => {
     mutationFn: (payload: CreatePaymentMethodDto) => createPaymentMethodApi(payload),
     onSuccess: (res) => {
       if (res.success) {
-        message.success(res.message || 'Thêm mới thành công!');
-        queryClient.invalidateQueries({ queryKey: PAYMENT_METHODS_QUERY_KEY });
+        toast.success(res.message || 'Thêm mới thành công!');
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
-        message.error(res.message || 'Có lỗi xảy ra');
+        toast.error(res.message || 'Có lỗi xảy ra');
       }
     },
     onError: (err: any) => {
-      message.error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
+      toast.error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
     },
   });
 };
@@ -56,14 +56,14 @@ export const useUpdatePaymentMethodMutation = () => {
       updatePaymentMethodApi(id, payload),
     onSuccess: (res) => {
       if (res.success) {
-        message.success(res.message || 'Cập nhật thành công!');
-        queryClient.invalidateQueries({ queryKey: PAYMENT_METHODS_QUERY_KEY });
+        toast.success(res.message || 'Cập nhật thành công!');
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
-        message.error(res.message || 'Có lỗi xảy ra');
+        toast.error(res.message || 'Có lỗi xảy ra');
       }
     },
     onError: (err: any) => {
-      message.error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
+      toast.error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
     },
   });
 };
@@ -76,14 +76,14 @@ export const useUpdatePaymentMethodSortOrderMutation = () => {
       updatePaymentMethodSortOrderApi(id, sortOrder),
     onSuccess: (res) => {
       if (res.success) {
-        message.success(res.message || 'Cập nhật thứ tự thành công!');
-        queryClient.invalidateQueries({ queryKey: PAYMENT_METHODS_QUERY_KEY });
+        toast.success(res.message || 'Cập nhật thứ tự thành công!');
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
-        message.error(res.message || 'Có lỗi xảy ra');
+        toast.error(res.message || 'Có lỗi xảy ra');
       }
     },
     onError: (err: any) => {
-      message.error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
+      toast.error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
     },
   });
 };
@@ -95,14 +95,14 @@ export const useTogglePaymentMethodStatusMutation = () => {
     mutationFn: (id: number) => togglePaymentMethodStatusApi(id),
     onSuccess: (res) => {
       if (res.success) {
-        message.success(res.message || 'Cập nhật trạng thái thành công!');
-        queryClient.invalidateQueries({ queryKey: PAYMENT_METHODS_QUERY_KEY });
+        toast.success(res.message || 'Cập nhật trạng thái thành công!');
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
-        message.error(res.message || 'Có lỗi xảy ra');
+        toast.error(res.message || 'Có lỗi xảy ra');
       }
     },
     onError: (err: any) => {
-      message.error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
+      toast.error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
     },
   });
 };
@@ -114,14 +114,14 @@ export const useDeletePaymentMethodMutation = () => {
     mutationFn: (id: number) => deletePaymentMethodApi(id),
     onSuccess: (res) => {
       if (res.success) {
-        message.success(res.message || 'Xóa thành công!');
-        queryClient.invalidateQueries({ queryKey: PAYMENT_METHODS_QUERY_KEY });
+        toast.success(res.message || 'Xóa thành công!');
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
-        message.error(res.message || 'Có lỗi xảy ra');
+        toast.error(res.message || 'Có lỗi xảy ra');
       }
     },
     onError: (err: any) => {
-      message.error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
+      toast.error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
     },
   });
 };

@@ -14,10 +14,9 @@ const PaymentTransactionPage = () => {
     isApproving,
     pagination,
     params,
+    setParams,
     fetchTransactions,
     handlePageChange,
-    handleSearch,
-    handleStatusFilter,
     handleApprove,
     handleCancel,
   } = usePaymentTransactions();
@@ -53,23 +52,7 @@ const PaymentTransactionPage = () => {
 
       {/* Toolbar / Filter */}
       <div className="shrink-0">
-        <FilterBar
-          params={params}
-          setParams={(updater) => {
-            if (typeof updater === 'function') {
-              const next = updater(params);
-              if (next.search !== undefined && next.search !== params.search) {
-                handleSearch(next.search);
-              }
-              if (next.status !== undefined && next.status !== params.status) {
-                handleStatusFilter(next.status);
-              }
-            } else {
-              if (updater.search !== undefined) handleSearch(updater.search);
-              if (updater.status !== undefined) handleStatusFilter(updater.status);
-            }
-          }}
-        />
+        <FilterBar params={params} setParams={setParams} />
       </div>
 
       {/* Table Content */}

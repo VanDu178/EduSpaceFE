@@ -1,31 +1,37 @@
 import { useState } from 'react';
 import { Button } from 'antd';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { useFeatures } from '../hooks/useFeatures';
+import {
+  useFeaturesQuery,
+  useCreateFeatureMutation,
+  useUpdateFeatureMutation,
+  useUpdateFeatureSortOrderMutation,
+  useToggleFeatureStatusMutation,
+  useDeleteFeatureMutation,
+} from '../hooks';
 import { FilterBar, ListPage, FormCreate, FormUpdate, ModalDetail } from '../components';
 import MembershipSubNav from '../../../components/MembershipSubNav';
-import type { Feature } from '../types';
+import type { Feature, FeaturePayload, FeatureQueryParams } from '../types';
+
+const defaultParam: FeatureQueryParams = {
+  keyword: '',
+  status: 'ALL',
+};
 
 const FeatureListPage = () => {
-  const {
-    features,
-    isLoading,
-    isSubmitting,
-    keyword,
-    setKeyword,
-    status,
-    setStatus,
-    handleCreate,
-    handleUpdate,
-    handleUpdateSortOrder,
-    handleToggleStatus,
-    handleDelete,
-  } = useFeatures();
-
+  const [params, setParams] = useState<FeatureQueryParams>(defaultParam);
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState<boolean>(false);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
+
+  // Queries & Mutations
+  const { data: features = [], isLoading } = useFeaturesQuery(params);
+  const createMutation = useCreateFeatureMutation();
+  const updateMutation = useUpdateFeatureMutation();
+  const toggleStatusMutation = useToggleFeatureStatusMutation();
+  const updateSortOrderMutation = useUpdateFeatureSortOrderMutation();
+  const deleteMutation = useDeleteFeatureMutation();
 
   const handleOpenDetail = (feature: Feature) => {
     setSelectedFeature(feature);
@@ -35,6 +41,43 @@ const FeatureListPage = () => {
   const handleOpenEdit = (feature: Feature) => {
     setSelectedFeature(feature);
     setIsUpdateOpen(true);
+  };
+
+  const handleCreateSubmit = (values: FeaturePayload) => {
+    createMutation.mutate(values, {
+      onSuccess: (res) => {
+        if (res?.success) {
+          setIsCreateOpen(false);
+        }
+      },
+    });
+  };
+
+  const handleUpdateSubmit = (values: FeaturePayload) => {
+    if (!selectedFeature) return;
+    updateMutation.mutate(
+      { id: selectedFeature.id, payload: values },
+      {
+        onSuccess: (res) => {
+          if (res?.success) {
+            setIsUpdateOpen(false);
+            setSelectedFeature(null);
+          }
+        },
+      }
+    );
+  };
+
+  const handleToggleStatus = (id: number) => {
+    toggleStatusMutation.mutate(id);
+  };
+
+  const handleUpdateSortOrder = (id: number, sortOrder: number) => {
+    updateSortOrderMutation.mutate({ id, sortOrder });
+  };
+
+  const handleDelete = (id: number) => {
+    deleteMutation.mutate(id);
   };
 
   return (
@@ -63,14 +106,8 @@ const FeatureListPage = () => {
 
       {/* Toolbar / Filter */}
       <div className="shrink-0">
-        <FilterBar
-          keyword={keyword}
-          onSearchChange={setKeyword}
-          status={status}
-          onStatusChange={setStatus}
-        />
+        <FilterBar params={params} setParams={setParams} />
       </div>
-
 
       {/* Table Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -89,8 +126,8 @@ const FeatureListPage = () => {
       <FormCreate
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        onSave={handleCreate}
-        isLoading={isSubmitting}
+        onSave={handleCreateSubmit}
+        isLoading={createMutation.isPending}
       />
 
       <FormUpdate
@@ -99,8 +136,8 @@ const FeatureListPage = () => {
           setIsUpdateOpen(false);
           setSelectedFeature(null);
         }}
-        onSave={handleUpdate}
-        isLoading={isSubmitting}
+        onSave={handleUpdateSubmit}
+        isLoading={updateMutation.isPending}
         feature={selectedFeature}
       />
 

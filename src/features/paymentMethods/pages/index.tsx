@@ -16,11 +16,13 @@ import {
 } from '../hooks';
 import type { PaymentMethod, PaymentMethodFilterParams, CreatePaymentMethodDto, UpdatePaymentMethodDto } from '../types';
 
+const defaultParam: PaymentMethodFilterParams = {
+  keyword: '',
+  status: 'ALL',
+};
+
 export const PaymentMethodListPage = () => {
-  const [filters, setFilters] = useState<PaymentMethodFilterParams>({
-    keyword: '',
-    status: 'ALL',
-  });
+  const [params, setParams] = useState<PaymentMethodFilterParams>(defaultParam);
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
@@ -28,16 +30,12 @@ export const PaymentMethodListPage = () => {
   const [selectedRecord, setSelectedRecord] = useState<PaymentMethod | null>(null);
 
   // Queries & Mutations
-  const { data: paymentMethods = [], isLoading } = usePaymentMethodsQuery(filters);
+  const { data: paymentMethods = [], isLoading } = usePaymentMethodsQuery(params);
   const createMutation = useCreatePaymentMethodMutation();
   const updateMutation = useUpdatePaymentMethodMutation();
   const toggleStatusMutation = useTogglePaymentMethodStatusMutation();
   const updateSortOrderMutation = useUpdatePaymentMethodSortOrderMutation();
   const deleteMutation = useDeletePaymentMethodMutation();
-
-  const handleFilterChange = (newFilters: Partial<PaymentMethodFilterParams>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-  };
 
   const handleCreateSubmit = (values: CreatePaymentMethodDto) => {
     createMutation.mutate(values, {
@@ -90,7 +88,7 @@ export const PaymentMethodListPage = () => {
 
       {/* Toolbar / Filter */}
       <div className="shrink-0">
-        <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+        <FilterBar params={params} setParams={setParams} />
       </div>
 
       {/* Table Content */}
@@ -118,6 +116,7 @@ export const PaymentMethodListPage = () => {
         onCancel={() => setCreateModalOpen(false)}
         onSubmit={handleCreateSubmit}
         loading={createMutation.isPending}
+        existingMethods={paymentMethods}
       />
 
       {/* Form Update Modal */}
@@ -130,6 +129,7 @@ export const PaymentMethodListPage = () => {
         }}
         onSubmit={handleUpdateSubmit}
         loading={updateMutation.isPending}
+        existingMethods={paymentMethods}
       />
 
       {/* Detail Drawer */}

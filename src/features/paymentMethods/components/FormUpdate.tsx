@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
-import { Drawer, Form, Input, InputNumber, Switch, Button } from 'antd';
+import { Drawer, Form, Input, InputNumber, Switch, Button, Select } from 'antd';
 import type { PaymentMethod, UpdatePaymentMethodDto } from '../types';
+import { PAYMENT_ICON_OPTIONS } from '../constants';
+import PaymentMethodIcon from './PaymentMethodIcon';
 
 interface FormUpdateProps {
   visible: boolean;
@@ -8,15 +10,16 @@ interface FormUpdateProps {
   onCancel: () => void;
   onSubmit: (id: number, values: UpdatePaymentMethodDto) => void;
   loading: boolean;
+  existingMethods?: PaymentMethod[];
 }
 
-const FormUpdate = ({ visible, data, onCancel, onSubmit, loading }: FormUpdateProps) => {
+const FormUpdate = ({ visible, data, onCancel, onSubmit, loading, existingMethods = [] }: FormUpdateProps) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (data && visible) {
       form.setFieldsValue({
-        code: data.code,
+        code: data.code ? data.code.toUpperCase() : '',
         name: data.name,
         description: data.description,
         icon: data.icon,
@@ -42,6 +45,27 @@ const FormUpdate = ({ visible, data, onCancel, onSubmit, loading }: FormUpdatePr
     onCancel();
   };
 
+  const otherIcons = existingMethods
+    .filter((m) => m.id !== data?.id)
+    .map((m) => m.icon);
+
+  const iconOptions = PAYMENT_ICON_OPTIONS.map((opt) => {
+    const isIconUsed = otherIcons.includes(opt.value);
+    return {
+      value: opt.value,
+      label: (
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center space-x-2">
+            <PaymentMethodIcon iconName={opt.value} className="h-4 w-4 text-sky-600 shrink-0" />
+            <span>{opt.label}</span>
+          </div>
+          {isIconUsed && <span className="text-xs italic text-slate-400 font-normal ml-2">(Đã sử dụng)</span>}
+        </div>
+      ),
+      disabled: isIconUsed,
+    };
+  });
+
   return (
     <Drawer
       title={<span className="text-lg font-bold text-slate-800">Cập nhật</span>}
@@ -49,7 +73,6 @@ const FormUpdate = ({ visible, data, onCancel, onSubmit, loading }: FormUpdatePr
       width={420}
       open={visible}
       onClose={handleClose}
-      destroyOnClose
       footer={
         <div className="flex justify-end space-x-3 py-2 px-2">
           <Button onClick={handleClose} className="rounded-xl border-slate-200 text-sm font-medium">
@@ -72,9 +95,9 @@ const FormUpdate = ({ visible, data, onCancel, onSubmit, loading }: FormUpdatePr
         </Form.Item>
 
         <Form.Item
-          label={<span className="text-xs font-semibold text-slate-700">Tên hiển thị</span>}
+          label={<span className="text-xs font-semibold text-slate-700">Tên</span>}
           name="name"
-          rules={[{ required: true, message: 'Vui lòng nhập tên hiển thị' }]}
+          rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
         >
           <Input placeholder="ví dụ: Chuyển khoản QR (VietQR)" className="rounded-xl py-2" />
         </Form.Item>
@@ -86,10 +109,13 @@ const FormUpdate = ({ visible, data, onCancel, onSubmit, loading }: FormUpdatePr
         <Form.Item
           label={<span className="text-xs font-semibold text-slate-700">Icon</span>}
           name="icon"
-          rules={[{ required: true, message: 'Vui lòng nhập tên icon' }]}
-          tooltip="Tên icon từ thư viện Heroicons v2 (vd: QrCodeIcon, CreditCardIcon, WalletIcon)"
+          rules={[{ required: true, message: 'Vui lòng chọn icon' }]}
         >
-          <Input placeholder="ví dụ: QrCodeIcon" className="rounded-xl py-2" />
+          <Select
+            placeholder="Chọn icon phương thức thanh toán"
+            options={iconOptions}
+            className="w-full text-sm"
+          />
         </Form.Item>
 
         <div className="flex items-center justify-between pt-2">

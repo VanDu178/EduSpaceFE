@@ -20,7 +20,6 @@ const FormDetail = ({ open, data, onCancel }: FormDetailProps) => {
       width={480}
       open={open}
       onClose={onCancel}
-      destroyOnClose
       footer={
         <div className="flex justify-end py-2 px-2">
           <Button onClick={onCancel} className="rounded-xl border-slate-200 text-sm font-medium">

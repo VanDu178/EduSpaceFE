@@ -57,7 +57,6 @@ const FormCreate = ({
         </Button>,
       ]}
       className="max-w-md"
-      destroyOnClose
     >
       <Form
         form={form}

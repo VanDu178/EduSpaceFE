@@ -8,7 +8,7 @@ interface FormUpdateProps {
   confirmLoading: boolean;
   banks: VietqrBank[];
   isBanksLoading?: boolean;
-  initialValues: PaymentAccount | null;
+  data: PaymentAccount | null;
   onCancel: () => void;
   onSubmit: (values: UpdatePaymentAccountDto) => void;
 }
@@ -18,24 +18,24 @@ const FormUpdate = ({
   confirmLoading,
   banks,
   isBanksLoading = false,
-  initialValues,
+  data,
   onCancel,
   onSubmit,
 }: FormUpdateProps) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (open && initialValues) {
+    if (open && data) {
       form.setFieldsValue({
-        bankCode: initialValues.bankCode,
-        accountNo: initialValues.accountNo,
-        accountHolder: initialValues.accountHolder,
-        note: initialValues.note || '',
-        isDefault: initialValues.isDefault,
-        isActive: initialValues.isActive,
+        bankCode: data.bankCode,
+        accountNo: data.accountNo,
+        accountHolder: data.accountHolder,
+        note: data.note || '',
+        isDefault: data.isDefault,
+        isActive: data.isActive,
       });
     }
-  }, [open, initialValues, form]);
+  }, [open, data, form]);
 
   const handleFinish = (values: any) => {
     onSubmit({

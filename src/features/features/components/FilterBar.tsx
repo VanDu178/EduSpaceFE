@@ -1,19 +1,14 @@
+import type React from 'react';
 import { Input, Select } from 'antd';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import type { FeatureQueryParams } from '../types';
 
 interface FilterBarProps {
-  keyword: string;
-  onSearchChange: (value: string) => void;
-  status: string;
-  onStatusChange: (value: string) => void;
+  params: FeatureQueryParams;
+  setParams: React.Dispatch<React.SetStateAction<FeatureQueryParams>>;
 }
 
-const FilterBar = ({
-  keyword,
-  onSearchChange,
-  status,
-  onStatusChange,
-}: FilterBarProps) => {
+const FilterBar = ({ params, setParams }: FilterBarProps) => {
   return (
     <div className="flex flex-wrap justify-between items-center gap-3">
       {/* Nút / Nhãn Bộ lọc nâng cao */}
@@ -29,8 +24,13 @@ const FilterBar = ({
         {/* Lọc Trạng thái */}
         <div className="w-full sm:w-[180px]">
           <Select
-            value={status}
-            onChange={onStatusChange}
+            value={params?.status || 'ALL'}
+            onChange={(value) =>
+              setParams((prev) => ({
+                ...prev,
+                status: value,
+              }))
+            }
             options={[
               { value: 'ALL', label: 'Tất cả trạng thái' },
               { value: 'active', label: 'Đang kích hoạt' },
@@ -44,8 +44,13 @@ const FilterBar = ({
         <div className="w-full sm:w-[280px]">
           <Input
             placeholder="Tìm theo tên hoặc mã tính năng..."
-            value={keyword}
-            onChange={(e) => onSearchChange(e.target.value)}
+            value={params?.keyword || ''}
+            onChange={(e) =>
+              setParams((prev) => ({
+                ...prev,
+                keyword: e.target.value,
+              }))
+            }
             prefix={<MagnifyingGlassIcon className="h-5 w-5 text-slate-400 mr-1.5" />}
             className="w-full px-4 border-slate-200 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 text-slate-700 text-sm"
           />

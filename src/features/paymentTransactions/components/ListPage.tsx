@@ -310,39 +310,57 @@ const ListPage = ({
             </Tooltip>
           )}
 
-          {record.status === 'pending' && (
-            <>
-              <Popconfirm
-                title="Xác nhận duyệt giao dịch?"
-                description={`Bạn có chắc muốn duyệt đơn ${record.code}?`}
-                onConfirm={() => onApprove(record.id)}
-                okText="Duyệt"
-                cancelText="Hủy"
-              >
-                <Button
-                  size='small'
-                  type='primary'
-                  disabled={isApproving}
-                >
-                  Duyệt
-                </Button>
-              </Popconfirm>
+          {record.status === 'pending' && (() => {
+            const userActiveSub = (record.user as any)?.subscriptions?.[0];
+            const userActiveTier = userActiveSub?.plan?.tierLevel || 0;
+            const txPlanTier = (record.plan as any)?.tierLevel || 0;
+            const isBlockedByTier = Boolean(userActiveTier > 0 && txPlanTier > 0 && txPlanTier <= userActiveTier);
 
-              <Popconfirm
-                title="Hủy đơn này?"
-                onConfirm={() => onCancel(record.code)}
-                okText="Đồng ý"
-                cancelText="Quay lại"
-              >
-                <Button
-                  size='small'
-                  type='default'
+            return (
+              <>
+                <Tooltip
+                  title={
+                    isBlockedByTier
+                      ? `Khách hàng đã sở hữu gói ${userActiveSub?.plan?.name || ''}. Không thể duyệt đơn gói cùng cấp hoặc cấp thấp hơn.`
+                      : undefined
+                  }
                 >
-                  Hủy
-                </Button>
-              </Popconfirm>
-            </>
-          )}
+                  <span>
+                    <Popconfirm
+                      title="Xác nhận duyệt giao dịch?"
+                      description={`Bạn có chắc muốn duyệt đơn ${record.code}?`}
+                      onConfirm={() => onApprove(record.id)}
+                      disabled={isApproving || isBlockedByTier}
+                      okText="Duyệt"
+                      cancelText="Hủy"
+                    >
+                      <Button
+                        size='small'
+                        type='primary'
+                        disabled={isApproving || isBlockedByTier}
+                      >
+                        Duyệt
+                      </Button>
+                    </Popconfirm>
+                  </span>
+                </Tooltip>
+
+                <Popconfirm
+                  title="Hủy đơn này?"
+                  onConfirm={() => onCancel(record.code)}
+                  okText="Đồng ý"
+                  cancelText="Quay lại"
+                >
+                  <Button
+                    size='small'
+                    type='default'
+                  >
+                    Hủy
+                  </Button>
+                </Popconfirm>
+              </>
+            );
+          })()}
         </div>
       ),
     },

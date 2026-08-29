@@ -8,10 +8,12 @@ import {
 } from '../api';
 import type { VietqrBank, VietqrBankQueryParams } from '../types';
 
+export const QUERY_KEY = ['vietqrBanks'];
+
 // Query danh sách ngân hàng VietQR theo bộ lọc
 export const useVietqrBanksQuery = (params?: VietqrBankQueryParams) => {
   return useQuery<VietqrBank[]>({
-    queryKey: ['vietqrBanks', params],
+    queryKey: [...QUERY_KEY, params],
     queryFn: () => fetchVietqrBanksApi(params),
   });
 };
@@ -19,7 +21,7 @@ export const useVietqrBanksQuery = (params?: VietqrBankQueryParams) => {
 // Query danh sách ngân hàng VietQR đang hoạt động
 export const useActiveVietqrBanksQuery = () => {
   return useQuery<VietqrBank[]>({
-    queryKey: ['vietqrBanks', { status: 'active' }],
+    queryKey: [...QUERY_KEY, { status: 'active' }],
     queryFn: () => fetchVietqrBanksApi({ status: 'active' }),
   });
 };
@@ -27,7 +29,7 @@ export const useActiveVietqrBanksQuery = () => {
 // Query chi tiết ngân hàng theo ID
 export const useVietqrBankDetailQuery = (id?: number) => {
   return useQuery<VietqrBank>({
-    queryKey: ['vietqrBank', id],
+    queryKey: [...QUERY_KEY, id],
     queryFn: () => fetchVietqrBankByIdApi(id!),
     enabled: !!id,
   });
@@ -41,7 +43,7 @@ export const useSyncVietqrBanksMutation = () => {
     onSuccess: (res) => {
       if (res?.success) {
         toast.success(res.message || 'Đồng bộ danh sách ngân hàng VietQR thành công');
-        queryClient.invalidateQueries({ queryKey: ['vietqrBanks'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
         toast.error(res?.message || 'Đồng bộ thất bại');
       }
@@ -60,7 +62,7 @@ export const useToggleVietqrBankStatusMutation = () => {
     onSuccess: (res) => {
       if (res?.success) {
         toast.success(res.message || 'Thay đổi trạng thái ngân hàng thành công');
-        queryClient.invalidateQueries({ queryKey: ['vietqrBanks'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
         toast.error(res?.message || 'Không thể đổi trạng thái');
       }

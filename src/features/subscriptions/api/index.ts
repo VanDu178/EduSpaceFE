@@ -8,6 +8,8 @@ import type {
 } from '../types';
 import type { ApiResponse } from '../../../types/api';
 
+const BASE_PATH = '/subscriptions';
+
 // API Lấy danh sách đăng ký & thanh toán (Admin)
 export const fetchSubscriptionsApi = async (
   params?: UserSubscriptionParams
@@ -19,7 +21,7 @@ export const fetchSubscriptionsApi = async (
   if (params?.status && params.status !== 'all') queryParams.status = params.status;
   if (params?.search && params.search.trim() !== '') queryParams.search = params.search.trim();
 
-  const response = await api.get('/subscriptions', { params: queryParams });
+  const response = await api.get(`${BASE_PATH}`, { params: queryParams });
   if (response?.data?.success) {
     return response.data.data;
   }
@@ -30,7 +32,7 @@ export const fetchSubscriptionsApi = async (
 export const fetchSubscriptionByIdApi = async (
   id: number
 ): Promise<UserSubscription> => {
-  const response = await api.get(`/subscriptions/${id}`);
+  const response = await api.get(`${BASE_PATH}/${id}`);
   if (response?.data?.success) {
     return response.data.data;
   }
@@ -41,7 +43,7 @@ export const fetchSubscriptionByIdApi = async (
 export const createSubscriptionApi = async (
   payload: CreateSubscriptionPayload
 ): Promise<ApiResponse<UserSubscription>> => {
-  const response = await api.post('/subscriptions', payload);
+  const response = await api.post(`${BASE_PATH}`, payload);
   return response?.data;
 };
 
@@ -50,6 +52,6 @@ export const updateSubscriptionStatusApi = async (
   id: number,
   payload: UpdateSubscriptionStatusPayload
 ): Promise<ApiResponse<UserSubscription>> => {
-  const response = await api.patch(`/subscriptions/${id}/status`, payload);
+  const response = await api.patch(`${BASE_PATH}/${id}/status`, payload);
   return response?.data;
 };

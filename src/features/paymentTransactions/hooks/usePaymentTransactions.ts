@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { message } from 'antd';
+import toast from 'react-hot-toast';
 import type { PaymentTransaction, PaymentTransactionParams } from '../types';
 import {
   fetchPaymentTransactionsApi,
@@ -7,15 +7,19 @@ import {
   cancelPaymentTransactionApi,
 } from '../api';
 
+const defaultParam: PaymentTransactionParams = {
+  page: 1,
+  limit: 10,
+  status: 'all',
+  search: '',
+};
+
 export const usePaymentTransactions = (initialParams?: PaymentTransactionParams) => {
   const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isApproving, setIsApproving] = useState<boolean>(false);
   const [params, setParams] = useState<PaymentTransactionParams>({
-    page: 1,
-    limit: 10,
-    status: 'all',
-    search: '',
+    ...defaultParam,
     ...initialParams,
   });
   const [pagination, setPagination] = useState({
@@ -35,7 +39,7 @@ export const usePaymentTransactions = (initialParams?: PaymentTransactionParams)
         total: data.pagination.totalItems,
       });
     } catch (error: any) {
-      message.error(error.message || 'Không thể tải danh sách giao dịch VietQR');
+      toast.error(error.message || 'Không thể tải danh sách giao dịch VietQR');
     } finally {
       setIsLoading(false);
     }
@@ -62,15 +66,15 @@ export const usePaymentTransactions = (initialParams?: PaymentTransactionParams)
     try {
       const res = await approvePaymentTransactionApi(id, paymentRef);
       if (res?.success) {
-        message.success('🎉 Duyệt thanh toán và kích hoạt gói thành công!');
+        toast.success('🎉 Duyệt thanh toán và kích hoạt gói thành công!');
         fetchTransactions();
         return true;
       } else {
-        message.error(res?.message || 'Duyệt thanh toán thất bại');
+        toast.error(res?.message || 'Duyệt thanh toán thất bại');
         return false;
       }
     } catch (error: any) {
-      message.error(error.message || 'Lỗi khi duyệt thanh toán');
+      toast.error(error.message || 'Lỗi khi duyệt thanh toán');
       return false;
     } finally {
       setIsApproving(false);
@@ -81,15 +85,15 @@ export const usePaymentTransactions = (initialParams?: PaymentTransactionParams)
     try {
       const res = await cancelPaymentTransactionApi(code);
       if (res?.success) {
-        message.success('Đã hủy giao dịch thanh toán');
+        toast.success('Đã hủy giao dịch thanh toán');
         fetchTransactions();
         return true;
       } else {
-        message.error(res?.message || 'Hủy giao dịch thất bại');
+        toast.error(res?.message || 'Hủy giao dịch thất bại');
         return false;
       }
     } catch (error: any) {
-      message.error(error.message || 'Lỗi khi hủy giao dịch');
+      toast.error(error.message || 'Lỗi khi hủy giao dịch');
       return false;
     }
   };
@@ -100,6 +104,7 @@ export const usePaymentTransactions = (initialParams?: PaymentTransactionParams)
     isApproving,
     pagination,
     params,
+    setParams,
     fetchTransactions,
     handlePageChange,
     handleSearch,

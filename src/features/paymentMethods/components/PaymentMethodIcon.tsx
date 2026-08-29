@@ -2,12 +2,18 @@ import {
   QrCodeIcon,
   CreditCardIcon,
   WalletIcon,
-  DevicePhoneMobileIcon,
   BanknotesIcon,
   BuildingLibraryIcon,
-  SparklesIcon,
-  AdjustmentsHorizontalIcon,
 } from '@heroicons/react/24/outline';
+import type { FC, SVGProps } from 'react';
+
+const ICON_MAP: Record<string, FC<SVGProps<SVGSVGElement>>> = {
+  QrCodeIcon,
+  CreditCardIcon,
+  WalletIcon,
+  BanknotesIcon,
+  BuildingLibraryIcon,
+};
 
 interface PaymentMethodIconProps {
   iconName?: string | null;
@@ -15,20 +21,11 @@ interface PaymentMethodIconProps {
 }
 
 export const PaymentMethodIcon = ({ iconName, className = 'h-4 w-4 text-sky-600' }: PaymentMethodIconProps) => {
-  if (!iconName) return null;
-
+  if (!iconName) return <CreditCardIcon className={className} />;
   const normalized = iconName.trim();
-
-  switch (normalized) {
-    case 'QrCodeIcon':
-      return <QrCodeIcon className={className} />;
-    case 'CreditCardIcon':
-      return <CreditCardIcon className={className} />;
-    case 'WalletIcon':
-      return <WalletIcon className={className} />;
-    default:
-      return <AdjustmentsHorizontalIcon className={className} />;
-  }
+  const IconComponent = ICON_MAP[normalized] || ICON_MAP[`${normalized}Icon`] || CreditCardIcon;
+  return <IconComponent className={className} />;
 };
 
 export default PaymentMethodIcon;
+

@@ -18,14 +18,6 @@ const FormCreate = ({ isOpen, onClose, onSave, isLoading }: FormCreateProps) => 
   useEffect(() => {
     if (isOpen) {
       form.resetFields();
-      form.setFieldsValue({
-        monthlyPrice: 0,
-        yearlyDiscountPercent: 10,
-        yearlyPrice: 0,
-        tierLevel: 1,
-        isActive: true,
-        buttonText: 'Đăng ký ngay',
-      });
       setPlanFeatures([]);
     }
   }, [isOpen, form]);
@@ -65,7 +57,6 @@ const FormCreate = ({ isOpen, onClose, onSave, isLoading }: FormCreateProps) => 
       width={600}
       open={isOpen}
       onClose={onClose}
-      destroyOnClose
       footer={
         <div className="flex justify-end space-x-3 py-2 px-2">
           <Button onClick={onClose} className="rounded-xl">
@@ -86,6 +77,14 @@ const FormCreate = ({ isOpen, onClose, onSave, isLoading }: FormCreateProps) => 
         form={form}
         layout="vertical"
         onValuesChange={handleValuesChange}
+        initialValues={{
+          monthlyPrice: 0,
+          yearlyDiscountPercent: 10,
+          yearlyPrice: 0,
+          tierLevel: 1,
+          isActive: true,
+          buttonText: 'Đăng ký ngay',
+        }}
         className="space-y-3"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">

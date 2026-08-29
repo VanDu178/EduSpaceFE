@@ -19,6 +19,8 @@ export interface MembershipPlan {
   buttonText: string | null;
   tierLevel: number;
   isActive: boolean;
+  hasSubscribers?: boolean;
+  subscriberCount?: number;
   planFeatures?: PlanFeatureItem[];
   createdAt: string;
   updatedAt: string;

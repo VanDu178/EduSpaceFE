@@ -4,10 +4,11 @@ import { fetchUsersApi, createUserApi, updateUserApi, resetPasswordApi, toggleUs
 import type { User, UserParams } from '../types';
 import type { PaginatedData } from '../../../types/api';
 
+export const QUERY_KEY = ['users'];
 
 export const useUsersQuery = (params?: UserParams) => {
   return useQuery<PaginatedData<{ users: User[] }>>({
-    queryKey: ['users', params],
+    queryKey: [...QUERY_KEY, params],
     queryFn: () => fetchUsersApi(params),
   });
 };
@@ -18,7 +19,7 @@ export const useCreateUserMutation = () => {
   return useMutation({
     mutationFn: createUserApi,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       toast.success('Tạo tài khoản người dùng thành công!');
     },
     onError: (err: any) => {
@@ -33,7 +34,7 @@ export const useUpdateUserMutation = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<User> }) => updateUserApi(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       toast.success('Cập nhật thông tin tài khoản thành công!');
     },
     onError: (err: any) => {
@@ -48,7 +49,7 @@ export const useResetPasswordMutation = () => {
   return useMutation({
     mutationFn: (id: number) => resetPasswordApi(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       toast.success('Đặt lại mật khẩu thành công!');
     },
     onError: (err: any) => {
@@ -63,7 +64,7 @@ export const useToggleUserStatusMutation = () => {
   return useMutation({
     mutationFn: ({ id, status }: { id: number; status: 'active' | 'locked' }) => toggleUserStatusApi(id, status),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       toast.success(variables.status === 'locked' ? 'Khóa tài khoản thành công!' : 'Mở khóa tài khoản thành công!');
     },
     onError: (err: any) => {

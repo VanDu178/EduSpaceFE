@@ -2,6 +2,8 @@ import api from '../../../services/api';
 import type { MembershipPlan, MembershipPlanPayload, MembershipPlanParams } from '../types';
 import type { ApiResponse } from '../../../types/api';
 
+const BASE_PATH = '/membership-plans';
+
 // API Lấy danh sách gói hội viên
 export const fetchMembershipPlansApi = async (
   params?: MembershipPlanParams
@@ -11,7 +13,7 @@ export const fetchMembershipPlansApi = async (
     queryParams.isActive = params.isActive;
   }
 
-  const response = await api.get('/membership-plans', { params: queryParams });
+  const response = await api.get(`${BASE_PATH}`, { params: queryParams });
   if (response?.data?.success) {
     return response.data.data;
   }
@@ -22,7 +24,7 @@ export const fetchMembershipPlansApi = async (
 export const fetchMembershipPlanByIdApi = async (
   idOrCode: string | number
 ): Promise<MembershipPlan> => {
-  const response = await api.get(`/membership-plans/${idOrCode}`);
+  const response = await api.get(`${BASE_PATH}/${idOrCode}`);
   if (response?.data?.success) {
     return response.data.data;
   }
@@ -33,7 +35,7 @@ export const fetchMembershipPlanByIdApi = async (
 export const createMembershipPlanApi = async (
   payload: MembershipPlanPayload
 ): Promise<ApiResponse<MembershipPlan>> => {
-  const response = await api.post('/membership-plans', payload);
+  const response = await api.post(`${BASE_PATH}`, payload);
   return response?.data;
 };
 
@@ -42,7 +44,7 @@ export const updateMembershipPlanApi = async (
   id: number,
   payload: MembershipPlanPayload
 ): Promise<ApiResponse<MembershipPlan>> => {
-  const response = await api.put(`/membership-plans/${id}`, payload);
+  const response = await api.put(`${BASE_PATH}/${id}`, payload);
   return response?.data;
 };
 
@@ -50,7 +52,7 @@ export const updateMembershipPlanApi = async (
 export const toggleMembershipPlanStatusApi = async (
   id: number
 ): Promise<ApiResponse<MembershipPlan>> => {
-  const response = await api.patch(`/membership-plans/${id}/status`);
+  const response = await api.patch(`${BASE_PATH}/${id}/status`);
   return response?.data;
 };
 
@@ -58,6 +60,6 @@ export const toggleMembershipPlanStatusApi = async (
 export const deleteMembershipPlanApi = async (
   id: number
 ): Promise<ApiResponse<null>> => {
-  const response = await api.delete(`/membership-plans/${id}`);
+  const response = await api.delete(`${BASE_PATH}/${id}`);
   return response?.data;
 };

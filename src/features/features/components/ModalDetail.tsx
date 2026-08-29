@@ -19,7 +19,6 @@ const ModalDetail = ({ isOpen, onClose, feature }: ModalDetailProps) => {
       width={480}
       open={isOpen}
       onClose={onClose}
-      destroyOnClose
       footer={
         <div className="flex justify-end py-2 px-2">
           <Button onClick={onClose} className="rounded-xl px-5">

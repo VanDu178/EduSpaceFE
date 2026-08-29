@@ -57,7 +57,7 @@ const ListPage = ({
       ),
     },
     {
-      title: 'Tên phương thức',
+      title: 'Tên',
       dataIndex: 'name',
       key: 'name',
       render: (name: string, record: PaymentMethod) => (
@@ -85,6 +85,7 @@ const ListPage = ({
         <div className="flex items-center space-x-1.5">
           {icon ? (
             <>
+
               <PaymentMethodIcon iconName={icon} className="h-4 w-4 text-sky-600 shrink-0" />
               <span className="font-mono text-xs text-slate-600 font-medium">{icon}</span>
             </>

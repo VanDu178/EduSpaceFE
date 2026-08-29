@@ -18,7 +18,6 @@ const FormDetail = ({ open, bank, onClose }: FormDetailProps) => {
       width={480}
       open={open}
       onClose={onClose}
-      destroyOnClose
     >
       <div className="space-y-5">
         {/* Header card */}

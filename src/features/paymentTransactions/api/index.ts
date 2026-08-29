@@ -6,6 +6,8 @@ import type {
 } from '../types';
 import type { ApiResponse } from '../../../types/api';
 
+const BASE_PATH = '/payment-transactions';
+
 // API Lấy danh sách giao dịch VietQR (Admin)
 export const fetchPaymentTransactionsApi = async (
   params?: PaymentTransactionParams
@@ -16,7 +18,7 @@ export const fetchPaymentTransactionsApi = async (
   if (params?.status && params.status !== 'all') queryParams.status = params.status;
   if (params?.search && params.search.trim() !== '') queryParams.search = params.search.trim();
 
-  const response = await api.get('/payment-transactions', { params: queryParams });
+  const response = await api.get(`${BASE_PATH}`, { params: queryParams });
   if (response?.data?.success) {
     return response.data.data;
   }
@@ -28,7 +30,7 @@ export const approvePaymentTransactionApi = async (
   id: number,
   paymentRef?: string
 ): Promise<ApiResponse<PaymentTransaction>> => {
-  const response = await api.post(`/payment-transactions/${id}/approve`, { paymentRef });
+  const response = await api.post(`${BASE_PATH}/${id}/approve`, { paymentRef });
   return response?.data;
 };
 
@@ -36,13 +38,13 @@ export const approvePaymentTransactionApi = async (
 export const cancelPaymentTransactionApi = async (
   code: string
 ): Promise<ApiResponse<PaymentTransaction>> => {
-  const response = await api.post(`/payment-transactions/cancel/${code}`);
+  const response = await api.post(`${BASE_PATH}/cancel/${code}`);
   return response?.data;
 };
 
 // API Tải file PDF Hóa đơn (Admin)
 export const downloadInvoicePdfApi = async (code: string): Promise<void> => {
-  const response = await api.get(`/payment-transactions/${code}/pdf`, {
+  const response = await api.get(`${BASE_PATH}/${code}/pdf`, {
     responseType: 'blob',
   });
   const blob = new Blob([response.data], { type: 'application/pdf' });

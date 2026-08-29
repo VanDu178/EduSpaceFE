@@ -5,7 +5,7 @@ import type { Feature, FeaturePayload } from '../types';
 interface FormUpdateProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (id: number, values: FeaturePayload) => Promise<boolean>;
+  onSave: (values: FeaturePayload) => void;
   isLoading: boolean;
   feature: Feature | null;
 }
@@ -31,10 +31,7 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, feature }: FormUpdateP
     try {
       if (!feature) return;
       const values = await form.validateFields();
-      const success = await onSave(feature.id, values);
-      if (success) {
-        onClose();
-      }
+      onSave(values);
     } catch (error) {
       console.error('Validation failed:', error);
     }
@@ -47,7 +44,6 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, feature }: FormUpdateP
       width={480}
       open={isOpen}
       onClose={onClose}
-      destroyOnClose
       footer={
         <div className="flex justify-end space-x-3 py-2 px-2">
           <Button onClick={onClose} className="rounded-xl">

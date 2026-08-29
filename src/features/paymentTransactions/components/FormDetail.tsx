@@ -53,6 +53,16 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
   const statusConfig = STATUS_CONFIG[transaction.status] || STATUS_CONFIG.pending;
   const StatusIcon = statusConfig.icon;
 
+  const userActiveSub = (transaction.user as any)?.subscriptions?.[0];
+  const userActiveTier = userActiveSub?.plan?.tierLevel || 0;
+  const txPlanTier = (transaction.plan as any)?.tierLevel || 0;
+  const isBlockedByTier = Boolean(
+    transaction.status === 'pending' &&
+    userActiveTier > 0 &&
+    txPlanTier > 0 &&
+    txPlanTier <= userActiveTier
+  );
+
   return (
     <Drawer
       title={<span className="text-lg font-bold text-slate-800">Chi tiết</span>}
@@ -60,9 +70,17 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
       width={480}
       open={open}
       onClose={onClose}
-      destroyOnClose
     >
       <div className="space-y-5">
+        {isBlockedByTier && (
+          <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs space-y-1">
+            <span className="font-bold block text-amber-950">Không thể duyệt đơn này</span>
+            <span>
+              Khách hàng đã sở hữu gói <span className="font-bold">{userActiveSub?.plan?.name || 'tương đương'}</span> (Tier {userActiveTier}).
+              Đơn hàng này là gói Tier {txPlanTier} nên hệ thống không cho phép duyệt thanh toán.
+            </span>
+          </div>
+        )}
         {/* Header card */}
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 flex flex-col items-center justify-center text-center space-y-3">
           {transaction.qrCodeUrl ? (

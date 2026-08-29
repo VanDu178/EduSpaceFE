@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Select, Button, Switch, Upload, message, Spin, Tooltip } from 'antd';
+import { Form, Input, Select, Button, Switch, Upload, Spin, Tooltip } from 'antd';
+import toast from 'react-hot-toast';
 import {
   ArrowLeftIcon,
   ArrowUpTrayIcon,
@@ -82,26 +83,25 @@ const FormCreate = ({
   const handleBannerUpload = async (file: File) => {
     const isImage = file.type.startsWith('image/');
     if (!isImage) {
-      message.error('Vui lòng chọn file hình ảnh hợp lệ (PNG, JPG, WEBP, GIF)!');
+      toast.error('Vui lòng chọn file hình ảnh hợp lệ (PNG, JPG, WEBP, GIF)!');
       return;
     }
     const isLt5M = file.size / 1024 / 1024 < 5;
     if (!isLt5M) {
-      message.error('Dung lượng ảnh bìa không được vượt quá 5MB!');
+      toast.error('Dung lượng ảnh bìa không được vượt quá 5MB!');
       return;
     }
 
     setIsUploadingBanner(true);
-    const hideLoading = message.loading('Đang tải ảnh lên Supabase Storage...', 0);
+    const toastId = toast.loading('Đang tải ảnh lên Supabase Storage...');
     try {
       const res = await uploadSingleFileApi(file, 'blogs');
       setBannerUrl(res.url);
-      message.success('Tải ảnh bìa lên Supabase thành công!');
+      toast.success('Tải ảnh bìa lên Supabase thành công!', { id: toastId });
     } catch (err: any) {
       console.error('Lỗi upload banner:', err);
-      message.error(err.response?.data?.message || 'Không thể tải ảnh lên Supabase Storage!');
+      toast.error(err.response?.data?.message || 'Không thể tải ảnh lên Supabase Storage!', { id: toastId });
     } finally {
-      hideLoading();
       setIsUploadingBanner(false);
     }
   };

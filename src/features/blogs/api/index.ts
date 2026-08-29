@@ -2,9 +2,11 @@ import api from '../../../services/api';
 import type { Blog, BlogPayload, Params } from '../types';
 import type { ApiResponse, PaginatedData } from '../../../types/api';
 
+const BASE_PATH = '/blogs';
+
 // API lấy danh sách bài blog
 export const fetchBlogsApi = async (params?: Params): Promise<PaginatedData<{ blogs: Blog[] }>> => {
-  const response = await api.get('/blogs', { params });
+  const response = await api.get(`${BASE_PATH}`, { params });
   if (response?.data?.success) {
     return response?.data?.data;
   }
@@ -13,13 +15,13 @@ export const fetchBlogsApi = async (params?: Params): Promise<PaginatedData<{ bl
 
 // API tạo mới bài blog
 export const createBlogApi = async (newBlog: BlogPayload): Promise<ApiResponse<{ blog: Blog }>> => {
-  const response = await api.post('/blogs', newBlog);
+  const response = await api.post(`${BASE_PATH}`, newBlog);
   return response?.data;
 };
 
 // API xóa bài blog
 export const deleteBlogApi = async (id: number): Promise<ApiResponse<null>> => {
-  const response = await api.delete(`/blogs/${id}`);
+  const response = await api.delete(`${BASE_PATH}/${id}`);
   return response?.data;
 };
 
@@ -28,7 +30,7 @@ export const updateBlogApi = async (
   id: number,
   updatedBlog: BlogPayload
 ): Promise<ApiResponse<{ blog: Blog }>> => {
-  const response = await api.put(`/blogs/${id}`, updatedBlog);
+  const response = await api.put(`${BASE_PATH}/${id}`, updatedBlog);
   return response?.data;
 };
 
@@ -37,7 +39,7 @@ export const updateBlogStatusApi = async (
   id: number,
   status: string
 ): Promise<ApiResponse<{ blog: Blog }>> => {
-  const response = await api.patch(`/blogs/${id}/status`, { status });
+  const response = await api.patch(`${BASE_PATH}/${id}/status`, { status });
   return response?.data;
 };
 
@@ -46,14 +48,14 @@ export const updateBlogAccessApi = async (
   id: number,
   isPremium: boolean
 ): Promise<ApiResponse<{ blog: Blog }>> => {
-  const response = await api.patch(`/blogs/${id}/access`, { isPremium });
+  const response = await api.patch(`${BASE_PATH}/${id}/access`, { isPremium });
   return response?.data;
 };
 
 
 // API lấy chi tiết bài blog theo ID
 export const fetchBlogByIdApi = async (id: number | string): Promise<{ blog: Blog }> => {
-  const response = await api.get(`/blogs/id/${id}`);
+  const response = await api.get(`${BASE_PATH}/id/${id}`);
   if (response?.data?.success) {
     return response?.data?.data;
   }

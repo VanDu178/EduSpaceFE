@@ -29,3 +29,8 @@ export interface SystemFeatureCode {
   description: string;
   isCreated: boolean;
 }
+
+export interface FeatureQueryParams {
+  keyword?: string;
+  status?: string;
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Modal, Form, Select, Input, Switch, Button } from 'antd';
 import type { CreateSubscriptionPayload, BillingCycle, SubscriptionStatus } from '../types';
 import { PAYMENT_METHOD_OPTIONS } from '../constants';
+import { PAYMENT_METHOD_CODES } from '../../paymentMethods/constants';
 import { fetchUsersApi } from '../../users/api';
 import { fetchMembershipPlansApi } from '../../membershipPlans/api';
 import type { User } from '../../users/types';
@@ -24,12 +25,6 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
   useEffect(() => {
     if (open) {
       form.resetFields();
-      form.setFieldsValue({
-        billingCycle: 'monthly',
-        paymentMethod: 'bank_transfer',
-        status: 'active',
-        autoRenew: false,
-      });
 
       // Load danh sách người dùng và danh sách gói hội viên để hiển thị Dropdown
       const loadOptions = async () => {
@@ -81,13 +76,18 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
       footer={null}
       title={<span className="text-base font-semibold text-slate-800">Thêm mới</span>}
       width={560}
-      destroyOnClose
       className="top-8"
     >
       <Form
         form={form}
         layout="vertical"
         onFinish={handleFinish}
+        initialValues={{
+          billingCycle: 'monthly',
+          paymentMethod: PAYMENT_METHOD_CODES.VIETQR,
+          status: 'active',
+          autoRenew: false,
+        }}
         className="pt-3"
         requiredMark="optional"
       >

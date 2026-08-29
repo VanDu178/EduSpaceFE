@@ -149,19 +149,25 @@ const ListPage = ({
       key: 'isActive',
       width: 120,
       align: "left",
-      render: (isActive: boolean, record: MembershipPlan) => (
-        <div className="flex items-center !space-x-2">
-          <Switch
-            checked={isActive}
-            onChange={() => onToggleStatus(record.id)}
-            size="small"
-            className={isActive ? 'bg-sky-500' : 'bg-slate-300'}
-          />
-          <span className={`text-xs font-medium ${isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
-            {isActive ? 'Kích hoạt' : 'Ẩn'}
-          </span>
-        </div>
-      ),
+      render: (isActive: boolean, record: MembershipPlan) => {
+        const isLocked = Boolean(record.hasSubscribers || (record.subscriberCount && record.subscriberCount > 0));
+        return (
+          <Tooltip title={isLocked ? "Gói dịch vụ đã có người đăng ký, không thể chuyển đổi trạng thái" : undefined}>
+            <div className="flex items-center !space-x-2">
+              <Switch
+                checked={isActive}
+                disabled={isLocked}
+                onChange={() => onToggleStatus(record.id)}
+                size="small"
+                className={isActive ? 'bg-sky-500' : 'bg-slate-300'}
+              />
+              <span className={`text-xs font-medium ${isLocked ? 'text-slate-400' : isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
+                {isActive ? 'Kích hoạt' : 'Ẩn'}
+              </span>
+            </div>
+          </Tooltip>
+        );
+      },
     },
     {
       title: 'Thao tác',
@@ -169,49 +175,55 @@ const ListPage = ({
       width: 130,
       align: 'center',
       fixed: "right",
-      render: (_: any, record: MembershipPlan) => (
-        <div className="flex items-center justify-center space-x-1">
-          <Tooltip title="Xem chi tiết">
-            <Button
-              type="text"
-              size="small"
-              onClick={() => onViewDetail(record)}
-              icon={<EyeIcon className="h-4 w-4 text-slate-500 hover:text-sky-600 transition-colors" />}
-              className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
-            />
-          </Tooltip>
-
-          <Tooltip title="Chỉnh sửa">
-            <Button
-              type="text"
-              size="small"
-              onClick={() => onEdit(record)}
-              icon={<PencilSquareIcon className="h-4 w-4 text-slate-500 hover:text-sky-600 transition-colors" />}
-              className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
-            />
-          </Tooltip>
-
-          <Tooltip title="Xóa">
-            <Popconfirm
-              title="Xóa gói hội viên"
-              description="Bạn có chắc chắn muốn xóa gói hội viên này không?"
-              onConfirm={() => onDelete(record.id)}
-              okText="Xóa"
-              cancelText="Hủy"
-              okButtonProps={{ danger: true, className: 'rounded-lg' }}
-              cancelButtonProps={{ className: 'rounded-lg' }}
-            >
+      render: (_: any, record: MembershipPlan) => {
+        const isLocked = Boolean(record.hasSubscribers || (record.subscriberCount && record.subscriberCount > 0));
+        return (
+          <div className="flex items-center justify-center space-x-1">
+            <Tooltip title="Xem chi tiết">
               <Button
                 type="text"
                 size="small"
-                danger
-                icon={<TrashIcon className="h-4 w-4 text-rose-500 hover:text-rose-700 transition-colors" />}
-                className="p-1 hover:bg-rose-50 rounded-lg flex items-center justify-center"
+                onClick={() => onViewDetail(record)}
+                icon={<EyeIcon className="h-4 w-4 text-slate-500 hover:text-sky-600 transition-colors" />}
+                className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
               />
-            </Popconfirm>
-          </Tooltip>
-        </div>
-      ),
+            </Tooltip>
+
+            <Tooltip title={isLocked ? "Gói dịch vụ đã có người đăng ký, không thể chỉnh sửa" : "Chỉnh sửa"}>
+              <Button
+                type="text"
+                size="small"
+                disabled={isLocked}
+                onClick={() => onEdit(record)}
+                icon={<PencilSquareIcon className={`h-4 w-4 ${isLocked ? 'text-slate-300' : 'text-slate-500 hover:text-sky-600'} transition-colors`} />}
+                className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
+              />
+            </Tooltip>
+
+            <Tooltip title={isLocked ? "Gói dịch vụ đã có người đăng ký, không thể xóa" : "Xóa"}>
+              <Popconfirm
+                title="Xóa gói hội viên"
+                description="Bạn có chắc chắn muốn xóa gói hội viên này không?"
+                onConfirm={() => onDelete(record.id)}
+                disabled={isLocked}
+                okText="Xóa"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true, className: 'rounded-lg' }}
+                cancelButtonProps={{ className: 'rounded-lg' }}
+              >
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  disabled={isLocked}
+                  icon={<TrashIcon className={`h-4 w-4 ${isLocked ? 'text-slate-300' : 'text-rose-500 hover:text-rose-700'} transition-colors`} />}
+                  className="p-1 hover:bg-rose-50 rounded-lg flex items-center justify-center"
+                />
+              </Popconfirm>
+            </Tooltip>
+          </div>
+        );
+      },
     },
   ];
 

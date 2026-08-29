@@ -2,11 +2,13 @@ import api from '../../../services/api';
 import type { VietqrBank, VietqrBankQueryParams, SyncBankResultDto } from '../types';
 import type { ApiResponse } from '../../../types/api';
 
+const BASE_PATH = '/vietqr-banks';
+
 // Lấy danh sách ngân hàng VietQR
 export const fetchVietqrBanksApi = async (
   params?: VietqrBankQueryParams
 ): Promise<VietqrBank[]> => {
-  const response = await api.get('/vietqr-banks', { params });
+  const response = await api.get(`${BASE_PATH}`, { params });
   if (response?.data?.success) {
     return response.data.data.banks;
   }
@@ -17,7 +19,7 @@ export const fetchVietqrBanksApi = async (
 export const fetchVietqrBankByIdApi = async (
   id: number
 ): Promise<VietqrBank> => {
-  const response = await api.get(`/vietqr-banks/${id}`);
+  const response = await api.get(`${BASE_PATH}/${id}`);
   if (response?.data?.success) {
     return response.data.data.bank;
   }
@@ -26,7 +28,7 @@ export const fetchVietqrBankByIdApi = async (
 
 // Đồng bộ danh sách ngân hàng từ VietQR API
 export const syncVietqrBanksApi = async (): Promise<ApiResponse<SyncBankResultDto>> => {
-  const response = await api.post('/vietqr-banks/sync');
+  const response = await api.post(`${BASE_PATH}/sync`);
   return response?.data;
 };
 
@@ -34,6 +36,6 @@ export const syncVietqrBanksApi = async (): Promise<ApiResponse<SyncBankResultDt
 export const toggleVietqrBankStatusApi = async (
   id: number
 ): Promise<ApiResponse<{ bank: VietqrBank }>> => {
-  const response = await api.patch(`/vietqr-banks/${id}/status`);
+  const response = await api.patch(`${BASE_PATH}/${id}/status`);
   return response?.data;
 };

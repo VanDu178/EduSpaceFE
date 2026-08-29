@@ -18,10 +18,12 @@ import type {
 
 export { useActiveVietqrBanksQuery };
 
+export const QUERY_KEY = ['paymentAccounts'];
+
 // Query danh sách tài khoản thanh toán
 export const usePaymentAccountsQuery = (params?: PaymentAccountQueryParams) => {
   return useQuery<PaymentAccount[]>({
-    queryKey: ['paymentAccounts', params],
+    queryKey: [...QUERY_KEY, params],
     queryFn: () => fetchPaymentAccountsApi(params),
   });
 };
@@ -34,7 +36,7 @@ export const useCreatePaymentAccountMutation = () => {
     onSuccess: (res) => {
       if (res?.success) {
         toast.success('Thêm mới thành công');
-        queryClient.invalidateQueries({ queryKey: ['paymentAccounts'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
         toast.error(res?.message || 'Thêm mới thất bại');
       }
@@ -54,7 +56,7 @@ export const useUpdatePaymentAccountMutation = () => {
     onSuccess: (res) => {
       if (res?.success) {
         toast.success('Cập nhật thành công');
-        queryClient.invalidateQueries({ queryKey: ['paymentAccounts'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
         toast.error(res?.message || 'Cập nhật thất bại');
       }
@@ -73,7 +75,7 @@ export const useTogglePaymentAccountStatusMutation = () => {
     onSuccess: (res) => {
       if (res?.success) {
         toast.success(res.message || 'Đã cập nhật trạng thái');
-        queryClient.invalidateQueries({ queryKey: ['paymentAccounts'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
         toast.error(res?.message || 'Cập nhật trạng thái thất bại');
       }
@@ -92,7 +94,7 @@ export const useSetDefaultPaymentAccountMutation = () => {
     onSuccess: (res) => {
       if (res?.success) {
         toast.success(res?.message || 'Đã cập nhật trạng thái mặc định');
-        queryClient.invalidateQueries({ queryKey: ['paymentAccounts'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
         toast.error(res?.message || 'Không thể cập nhật trạng thái mặc định');
       }
@@ -111,13 +113,13 @@ export const useDeletePaymentAccountMutation = () => {
     onSuccess: (res) => {
       if (res?.success) {
         toast.success('Xóa bản ghi thành công');
-        queryClient.invalidateQueries({ queryKey: ['paymentAccounts'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       } else {
         toast.error(res?.message || 'Xóa bản ghi thất bại');
       }
     },
     onError: (err: any) => {
-      toast.error(err?.message || 'Đã xảy ra lỗi khi xóa');
+      toast.error(err?.response?.data?.message || err?.message || 'Đã xảy ra lỗi khi xóa');
     },
   });
 };

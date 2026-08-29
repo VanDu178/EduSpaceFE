@@ -2,9 +2,11 @@ import api from '../../../services/api';
 import type { Feature, FeaturePayload, SystemFeatureCode } from '../types';
 import type { ApiResponse } from '../../../types/api';
 
+const BASE_PATH = '/features';
+
 // API Lấy danh sách tất cả các tính năng (Features)
 export const fetchFeaturesApi = async (params?: { keyword?: string; status?: string }): Promise<Feature[]> => {
-  const response = await api.get('/features', { params });
+  const response = await api.get(`${BASE_PATH}`, { params });
   if (response?.data?.success) {
     return response.data.data.features;
   }
@@ -13,37 +15,37 @@ export const fetchFeaturesApi = async (params?: { keyword?: string; status?: str
 
 // API Tạo mới tính năng
 export const createFeatureApi = async (payload: FeaturePayload): Promise<ApiResponse<Feature>> => {
-  const response = await api.post('/features', payload);
+  const response = await api.post(`${BASE_PATH}`, payload);
   return response?.data;
 };
 
 // API Cập nhật tính năng
 export const updateFeatureApi = async (id: number, payload: FeaturePayload): Promise<ApiResponse<Feature>> => {
-  const response = await api.put(`/features/${id}`, payload);
+  const response = await api.put(`${BASE_PATH}/${id}`, payload);
   return response?.data;
 };
 
 // API Bật/tắt trạng thái kích hoạt tính năng
 export const toggleFeatureStatusApi = async (id: number): Promise<ApiResponse<Feature>> => {
-  const response = await api.patch(`/features/${id}/status`);
+  const response = await api.patch(`${BASE_PATH}/${id}/status`);
   return response?.data;
 };
 
 // API Cập nhật thứ tự sắp xếp tính năng
 export const updateFeatureSortOrderApi = async (id: number, sortOrder: number): Promise<ApiResponse<Feature>> => {
-  const response = await api.patch(`/features/${id}/sort-order`, { sortOrder });
+  const response = await api.patch(`${BASE_PATH}/${id}/sort-order`, { sortOrder });
   return response?.data;
 };
 
 // API Xóa tính năng
 export const deleteFeatureApi = async (id: number): Promise<ApiResponse<null>> => {
-  const response = await api.delete(`/features/${id}`);
+  const response = await api.delete(`${BASE_PATH}/${id}`);
   return response?.data;
 };
 
 // API Lấy danh sách mã tính năng hệ thống chuẩn
 export const fetchSystemFeatureCodesApi = async (): Promise<SystemFeatureCode[]> => {
-  const response = await api.get('/features/system-codes');
+  const response = await api.get(`${BASE_PATH}/system-codes`);
   if (response?.data?.success) {
     return response.data.data.systemCodes;
   }

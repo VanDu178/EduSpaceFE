@@ -6,7 +6,7 @@ import { fetchSystemFeatureCodesApi } from '../api';
 interface FormCreateProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (values: FeaturePayload) => Promise<boolean>;
+  onSave: (values: FeaturePayload) => void;
   isLoading: boolean;
 }
 
@@ -18,10 +18,6 @@ const FormCreate = ({ isOpen, onClose, onSave, isLoading }: FormCreateProps) => 
   useEffect(() => {
     if (isOpen) {
       form.resetFields();
-      form.setFieldsValue({
-        sortOrder: 0,
-        isActive: true,
-      });
 
       // Fetch system feature codes when opening the drawer
       const loadSystemCodes = async () => {
@@ -53,10 +49,7 @@ const FormCreate = ({ isOpen, onClose, onSave, isLoading }: FormCreateProps) => 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      const success = await onSave(values);
-      if (success) {
-        onClose();
-      }
+      onSave(values);
     } catch (error) {
       console.error('Validation failed:', error);
     }
@@ -69,7 +62,6 @@ const FormCreate = ({ isOpen, onClose, onSave, isLoading }: FormCreateProps) => 
       width={480}
       open={isOpen}
       onClose={onClose}
-      destroyOnClose
       footer={
         <div className="flex justify-end space-x-3 py-2 px-2">
           <Button onClick={onClose} className="rounded-xl">
@@ -89,6 +81,10 @@ const FormCreate = ({ isOpen, onClose, onSave, isLoading }: FormCreateProps) => 
       <Form
         form={form}
         layout="vertical"
+        initialValues={{
+          sortOrder: 0,
+          isActive: true,
+        }}
         className="space-y-4"
       >
         <Form.Item

@@ -11,14 +11,17 @@ import {
 } from '../api';
 import type { Blog, BlogPayload, Params } from '../types';
 import type { BlogType } from '../../blogTypes';
+import { QUERY_KEY as BLOG_TYPES_QUERY_KEY } from '../../blogTypes/hooks';
 import type { ApiResponse, PaginatedData } from '../../../types/api';
 import { handleApiError } from '../../../utils/errorHandler';
 import { toast } from '../../../utils/toastHelper';
 
+export const QUERY_KEY = ['blogs'];
+
 // Custom hook truy vấn danh sách bài blog
 export const useBlogsQuery = (params?: Params) => {
   return useQuery<PaginatedData<{ blogs: Blog[] }>>({
-    queryKey: ['blogs', params],
+    queryKey: [...QUERY_KEY, params],
     queryFn: () => fetchBlogsApi(params),
   });
 };
@@ -26,7 +29,7 @@ export const useBlogsQuery = (params?: Params) => {
 // Custom hook truy vấn chi tiết bài blog theo ID (Admin)
 export const useBlogQuery = (id: number | string | undefined) => {
   return useQuery<{ blog: Blog }>({
-    queryKey: ['blog', id],
+    queryKey: [...QUERY_KEY, id],
     queryFn: () => fetchBlogByIdApi(id!),
     enabled: Boolean(id),
   });
@@ -44,7 +47,7 @@ export const useCreateBlogMutation = (
     onSuccess: (res) => {
       if (res?.success) {
         toast.success('Tạo bài blog mới thành công!');
-        queryClient.invalidateQueries({ queryKey: ['blogs'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
         if (onSuccessCallback) onSuccessCallback();
       } else {
         toast.error(res?.message || 'Tạo bài blog thất bại!');
@@ -73,7 +76,7 @@ export const useDeleteBlogMutation = (
     onSuccess: (res) => {
       if (res?.success) {
         toast.success('Xóa bài blog thành công!');
-        queryClient.invalidateQueries({ queryKey: ['blogs'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
         if (onSuccessCallback) onSuccessCallback();
       } else {
         toast.error(res?.message || 'Xóa bài blog thất bại!');
@@ -103,7 +106,7 @@ export const useUpdateBlogMutation = (
     onSuccess: (res) => {
       if (res?.success) {
         toast.success('Cập nhật bài blog thành công!');
-        queryClient.invalidateQueries({ queryKey: ['blogs'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
         if (onSuccessCallback) onSuccessCallback();
       } else {
         toast.error(res?.message || 'Cập nhật bài blog thất bại!');
@@ -115,12 +118,12 @@ export const useUpdateBlogMutation = (
       if (isNotImplemented) {
         console.warn('PUT /blogs/:id failed or not implemented yet. Using simulated fallback on frontend.', err);
 
-        const blogTypes = queryClient.getQueryData<BlogType[]>(['blogTypes']) || [];
+        const blogTypes = queryClient.getQueryData<BlogType[]>(BLOG_TYPES_QUERY_KEY) || [];
 
         setTimeout(() => {
           toast.success('Cập nhật thành công (Giả lập phía giao diện)!');
 
-          queryClient.setQueryData(['blogs'], (oldData: any) => {
+          queryClient.setQueryData(QUERY_KEY, (oldData: any) => {
             if (!oldData) return undefined;
 
             const updateBlogInList = (list: Blog[]) =>
@@ -180,7 +183,7 @@ export const useUpdateBlogStatusMutation = (
     onSuccess: (res) => {
       if (res?.success) {
         toast.success('Cập nhật trạng thái bài blog thành công!');
-        queryClient.invalidateQueries({ queryKey: ['blogs'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
         if (onSuccessCallback) onSuccessCallback();
       } else {
         toast.error(res?.message || 'Cập nhật trạng thái bài blog thất bại!');
@@ -210,7 +213,7 @@ export const useUpdateBlogAccessMutation = (
     onSuccess: (res) => {
       if (res?.success) {
         toast.success('Cập nhật quyền truy cập bài viết thành công!');
-        queryClient.invalidateQueries({ queryKey: ['blogs'] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
         if (onSuccessCallback) onSuccessCallback();
       } else {
         toast.error(res?.message || 'Cập nhật quyền truy cập thất bại!');

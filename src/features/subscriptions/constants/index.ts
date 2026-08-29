@@ -1,4 +1,5 @@
 import type { SubscriptionStatus, BillingCycle } from '../types';
+import { PAYMENT_METHOD_CODES } from '../../paymentMethods/constants';
 
 export const STATUS_CONFIG: Record<
   SubscriptionStatus,
@@ -36,22 +37,13 @@ export const BILLING_CYCLE_LABELS: Record<BillingCycle, string> = {
 };
 
 export const PAYMENT_METHOD_OPTIONS = [
-  { value: 'bank_transfer', label: 'Chuyển khoản ngân hàng' },
-  { value: 'momo', label: 'Ví MoMo' },
-  { value: 'vnpay', label: 'Cổng VNPay' },
-  { value: 'credit_card', label: 'Thẻ tín dụng / Ghi nợ' },
-  { value: 'cash', label: 'Tiền mặt' },
-  { value: 'free', label: 'Miễn phí / Quà tặng' },
+  { value: PAYMENT_METHOD_CODES.VIETQR, label: 'Chuyển khoản QR (VietQR)' },
+  { value: PAYMENT_METHOD_CODES.CREDIT_CARD, label: 'Thẻ quốc tế / Ghi nợ' },
+  { value: PAYMENT_METHOD_CODES.E_WALLET, label: 'Ví điện tử' },
 ];
 
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  vietqr: 'Chuyển khoản QR (VietQR)',
-  qr_banking: 'Chuyển khoản QR (VietQR)',
-  bank_transfer: 'Chuyển khoản ngân hàng',
-  credit_card: 'Thẻ tín dụng / Ghi nợ',
-  e_wallet: 'Ví điện tử',
-  momo: 'Ví MoMo',
-  vnpay: 'Cổng VNPay',
-  cash: 'Tiền mặt',
-  free: 'Miễn phí',
+  [PAYMENT_METHOD_CODES.VIETQR]: 'Chuyển khoản QR (VietQR)',
+  [PAYMENT_METHOD_CODES.CREDIT_CARD]: 'Thẻ quốc tế / Ghi nợ',
+  [PAYMENT_METHOD_CODES.E_WALLET]: 'Ví điện tử',
 };

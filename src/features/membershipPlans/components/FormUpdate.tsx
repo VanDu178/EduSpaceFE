@@ -79,7 +79,6 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProp
       width={600}
       open={isOpen}
       onClose={onClose}
-      destroyOnClose
       footer={
         <div className="flex justify-end space-x-3 py-2 px-2">
           <Button onClick={onClose} className="rounded-xl">
