@@ -12,7 +12,6 @@ interface ListPageProps {
   onViewDetail: (account: PaymentAccount) => void;
   onEdit: (account: PaymentAccount) => void;
   onDelete: (id: number) => void;
-  onToggleStatus: (account: PaymentAccount) => void;
   onSetDefault: (account: PaymentAccount) => void;
 }
 
@@ -23,7 +22,6 @@ const ListPage = ({
   onViewDetail,
   onEdit,
   onDelete,
-  onToggleStatus,
   onSetDefault,
 }: ListPageProps) => {
   const getBankInfo = (record: PaymentAccount) => {
@@ -118,43 +116,22 @@ const ListPage = ({
       ),
     },
     {
-      title: 'Mặc định',
+      title: 'Trạng thái nhận tiền',
       dataIndex: 'isDefault',
       key: 'isDefault',
-      align: 'center',
-      width: 150,
+      align: 'left',
+      width: 180,
       render: (isDefault: boolean, record: PaymentAccount) => (
-        <div className="flex items-center justify-center gap-2">
-          <Tooltip title={isDefault ? 'Tắt mặc định' : 'Đặt làm mặc định'}>
+        <div className="flex items-center gap-2">
+          <Tooltip title={isDefault ? 'Đang nhận tiền mặc định' : 'Đặt làm tài khoản nhận tiền chính'}>
             <Switch
               size="small"
               checked={isDefault}
               onChange={() => onSetDefault(record)}
             />
           </Tooltip>
-          <span className={`text-xs ${isDefault ? 'font-semibold text-purple-700' : 'font-semibold text-slate-400'}`}>
-            {isDefault ? 'Mặc định' : 'Tài khoản phụ'}
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'isActive',
-      key: 'isActive',
-      align: 'left',
-      width: 160,
-      render: (isActive: boolean, record: PaymentAccount) => (
-        <div className="flex items-center gap-2">
-          <Tooltip title={isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}>
-            <Switch
-              size="small"
-              checked={isActive}
-              onChange={() => onToggleStatus(record)}
-            />
-          </Tooltip>
-          <span className={`font-bold text-xs ${isActive ? 'text-emerald-600' : "text-slate-400"}`}>
-            {isActive ? 'Hoạt động' : 'Vô hiệu hóa'}
+          <span className={`text-xs ${isDefault ? 'font-bold text-emerald-600' : 'font-semibold text-slate-400'}`}>
+            {isDefault ? 'Đang nhận tiền' : 'Tài khoản dự phòng'}
           </span>
         </div>
       ),
@@ -235,5 +212,3 @@ const ListPage = ({
 };
 
 export default ListPage;
-
-

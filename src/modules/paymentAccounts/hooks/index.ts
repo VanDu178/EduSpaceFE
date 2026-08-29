@@ -4,7 +4,6 @@ import {
   fetchPaymentAccountsApi,
   createPaymentAccountApi,
   updatePaymentAccountApi,
-  togglePaymentAccountStatusApi,
   setDefaultPaymentAccountApi,
   deletePaymentAccountApi,
 } from '../api';
@@ -42,7 +41,7 @@ export const useCreatePaymentAccountMutation = () => {
       }
     },
     onError: (err: any) => {
-      toast.error(err?.message || 'Đã xảy ra lỗi khi thêm mới');
+      toast.error(err?.response?.data?.message || err?.message || 'Đã xảy ra lỗi khi thêm mới');
     },
   });
 };
@@ -62,31 +61,12 @@ export const useUpdatePaymentAccountMutation = () => {
       }
     },
     onError: (err: any) => {
-      toast.error(err?.message || 'Đã xảy ra lỗi khi cập nhật');
+      toast.error(err?.response?.data?.message || err?.message || 'Đã xảy ra lỗi khi cập nhật');
     },
   });
 };
 
-// Mutation đổi trạng thái kích hoạt/khóa tài khoản thanh toán
-export const useTogglePaymentAccountStatusMutation = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: number) => togglePaymentAccountStatusApi(id),
-    onSuccess: (res) => {
-      if (res?.success) {
-        toast.success(res.message || 'Đã cập nhật trạng thái');
-        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-      } else {
-        toast.error(res?.message || 'Cập nhật trạng thái thất bại');
-      }
-    },
-    onError: (err: any) => {
-      toast.error(err?.message || 'Lỗi khi cập nhật trạng thái');
-    },
-  });
-};
-
-// Mutation thiết lập tài khoản làm mặc định
+// Mutation thiết lập tài khoản làm mặc định đang nhận tiền
 export const useSetDefaultPaymentAccountMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -100,7 +80,7 @@ export const useSetDefaultPaymentAccountMutation = () => {
       }
     },
     onError: (err: any) => {
-      toast.error(err?.message || 'Đã xảy ra lỗi');
+      toast.error(err?.response?.data?.message || err?.message || 'Đã xảy ra lỗi');
     },
   });
 };

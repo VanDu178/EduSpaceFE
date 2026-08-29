@@ -8,14 +8,12 @@ import {
   useActiveVietqrBanksQuery,
   useCreatePaymentAccountMutation,
   useUpdatePaymentAccountMutation,
-  useTogglePaymentAccountStatusMutation,
   useSetDefaultPaymentAccountMutation,
   useDeletePaymentAccountMutation,
 } from '../hooks';
 
 const defaultParam: PaymentAccountQueryParams = {
   keyword: '',
-  status: 'ALL',
 };
 
 const PaymentAccountPage = () => {
@@ -29,7 +27,6 @@ const PaymentAccountPage = () => {
   // Mutations
   const createMutation = useCreatePaymentAccountMutation();
   const updateMutation = useUpdatePaymentAccountMutation();
-  const toggleStatusMutation = useTogglePaymentAccountStatusMutation();
   const setDefaultMutation = useSetDefaultPaymentAccountMutation();
   const deleteMutation = useDeletePaymentAccountMutation();
 
@@ -67,11 +64,6 @@ const PaymentAccountPage = () => {
         },
       }
     );
-  };
-
-  // Xử lý đổi trạng thái kích hoạt nhanh bằng Switch
-  const handleToggleStatus = (record: PaymentAccount) => {
-    toggleStatusMutation.mutate(record.id);
   };
 
   // Xử lý bật/tắt tài khoản mặc định
@@ -123,7 +115,6 @@ const PaymentAccountPage = () => {
             setIsUpdateOpen(true);
           }}
           onDelete={handleDelete}
-          onToggleStatus={handleToggleStatus}
           onSetDefault={handleSetDefault}
         />
       </div>
@@ -152,7 +143,7 @@ const PaymentAccountPage = () => {
         onSubmit={handleUpdate}
       />
 
-      {/* Drawer Chi tiết */}
+      {/* Drawer Xem chi tiết */}
       <FormDetail
         open={isDetailOpen}
         data={selectedDetailAccount}

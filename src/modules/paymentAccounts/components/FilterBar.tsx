@@ -1,4 +1,4 @@
-import { Input, Select } from 'antd';
+import { Input } from 'antd';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import type React from 'react';
 import type { PaymentAccountQueryParams } from '../types';
@@ -21,27 +21,8 @@ const FilterBar = ({ params, setParams }: FilterBarProps) => {
       </span>
 
       <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-        {/* Lọc Trạng thái */}
-        <div className="w-full sm:w-[180px]">
-          <Select
-            value={params?.status || 'ALL'}
-            onChange={(value) =>
-              setParams((prev) => ({
-                ...prev,
-                status: value as any,
-              }))
-            }
-            options={[
-              { value: 'ALL', label: 'Tất cả trạng thái' },
-              { value: 'active', label: 'Hoạt động' },
-              { value: 'inactive', label: 'Vô hiệu hóa' },
-            ]}
-            className="w-full"
-          />
-        </div>
-
         {/* Ô nhập tìm kiếm */}
-        <div className="w-full sm:w-[280px]">
+        <div className="w-full sm:w-[320px]">
           <Input
             placeholder="Tìm theo ngân hàng, STK, chủ TK..."
             value={params?.keyword || ''}
@@ -62,6 +43,3 @@ const FilterBar = ({ params, setParams }: FilterBarProps) => {
 };
 
 export default FilterBar;
-
-
-

@@ -168,7 +168,7 @@ const ListPage = ({
               onChange={() => onToggleStatus(record)}
             />
           </Tooltip>
-          <span className={`font-bold text-xs ${isActive ? 'text-emerald-600' : 'text-rose-600'}`}>
+          <span className={`font-bold text-xs ${isActive ? 'text-emerald-600' : 'text-slate-600'}`}>
             {isActive ? 'Hoạt động' : 'Vô hiệu hóa'}
           </span>
         </div>

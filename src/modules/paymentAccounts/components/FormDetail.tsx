@@ -31,7 +31,7 @@ const FormDetail = ({ open, data, onCancel }: FormDetailProps) => {
       <div className="space-y-5">
         {/* Realistic Bank Card Visual */}
         <div className="relative w-full aspect-[1.586/1] rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-5 text-white overflow-hidden border border-slate-800 flex flex-col justify-between select-none">
-          {/* Subtle Background Accent Glare (Border & Gradient based) */}
+          {/* Subtle Background Accent Glare */}
           <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-indigo-500/10 pointer-events-none blur-xl" />
           <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-sky-500/10 pointer-events-none blur-xl" />
 
@@ -62,7 +62,7 @@ const FormDetail = ({ open, data, onCancel }: FormDetailProps) => {
             </svg>
           </div>
 
-          {/* Middle: EMV Chip & Default / Active Status Badges */}
+          {/* Middle: EMV Chip & Default Status Badges */}
           <div className="relative z-10 flex items-center justify-between my-auto pt-2">
             {/* Metallic Gold EMV Chip Visual */}
             <div className="w-11 h-8 rounded-md bg-gradient-to-tr from-amber-300 via-yellow-400 to-amber-200 border border-amber-400/80 relative overflow-hidden flex flex-col justify-center px-1">
@@ -73,18 +73,13 @@ const FormDetail = ({ open, data, onCancel }: FormDetailProps) => {
 
             {/* Badges */}
             <div className="flex items-center gap-1.5">
-              {data.isDefault && (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-200 border border-purple-400/30 tracking-wider uppercase">
-                  Mặc định
-                </span>
-              )}
-              {data.isActive ? (
+              {data.isDefault ? (
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 tracking-wider uppercase">
-                  Hoạt động
+                  Đang nhận tiền
                 </span>
               ) : (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30 tracking-wider uppercase">
-                  Vô hiệu hóa
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/20 text-slate-300 border border-slate-400/30 tracking-wider uppercase">
+                  Tài khoản dự phòng
                 </span>
               )}
             </div>
@@ -160,27 +155,14 @@ const FormDetail = ({ open, data, onCancel }: FormDetailProps) => {
           </div>
 
           <div className="flex justify-between items-center py-2 border-b border-slate-100">
-            <span className="text-slate-500 font-medium">Tài khoản mặc định:</span>
+            <span className="text-slate-500 font-medium">Trạng thái nhận tiền:</span>
             {data.isDefault ? (
-              <span className="flex items-center gap-1 text-purple-700">
-                <StarIcon className="h-4 w-4 text-purple-600 shrink-0" />
-                <span className="text-xs font-semibold">Mặc định</span>
+              <span className="flex items-center gap-1 text-emerald-700 font-bold">
+                <StarIcon className="h-4 w-4 text-emerald-600 shrink-0" />
+                <span className="text-xs">Đang nhận tiền</span>
               </span>
             ) : (
-              <span className="text-slate-400 text-xs italic">Không</span>
-            )}
-          </div>
-
-          <div className="flex justify-between items-center py-2 border-b border-slate-100">
-            <span className="text-slate-500 font-medium">Trạng thái:</span>
-            {data.isActive ? (
-              <span className="text-xs font-semibold !border-none text-emerald-700">
-                Hoạt động
-              </span>
-            ) : (
-              <span className="text-xs font-semibold !border-none text-slate-700">
-                Vô hiệu hóa
-              </span>
+              <span className="text-slate-500 text-xs font-medium">Tài khoản dự phòng</span>
             )}
           </div>
 
@@ -195,7 +177,7 @@ const FormDetail = ({ open, data, onCancel }: FormDetailProps) => {
 
           <div className="py-2 space-y-1.5">
             <span className="text-slate-500 font-medium block">Ghi chú</span>
-            <div className="">
+            <div>
               {data.note ? (
                 <span className="text-slate-700 whitespace-pre-wrap">{data.note}</span>
               ) : (
@@ -210,5 +192,3 @@ const FormDetail = ({ open, data, onCancel }: FormDetailProps) => {
 };
 
 export default FormDetail;
-
-

@@ -32,7 +32,6 @@ const FormUpdate = ({
         accountHolder: data.accountHolder,
         note: data.note || '',
         isDefault: data.isDefault,
-        isActive: data.isActive,
       });
     }
   }, [open, data, form]);
@@ -114,7 +113,7 @@ const FormUpdate = ({
           name="accountHolder"
           rules={[{ required: true, message: 'Vui lòng nhập tên chủ tài khoản' }]}
         >
-          <Input placeholder="Ví dụ: CONG TY TRADEVERSE VIP" className="rounded-xl border-slate-200 text-sm py-2 uppercase" />
+          <Input placeholder="Ví dụ: CÔNG TY TNHH TRADEVERSE VIỆT NAM" className="rounded-xl border-slate-200 text-sm py-2 uppercase" />
         </Form.Item>
 
         <Form.Item
@@ -125,17 +124,9 @@ const FormUpdate = ({
         </Form.Item>
 
         <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-          <div className="flex items-center space-x-2">
-            <Form.Item name="isDefault" valuePropName="checked" className="mb-0" label={<span className="text-xs text-slate-600 font-medium">Đặt làm tài khoản mặc định</span>}>
-              <Switch className="bg-slate-300" />
-            </Form.Item>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Form.Item name="isActive" valuePropName="checked" className="mb-0" label={<span className="text-xs text-slate-600 font-medium">Kích hoạt</span>}>
-              <Switch className="bg-slate-300" />
-            </Form.Item>
-          </div>
+          <Form.Item name="isDefault" valuePropName="checked" className="mb-0" label={<span className="text-xs text-slate-600 font-medium">Đặt làm tài khoản nhận tiền chính</span>}>
+            <Switch className="bg-slate-300" />
+          </Form.Item>
         </div>
       </Form>
     </Drawer>
@@ -143,4 +134,3 @@ const FormUpdate = ({
 };
 
 export default FormUpdate;
-

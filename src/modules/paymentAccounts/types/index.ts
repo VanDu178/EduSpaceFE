@@ -8,7 +8,6 @@ export interface PaymentAccount {
   accountHolder: string;
   qrCodeUrl?: string | null;
   isDefault: boolean;
-  isActive: boolean;
   note?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -20,7 +19,6 @@ export interface CreatePaymentAccountDto {
   accountHolder: string;
   qrCodeUrl?: string | null;
   isDefault?: boolean;
-  isActive?: boolean;
   note?: string | null;
 }
 
@@ -30,11 +28,9 @@ export interface UpdatePaymentAccountDto {
   accountHolder?: string;
   qrCodeUrl?: string | null;
   isDefault?: boolean;
-  isActive?: boolean;
   note?: string | null;
 }
 
 export interface PaymentAccountQueryParams {
   keyword?: string;
-  status?: 'ALL' | 'active' | 'inactive';
 }

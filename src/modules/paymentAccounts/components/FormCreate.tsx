@@ -62,7 +62,6 @@ const FormCreate = ({
         onFinish={handleFinish}
         initialValues={{
           isDefault: false,
-          isActive: true,
         }}
         className="space-y-4"
       >
@@ -107,7 +106,7 @@ const FormCreate = ({
           name="accountHolder"
           rules={[{ required: true, message: 'Vui lòng nhập tên chủ tài khoản' }]}
         >
-          <Input placeholder="Ví dụ: CONG TY TRADEVERSE VIP" className="rounded-xl border-slate-200 text-sm py-2 uppercase" />
+          <Input placeholder="Ví dụ: CÔNG TY TNHH TRADEVERSE VIỆT NAM" className="rounded-xl border-slate-200 text-sm py-2 uppercase" />
         </Form.Item>
 
         <Form.Item
@@ -118,17 +117,9 @@ const FormCreate = ({
         </Form.Item>
 
         <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-          <div className="flex items-center space-x-2">
-            <Form.Item name="isDefault" valuePropName="checked" className="mb-0" label={<span className="font-semibold text-slate-700">Đặt làm tài khoản mặc định</span>}>
-              <Switch className="bg-slate-300" />
-            </Form.Item>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Form.Item name="isActive" valuePropName="checked" className="mb-0" label={<span className="font-semibold text-slate-700">Kích hoạt ngay</span>}>
-              <Switch className="bg-slate-300" />
-            </Form.Item>
-          </div>
+          <Form.Item name="isDefault" valuePropName="checked" className="mb-0" label={<span className="font-semibold text-slate-700">Đặt làm tài khoản nhận tiền chính</span>}>
+            <Switch className="bg-slate-300" />
+          </Form.Item>
         </div>
       </Form>
     </Drawer>
@@ -136,4 +127,3 @@ const FormCreate = ({
 };
 
 export default FormCreate;
-
