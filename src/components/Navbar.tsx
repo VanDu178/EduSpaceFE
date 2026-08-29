@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import type { User } from '../features/users/types';
+import type { User } from '../modules/users/types';
 import { BellIcon, ChevronDownIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { USER_ROLE } from '../constants/roles';
 
 interface NavbarProps {
   user: User | null;
@@ -13,7 +14,7 @@ const Navbar = ({ user, onLogout }: NavbarProps) => {
 
   const getRoleLabel = (role?: string) => {
     switch (role?.toLowerCase()) {
-      case 'admin':
+      case USER_ROLE.ADMIN:
         return 'Quản trị viên';
     }
   };

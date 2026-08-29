@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
-import type { User } from '../features/users/types';
+import type { User } from '../modules/users/types';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
-import { useLogoutMutation } from '../features/auth/hooks';
+import { useLogoutMutation } from '../modules/auth/hooks';
 
 const DashboardPage = () => {
   const [user, setUser] = useState<User | null>(null);

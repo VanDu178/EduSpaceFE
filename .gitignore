@@ -18,6 +18,9 @@ build/
 
 # User Knowledge documentation
 KienThuc/
+NANG_CAP.md
+Nâng cấp.md
+
 
 # Editor directories and files
 .vscode/*

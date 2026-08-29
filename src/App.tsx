@@ -1,20 +1,20 @@
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
-import Login from './features/auth/pages/Login';
+import Login from './modules/auth/pages/Login';
 import DashboardPage from './pages/DashboardPage';
-import ListPage from './features/blogs/pages';
-import CreatePage from './features/blogs/pages/CreatePage';
-import UpdatePage from './features/blogs/pages/UpdatePage';
-import DetailPage from './features/blogs/pages/DetailPage';
-import UserListPage from './features/users/pages';
-import { MembershipPlanListPage } from './features/membershipPlans';
-import { FeatureListPage } from './features/features';
-import { SubscriptionListPage } from './features/subscriptions';
-import { PaymentAccountListPage } from './features/paymentAccounts';
-import { VietqrBankListPage } from './features/vietqrBanks';
-import { PaymentTransactionPage } from './features/paymentTransactions';
-import { PaymentMethodListPage } from './features/paymentMethods';
+import ListPage from './modules/blogs/pages';
+import CreatePage from './modules/blogs/pages/CreatePage';
+import UpdatePage from './modules/blogs/pages/UpdatePage';
+import DetailPage from './modules/blogs/pages/DetailPage';
+import UserListPage from './modules/users/pages';
+import { MembershipPlanListPage } from './modules/membershipPlans';
+import { FeatureListPage } from './modules/features';
+import { SubscriptionListPage } from './modules/subscriptions';
+import { PaymentAccountListPage } from './modules/paymentAccounts';
+import { VietqrBankListPage } from './modules/vietqrBanks';
+import { PaymentTransactionPage } from './modules/paymentTransactions';
+import { PaymentMethodListPage } from './modules/paymentMethods';
 import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {

@@ -67,12 +67,14 @@ interface TiptapEditorProps {
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 const TiptapEditor = ({
   value = '',
   onChange,
   placeholder = 'Nhập nội dung chi tiết bài viết của bạn tại đây...',
+  disabled = false,
 }: TiptapEditorProps) => {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
@@ -81,7 +83,14 @@ const TiptapEditor = ({
   const [isYoutubeModalOpen, setIsYoutubeModalOpen] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState('');
 
+  const [isEmpty, setIsEmpty] = useState(() => {
+    if (!value) return true;
+    const clean = value.replace(/<[^>]*>/g, '').trim();
+    return clean.length === 0;
+  });
+
   const editor = useEditor({
+    editable: !disabled,
     extensions: [
       StarterKit.configure({
         codeBlock: false,
@@ -127,11 +136,18 @@ const TiptapEditor = ({
     ],
     content: preprocessContent(value),
     onUpdate: ({ editor }) => {
+      setIsEmpty(editor.isEmpty);
       const rawHtml = editor.getHTML();
       const processedHtml = postprocessContent(rawHtml);
       if (onChange) {
         onChange(processedHtml);
       }
+    },
+    onSelectionUpdate: ({ editor }) => {
+      setIsEmpty(editor.isEmpty);
+    },
+    onTransaction: ({ editor }) => {
+      setIsEmpty(editor.isEmpty);
     },
     editorProps: {
       attributes: {
@@ -150,8 +166,16 @@ const TiptapEditor = ({
       if (currentOutput !== valueOutput) {
         editor.commands.setContent(processedInput);
       }
+      setIsEmpty(editor.isEmpty);
     }
   }, [value, editor]);
+
+  // Synchronize editable state when disabled prop changes
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(!disabled);
+    }
+  }, [editor, disabled]);
 
   if (!editor) {
     return null;
@@ -185,7 +209,7 @@ const TiptapEditor = ({
   const highlightColors = ['#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8', '#fed7aa', '#e2e8f0'];
 
   return (
-    <div className="border border-slate-200 rounded-xl bg-white">
+    <div className={`border border-slate-200 rounded-xl bg-white transition-opacity ${disabled ? 'pointer-events-none opacity-60 select-none' : ''}`}>
       {/* Toolbar */}
       <div className="sticky top-[-16px] z-20 bg-slate-50/95 backdrop-blur-md border-b border-slate-200/80 p-2 flex flex-wrap items-center gap-1 rounded-t-xl">
         {/* Undo / Redo */}
@@ -500,7 +524,7 @@ const TiptapEditor = ({
 
       {/* Editor Content Area */}
       <div className="relative bg-white min-h-[380px] rounded-b-xl">
-        {editor.isEmpty && (
+        {isEmpty && (
           <div
             onClick={() => editor.chain().focus().run()}
             className="absolute top-4 left-4 text-slate-300 text-sm italic pointer-events-auto cursor-text select-none z-10"
