@@ -1,24 +1,128 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { DocumentTextIcon, UsersIcon, SparklesIcon, BanknotesIcon, BuildingLibraryIcon, ChevronLeftIcon, ChevronRightIcon, QrCodeIcon, AdjustmentsHorizontalIcon, TicketIcon } from '@heroicons/react/24/outline';
-import { Tooltip } from 'antd';
+import {
+  UsersIcon,
+  SparklesIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronDownIcon,
+  AdjustmentsHorizontalIcon,
+  TicketIcon,
+} from '@heroicons/react/24/outline';
+import { Dropdown } from 'antd';
+import type { MenuProps } from 'antd';
 
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
 }
 
+interface SubMenuItem {
+  key: string;
+  label: string;
+  path: string;
+}
+
+interface ParentMenuItem {
+  key: string;
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  items: SubMenuItem[];
+}
+
+const menuTree: ParentMenuItem[] = [
+  {
+    key: 'products-services',
+    title: 'Sản phẩm & Dịch vụ',
+    icon: SparklesIcon,
+    items: [
+      {
+        key: 'blogs',
+        label: 'Bài viết',
+        path: '/admin/blogs',
+      },
+      {
+        key: 'membership-plans',
+        label: 'Gói hội viên',
+        path: '/admin/membership-plans',
+      },
+    ],
+  },
+  {
+    key: 'accounting',
+    title: 'Kế toán',
+    icon: TicketIcon,
+    items: [
+      {
+        key: 'subscriptions',
+        label: 'Quản lý đăng ký gói dịch vụ',
+        path: '/admin/subscriptions',
+      },
+      {
+        key: 'payment-transactions',
+        label: 'Giao dịch VietQR',
+        path: '/admin/payment-transactions',
+      },
+    ],
+  },
+  {
+    key: 'account',
+    title: 'Tài khoản',
+    icon: UsersIcon,
+    items: [
+      {
+        key: 'users',
+        label: 'Danh sách người dùng',
+        path: '/admin/users',
+      },
+    ],
+  },
+  {
+    key: 'settings',
+    title: 'Thiết lập',
+    icon: AdjustmentsHorizontalIcon,
+    items: [
+      {
+        key: 'payment-accounts',
+        label: 'Tài khoản thanh toán',
+        path: '/admin/payment-accounts',
+      },
+      {
+        key: 'vietqr-banks',
+        label: 'Ngân hàng VietQR',
+        path: '/admin/vietqr-banks',
+      },
+      {
+        key: 'payment-methods',
+        label: 'Phương thức thanh toán',
+        path: '/admin/payment-methods',
+      },
+    ],
+  },
+];
+
 const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
   const location = useLocation();
+  const isSubItemActive = (path: string) => location.pathname.includes(path);
 
-  // Xác định active menu dựa trên đường dẫn URL hiện tại
-  const isBlogsActive = location.pathname.includes('/admin/blogs') || location.pathname.includes('/admin/posts');
-  const isUsersActive = location.pathname.includes('/admin/users');
-  const isMembershipPlansActive = location.pathname.includes('/admin/membership-plans');
-  const isSubscriptionsActive = location.pathname.includes('/admin/subscriptions');
-  const isPaymentTransactionsActive = location.pathname.includes('/admin/payment-transactions');
-  const isPaymentAccountsActive = location.pathname.includes('/admin/payment-accounts');
-  const isVietqrBanksActive = location.pathname.includes('/admin/vietqr-banks');
-  const isPaymentMethodsActive = location.pathname.includes('/admin/payment-methods');
+  const isParentActive = (parent: ParentMenuItem) => {
+    return parent.items.some((item) => isSubItemActive(item.path));
+  };
+
+  // State theo dõi danh sách các menu cha đang được mở (xổ xuống)
+  const [openKeys, setOpenKeys] = useState<Record<string, boolean>>({});
+
+  // Tự động mở menu cha chứa route con đang active khi URL thay đổi (Accordion mode)
+  useEffect(() => {
+    const activeParent = menuTree.find((parent) => isParentActive(parent));
+    if (activeParent) {
+      setOpenKeys({ [activeParent.key]: true });
+    }
+  }, [location.pathname]);
+
+  const toggleParent = (parentKey: string) => {
+    setOpenKeys((prev) => (prev[parentKey] ? {} : { [parentKey]: true }));
+  };
 
   return (
     <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white border-r border-slate-200/80 text-slate-500 flex flex-col h-screen fixed left-0 top-0 z-20 transition-all duration-300`}>
@@ -47,178 +151,101 @@ const Sidebar = ({ isCollapsed, onToggle }: SidebarProps) => {
       </div>
 
       {/* Navigation menu */}
-      <nav className={`flex-1 ${isCollapsed ? 'px-2' : 'px-4'} py-6 space-y-1.5 overflow-y-auto transition-all duration-300`}>
-        <Tooltip title={isCollapsed ? "Danh sách bài viết" : ""} placement="right">
-          <Link
-            to="/admin/blogs"
-            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
-              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isBlogsActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
-              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isBlogsActive
-                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
-                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
-              }`
-              }`}
-          >
-            <DocumentTextIcon
-              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isBlogsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
-                }`}
-            />
-            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
-              Bài viết
-            </span>
-          </Link>
-        </Tooltip>
+      <nav className={`flex-1 ${isCollapsed ? 'px-2' : 'px-3'} py-4 space-y-1.5 overflow-y-auto transition-all duration-300`}>
+        {menuTree.map((parent) => {
+          const parentActive = isParentActive(parent);
+          const isOpen = !!openKeys[parent.key];
+          const Icon = parent.icon;
 
-        <Tooltip title={isCollapsed ? "Danh sách người dùng" : ""} placement="right">
-          <Link
-            to="/admin/users"
-            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
-              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isUsersActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
-              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isUsersActive
-                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
-                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
-              }`
-              }`}
-          >
-            <UsersIcon
-              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isUsersActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
-                }`}
-            />
-            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
-              Danh sách người dùng
-            </span>
-          </Link>
-        </Tooltip>
+          // Cấu hình menu xổ ra cho Antd Dropdown khi Sidebar thu nhỏ (isCollapsed = true)
+          const dropdownMenuItems: MenuProps['items'] = parent.items.map((subItem) => {
+            const active = isSubItemActive(subItem.path);
+            return {
+              key: subItem.key,
+              label: (
+                <Link
+                  to={subItem.path}
+                  className={`block py-1.5 px-3 text-xs font-medium rounded-md ${active ? 'bg-sky-50 text-sky-600 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                >
+                  {subItem.label}
+                </Link>
+              ),
+            };
+          });
 
-        <Tooltip title={isCollapsed ? "Gói hội viên" : ""} placement="right">
-          <Link
-            to="/admin/membership-plans"
-            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
-              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isMembershipPlansActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
-              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isMembershipPlansActive
-                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
-                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
-              }`
-              }`}
-          >
-            <SparklesIcon
-              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isMembershipPlansActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
-                }`}
-            />
-            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
-              Gói hội viên
-            </span>
-          </Link>
-        </Tooltip>
+          // Render dạng THU NHỎ (Collapsed)
+          if (isCollapsed) {
+            return (
+              <Dropdown
+                key={parent.key}
+                menu={{ items: dropdownMenuItems }}
+                placement="topRight"
+                trigger={['hover', 'click']}
+              >
+                <div
+                  className={`flex items-center justify-center w-12 h-12 mx-auto rounded-xl cursor-pointer transition-all duration-200 ${parentActive
+                    ? 'bg-sky-50/80 text-sky-600 font-semibold'
+                    : 'hover:bg-slate-50 hover:text-slate-800 text-slate-400'
+                    }`}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                </div>
+              </Dropdown>
+            );
+          }
 
-        <Tooltip title={isCollapsed ? "Quản lý đăng ký gói dịch vụ" : ""} placement="right">
-          <Link
-            to="/admin/subscriptions"
-            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
-              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isSubscriptionsActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
-              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isSubscriptionsActive
-                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
-                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
-              }`
-              }`}
-          >
-            <TicketIcon
-              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isSubscriptionsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
-                }`}
-            />
-            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
-              Quản lý đăng ký gói dịch vụ
-            </span>
-          </Link>
-        </Tooltip>
+          // Render dạng MỞ RỘNG (Expanded)
+          return (
+            <div key={parent.key} className="space-y-1">
+              {/* Nút Cấp Cha (Parent) */}
+              <button
+                onClick={() => toggleParent(parent.key)}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all duration-200 cursor-pointer ${parentActive
+                  ? 'bg-slate-100/70 text-slate-900 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
+                  }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Icon
+                    className={`h-4 w-4 shrink-0 transition-colors duration-200 ${parentActive ? 'text-sky-600' : 'text-slate-400'
+                      }`}
+                  />
+                  <span className="text-sm tracking-wide whitespace-nowrap">{parent.title}</span>
+                </div>
+                <ChevronDownIcon
+                  className={`h-4 w-4 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180 text-slate-600' : 'text-slate-400'
+                    }`}
+                />
+              </button>
 
-        <Tooltip title={isCollapsed ? "Giao dịch VietQR" : ""} placement="right">
-          <Link
-            to="/admin/payment-transactions"
-            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
-              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isPaymentTransactionsActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
-              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isPaymentTransactionsActive
-                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
-                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
-              }`
-              }`}
-          >
-            <QrCodeIcon
-              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isPaymentTransactionsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
-                }`}
-            />
-            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
-              Giao dịch VietQR
-            </span>
-          </Link>
-        </Tooltip>
+              {/* Danh sách Menu Cấp Con (Sub-items) */}
+              {isOpen && (
+                <div className="pr-1 space-y-1 pt-0.5 pb-1 ml-2 transition-all">
+                  {parent.items.map((subItem) => {
+                    const active = isSubItemActive(subItem.path);
 
-        <Tooltip title={isCollapsed ? "Tài khoản thanh toán" : ""} placement="right">
-          <Link
-            to="/admin/payment-accounts"
-            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
-              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isPaymentAccountsActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
-              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isPaymentAccountsActive
-                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
-                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
-              }`
-              }`}
-          >
-            <BanknotesIcon
-              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isPaymentAccountsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
-                }`}
-            />
-            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
-              Tài khoản thanh toán
-            </span>
-          </Link>
-        </Tooltip>
-
-        <Tooltip title={isCollapsed ? "Ngân hàng VietQR" : ""} placement="right">
-          <Link
-            to="/admin/vietqr-banks"
-            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
-              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isVietqrBanksActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
-              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isVietqrBanksActive
-                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
-                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
-              }`
-              }`}
-          >
-            <BuildingLibraryIcon
-              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isVietqrBanksActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
-                }`}
-            />
-            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
-              Ngân hàng VietQR
-            </span>
-          </Link>
-        </Tooltip>
-
-        <Tooltip title={isCollapsed ? "Phương thức thanh toán" : ""} placement="right">
-          <Link
-            to="/admin/payment-methods"
-            className={`flex items-center transition-all duration-200 group relative ${isCollapsed
-              ? `justify-center w-12 h-12 mx-auto rounded-xl ${isPaymentMethodsActive ? 'bg-sky-50/70 text-sky-600' : 'hover:bg-slate-50 hover:text-slate-800'}`
-              : `space-x-3 px-4 py-3 rounded-xl border-l-4 ${isPaymentMethodsActive
-                ? 'bg-sky-50/70 text-sky-600 border-sky-500 pl-3 font-semibold'
-                : 'hover:bg-slate-50 hover:text-slate-800 border-transparent pl-4'
-              }`
-              }`}
-          >
-            <AdjustmentsHorizontalIcon
-              className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 shrink-0 ${isPaymentMethodsActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
-                }`}
-            />
-            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
-              Phương thức thanh toán
-            </span>
-          </Link>
-        </Tooltip>
+                    return (
+                      <Link
+                        key={subItem.key}
+                        to={subItem.path}
+                        className={`flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs transition-all duration-150 ${active
+                          ? 'bg-sky-50/80 text-sky-600 font-semibold pl-3.5'
+                          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium'
+                          }`}
+                      >
+                        <span className="truncate">{subItem.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </nav>
-    </aside>
+    </aside >
   );
 };
 
 export default Sidebar;
-
