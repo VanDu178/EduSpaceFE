@@ -150,23 +150,6 @@ const ModalDetail = ({ open, data, loading, onClose }: ModalDetailProps) => {
               </div>
 
               <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                <span className="text-slate-500 text-xs">Tự động gia hạn:</span>
-                <span className="text-xs font-medium">
-                  {data.autoRenew ? (
-                    <span className="flex items-center space-x-1">
-                      <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                      <span>Bật</span>
-                    </span>
-                  ) : (
-                    <span className="flex items-center space-x-1">
-                      <XCircleIcon className="h-4 w-4 text-red-500" />
-                      <span>Tắt</span>
-                    </span>
-                  )}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center py-1 border-b border-slate-100">
                 <span className="text-slate-500 text-xs">Ngày bắt đầu:</span>
                 <span className="font-medium text-slate-700 text-xs flex items-center space-x-1">
                   <CalendarIcon className="h-3.5 w-3.5 text-slate-400" />
@@ -196,6 +179,61 @@ const ModalDetail = ({ open, data, loading, onClose }: ModalDetailProps) => {
                 <p className="text-xs text-rose-700 mt-0.5">
                   <span className="font-medium">Lý do:</span> {data.cancelReason || 'Không ghi rõ'}
                 </p>
+              </div>
+            )}
+
+            {/* Admin Manual Allocation & Proof Images Section */}
+            {data.createdType === 'admin' && (
+              <div className="bg-purple-50/70 border border-purple-100 rounded-xl p-3.5 mt-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-1.5 text-purple-700 text-xs font-bold">
+                    <SparklesIcon className="h-4 w-4 text-purple-600" />
+                    <span>Gói cấp thủ công bởi CSKH Admin</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded bg-purple-100 text-purple-800 text-[10px] font-bold border border-purple-200">
+                    Admin Assign
+                  </span>
+                </div>
+
+                {data.createdByUser && (
+                  <p className="text-xs text-purple-900">
+                    <span className="font-medium text-slate-500">Admin cấp gói:</span>{' '}
+                    <strong className="font-semibold text-purple-950">{data.createdByUser.name || data.createdByUser.email}</strong>
+                  </p>
+                )}
+
+                {data.notes && (
+                  <div className="text-xs text-purple-900">
+                    <span className="font-medium text-slate-500 block mb-0.5">Ghi chú / Lý do cấp bù:</span>
+                    <p className="p-2 bg-white/80 rounded-lg border border-purple-100 text-slate-700 font-mono text-[11px] whitespace-pre-wrap">
+                      {data.notes}
+                    </p>
+                  </div>
+                )}
+
+                {data.proofUrls && Array.isArray(data.proofUrls) && data.proofUrls.length > 0 && (
+                  <div className="pt-2 border-t border-purple-200/60">
+                    <span className="text-xs font-bold text-purple-900 block mb-2">
+                      Ảnh minh chứng giao dịch ({data.proofUrls.length} ảnh):
+                    </span>
+                    <div className="flex gap-2.5 flex-wrap">
+                      {data.proofUrls.map((url, i) => (
+                        <a
+                          key={i}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-20 h-20 rounded-xl overflow-hidden border-2 border-purple-200 hover:border-purple-500 hover:shadow-md transition-all group bg-white relative"
+                        >
+                          <img src={url} alt={`Minh chứng ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                          <span className="absolute bottom-0 inset-x-0 bg-purple-900/70 text-white text-[9px] font-mono text-center py-0.5">
+                            Ảnh #{i + 1}
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

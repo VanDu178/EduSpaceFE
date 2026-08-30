@@ -5,7 +5,35 @@ import {
   fetchSubscriptionByIdApi,
   createSubscriptionApi,
   updateSubscriptionStatusApi,
+  deleteSubscriptionApi,
 } from '../api';
+
+export const useDeleteSubscription = (onSuccess?: () => void) => {
+  const [submitting, setSubmitting] = useState<boolean>(false);
+
+  const deleteItem = async (id: number) => {
+    setSubmitting(true);
+    try {
+      const res = await deleteSubscriptionApi(id);
+      if (res.success) {
+        toast.success(res.message || 'Xóa gói hội viên cấp thủ công thành công');
+        onSuccess?.();
+        return true;
+      } else {
+        toast.error(res.message || 'Không thể xóa gói hội viên');
+        return false;
+      }
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || 'Đã có lỗi xảy ra';
+      toast.error(msg);
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return { deleteItem, submitting };
+};
 import type {
   UserSubscription,
   UserSubscriptionParams,

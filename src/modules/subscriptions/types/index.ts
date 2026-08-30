@@ -1,6 +1,4 @@
-export type SubscriptionStatus = 'active' | 'expired' | 'cancelled' | 'pending_payment';
-
-export type BillingCycle = 'monthly' | 'yearly';
+export type SubscriptionCreatedType = 'system' | 'admin';
 
 export interface UserSubscription {
   id: number;
@@ -14,12 +12,22 @@ export interface UserSubscription {
   pricePaid: number;
   paymentMethod: string | null;
   paymentRef: string | null;
-  autoRenew: boolean;
   cancelledAt: string | null;
   cancelReason: string | null;
+  createdType?: SubscriptionCreatedType;
+  createdBy?: number | null;
+  notes?: string | null;
+  proofUrls?: string[] | null;
   createdAt: string;
   updatedAt: string;
   user?: {
+    id: number;
+    code?: string | null;
+    email: string;
+    name?: string | null;
+    avatarUrl?: string | null;
+  };
+  createdByUser?: {
     id: number;
     code?: string | null;
     email: string;
@@ -51,13 +59,18 @@ export interface CreateSubscriptionPayload {
   paymentMethod?: string;
   paymentRef?: string;
   status?: SubscriptionStatus;
-  autoRenew?: boolean;
+  notes?: string;
+  proofUrls?: string[];
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface UpdateSubscriptionStatusPayload {
   status?: SubscriptionStatus;
   cancelReason?: string;
   endDate?: string;
+  notes?: string;
+  proofUrls?: string[];
 }
 
 export interface SubscriptionPagination {

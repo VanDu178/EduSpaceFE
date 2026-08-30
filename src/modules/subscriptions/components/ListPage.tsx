@@ -1,6 +1,6 @@
-import { Table, Button, Tooltip, Empty } from 'antd';
+import { Table, Button, Tooltip, Empty, Popconfirm } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { EyeIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 import type { UserSubscription, SubscriptionStatus } from '../types';
 import { STATUS_CONFIG, BILLING_CYCLE_LABELS, PAYMENT_METHOD_LABELS } from '../constants';
 import CopyButton from '../../../components/CopyButton';
@@ -12,6 +12,7 @@ interface ListPageProps {
   onViewDetail: (subscription: UserSubscription) => void;
   onViewPlanDetail?: (planId: number) => void;
   onEdit: (subscription: UserSubscription) => void;
+  onDelete?: (subscription: UserSubscription) => void;
   pagination?: {
     current: number;
     pageSize: number;
@@ -26,6 +27,7 @@ const ListPage = ({
   onViewDetail,
   onViewPlanDetail,
   onEdit,
+  onDelete,
   pagination,
 }: ListPageProps) => {
   if (!isLoading && subscriptions.length === 0) {
@@ -170,34 +172,76 @@ const ListPage = ({
       },
     },
     {
+      title: 'Nguồn cấp',
+      key: 'createdType',
+      width: 130,
+      align: 'center',
+      render: (_, record) => {
+        const isAdmin = record.createdType === 'admin';
+        return (
+          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${isAdmin ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}`}>
+            {isAdmin ? 'Admin cấp' : 'Hệ thống'}
+          </span>
+        );
+      },
+    },
+    {
       title: 'Thao tác',
       key: 'actions',
-      width: 110,
+      width: 120,
       align: 'center',
       fixed: 'right',
-      render: (_, record) => (
-        <div className="flex items-center justify-center space-x-1">
-          <Tooltip title="Xem chi tiết">
-            <Button
-              type="text"
-              size="small"
-              onClick={() => onViewDetail(record)}
-              icon={<EyeIcon className="h-4 w-4 text-slate-500 hover:text-sky-600 transition-colors" />}
-              className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
-            />
-          </Tooltip>
+      render: (_, record) => {
+        const isAdminCreated = record.createdType === 'admin';
+        return (
+          <div className="flex items-center justify-center space-x-1">
+            <Tooltip title="Xem chi tiết">
+              <Button
+                type="text"
+                size="small"
+                onClick={() => onViewDetail(record)}
+                icon={<EyeIcon className="h-4 w-4 text-slate-500 hover:text-sky-600 transition-colors" />}
+                className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
+              />
+            </Tooltip>
 
-          <Tooltip title="Cập nhật">
-            <Button
-              type="text"
-              size="small"
-              onClick={() => onEdit(record)}
-              icon={<PencilSquareIcon className="h-4 w-4 text-slate-500 hover:text-sky-600 transition-colors" />}
-              className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
-            />
-          </Tooltip>
-        </div>
-      ),
+            {isAdminCreated ? (
+              <>
+                <Tooltip title="Cập nhật gói do Admin cấp">
+                  <Button
+                    type="text"
+                    size="small"
+                    onClick={() => onEdit(record)}
+                    icon={<PencilSquareIcon className="h-4 w-4 text-slate-500 hover:text-sky-600 transition-colors" />}
+                    className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
+                  />
+                </Tooltip>
+
+                {onDelete && (
+                  <Popconfirm
+                    title="Xóa gói hội viên thủ công này?"
+                    description="Hành động này sẽ xóa bản ghi và giải phóng toàn bộ ảnh minh chứng trên Supabase Storage."
+                    onConfirm={() => onDelete(record)}
+                    okText="Xóa"
+                    cancelText="Hủy"
+                    okButtonProps={{ danger: true }}
+                  >
+                    <Tooltip title="Xóa gói do Admin cấp">
+                      <Button
+                        type="text"
+                        size="small"
+                        danger
+                        icon={<TrashIcon className="h-4 w-4 text-rose-500 hover:text-rose-700 transition-colors" />}
+                        className="p-1 hover:bg-rose-50 rounded-lg flex items-center justify-center"
+                      />
+                    </Tooltip>
+                  </Popconfirm>
+                )}
+              </>
+            ) : null}
+          </div>
+        );
+      },
     },
   ];
 

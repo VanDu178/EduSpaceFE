@@ -55,3 +55,12 @@ export const updateSubscriptionStatusApi = async (
   const response = await api.patch(`${BASE_PATH}/${id}/status`, payload);
   return response?.data;
 };
+
+// API Xóa gói hội viên thủ công (Admin)
+export const deleteSubscriptionApi = async (
+  id: number
+): Promise<ApiResponse<{ deletedId: number }>> => {
+  const response = await api.delete(`${BASE_PATH}/${id}`);
+  return response?.data;
+};
+

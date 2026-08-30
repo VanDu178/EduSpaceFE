@@ -9,6 +9,7 @@ import {
   useSubscriptionDetail,
   useCreateSubscription,
   useUpdateSubscriptionStatus,
+  useDeleteSubscription,
 } from '../hooks/useSubscriptions';
 import type { UserSubscription, UserSubscriptionParams } from '../types';
 
@@ -47,6 +48,11 @@ const SubscriptionPage = () => {
 
   // Hook cập nhật
   const { updateStatus, submitting: updateSubmitting } = useUpdateSubscriptionStatus(() => {
+    refetch();
+  });
+
+  // Hook xóa gói do Admin cấp
+  const { deleteItem } = useDeleteSubscription(() => {
     refetch();
   });
 
@@ -117,6 +123,7 @@ const SubscriptionPage = () => {
           onViewDetail={handleOpenDetail}
           onViewPlanDetail={handleOpenPlanDetail}
           onEdit={handleOpenUpdate}
+          onDelete={(sub) => deleteItem(sub.id)}
           pagination={{
             current: pagination.currentPage,
             pageSize: pagination.itemsPerPage,

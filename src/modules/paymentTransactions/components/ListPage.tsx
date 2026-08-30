@@ -385,49 +385,38 @@ const ListPage = ({
               const userActiveTier = userActiveSub?.plan?.tierLevel || 0;
               const txPlanTier = (record.plan as any)?.tierLevel || 0;
               const isBlockedByTier = Boolean(userActiveTier > 0 && txPlanTier > 0 && txPlanTier <= userActiveTier);
+              const isExpired = record.status === 'expired' || Boolean(record.expiredAt && new Date(record.expiredAt) < new Date());
+              const isDisableApprove = isApproving || isBlockedByTier || isExpired;
+
+              let tooltipTitle: string | undefined = undefined;
+              if (isExpired) {
+                tooltipTitle = 'Giao dịch đã hết thời hạn thanh toán. Không thể duyệt.';
+              } else if (isBlockedByTier) {
+                tooltipTitle = `Khách hàng đã sở hữu gói ${userActiveSub?.plan?.name || ''}. Không thể duyệt đơn gói cùng cấp hoặc cấp thấp hơn.`;
+              }
 
               return (
                 <>
-                  <Tooltip
-                    title={
-                      isBlockedByTier
-                        ? `Khách hàng đã sở hữu gói ${userActiveSub?.plan?.name || ''}. Không thể duyệt đơn gói cùng cấp hoặc cấp thấp hơn.`
-                        : undefined
-                    }
-                  >
+                  <Tooltip title={tooltipTitle}>
                     <span>
                       <Popconfirm
                         title="Xác nhận duyệt giao dịch?"
                         description={`Bạn có chắc muốn duyệt đơn ${record.code}?`}
                         onConfirm={() => onApprove(record.id)}
-                        disabled={isApproving || isBlockedByTier}
+                        disabled={isDisableApprove}
                         okText="Duyệt"
                         cancelText="Hủy"
                       >
                         <Button
                           size="small"
                           type="primary"
-                          disabled={isApproving || isBlockedByTier}
+                          disabled={isDisableApprove}
                         >
                           Duyệt
                         </Button>
                       </Popconfirm>
                     </span>
                   </Tooltip>
-
-                  <Popconfirm
-                    title="Hủy đơn này?"
-                    onConfirm={() => onCancel(record.code)}
-                    okText="Đồng ý"
-                    cancelText="Quay lại"
-                  >
-                    <Button
-                      size="small"
-                      type="default"
-                    >
-                      Hủy
-                    </Button>
-                  </Popconfirm>
                 </>
               );
             })()}

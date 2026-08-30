@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, Form, Select, Input, Switch, Button } from 'antd';
+import { Modal, Form, Select, Input, Button } from 'antd';
 import type { CreateSubscriptionPayload, BillingCycle, SubscriptionStatus } from '../types';
 import { PAYMENT_METHOD_OPTIONS } from '../constants';
 import { PAYMENT_METHOD_CODES } from '../../paymentMethods/constants';
@@ -60,7 +60,6 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
       paymentMethod: values.paymentMethod,
       paymentRef: values.paymentRef ? String(values.paymentRef).trim() : undefined,
       status: values.status as SubscriptionStatus,
-      autoRenew: Boolean(values.autoRenew),
     };
 
     const success = await onSubmit(payload);
@@ -86,7 +85,6 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
           billingCycle: 'monthly',
           paymentMethod: PAYMENT_METHOD_CODES.VIETQR,
           status: 'active',
-          autoRenew: false,
         }}
         className="pt-3"
         requiredMark="optional"
@@ -177,19 +175,6 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
           </Form.Item>
         </div>
 
-        {/* Tự động gia hạn */}
-        <Form.Item
-          name="autoRenew"
-          valuePropName="checked"
-          className="mb-4"
-        >
-          <div className="flex items-center space-x-3 bg-slate-50 border border-slate-100 p-3 rounded-lg">
-            <Switch id="autoRenewSwitch" />
-            <label htmlFor="autoRenewSwitch" className="text-xs text-slate-600 font-medium cursor-pointer">
-              Tự động gia hạn khi hết hạn gói
-            </label>
-          </div>
-        </Form.Item>
 
         {/* Footer Actions */}
         <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100 mt-6">
