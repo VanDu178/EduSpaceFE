@@ -1,14 +1,16 @@
 import { Drawer, Descriptions, Image, Tooltip, Button } from 'antd';
-import { CheckCircleIcon, XCircleIcon, ClockIcon, NoSymbolIcon, QuestionMarkCircleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
-import type { PaymentTransaction, PaymentTransactionStatus } from '../types';
+import { CheckCircleIcon, XCircleIcon, ClockIcon, NoSymbolIcon, QuestionMarkCircleIcon, ArrowDownTrayIcon, BanknotesIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import type { PaymentTransaction, PaymentTransactionStatus, PaymentRefund } from '../types';
 import { formatCurrency, formatDate } from '../../../utils/format';
 import CopyButton from '../../../components/CopyButton';
-import { useDownloadInvoicePdf } from '../hooks/useDownloadInvoicePdf';
+import { useDownloadInvoicePdf } from '../hooks';
 
 interface FormDetailProps {
   open: boolean;
   transaction: PaymentTransaction | null;
   onClose: () => void;
+  onOpenRefund?: (transaction: PaymentTransaction) => void;
+  onOpenEditRefund?: (refund: PaymentRefund, transaction: PaymentTransaction) => void;
 }
 
 const STATUS_CONFIG: Record<
@@ -22,11 +24,25 @@ const STATUS_CONFIG: Record<
     border: 'border-amber-200',
     icon: ClockIcon,
   },
+  partially_paid: {
+    label: 'Thanh toán thiếu',
+    color: 'text-orange-700',
+    bg: 'bg-orange-50',
+    border: 'border-orange-200',
+    icon: ClockIcon,
+  },
   completed: {
     label: 'Đã hoàn tất',
     color: 'text-emerald-700',
     bg: 'bg-emerald-50',
     border: 'border-emerald-200',
+    icon: CheckCircleIcon,
+  },
+  overpaid: {
+    label: 'Thanh toán dư',
+    color: 'text-purple-700',
+    bg: 'bg-purple-50',
+    border: 'border-purple-200',
     icon: CheckCircleIcon,
   },
   expired: {
@@ -45,10 +61,11 @@ const STATUS_CONFIG: Record<
   },
 };
 
-const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
+const FormDetail = ({ open, transaction, onClose, onOpenRefund, onOpenEditRefund }: FormDetailProps) => {
   const { downloadPdf, isDownloading } = useDownloadInvoicePdf();
 
   if (!transaction) return null;
+
 
   const statusConfig = STATUS_CONFIG[transaction.status] || STATUS_CONFIG.pending;
   const StatusIcon = statusConfig.icon;
@@ -63,11 +80,20 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
     txPlanTier <= userActiveTier
   );
 
+  const amount = Number(transaction.amount);
+  const paidAmount = Number(transaction.paidAmount || 0);
+  const overpaidAmount = Number(transaction.overpaidAmount || Math.max(0, paidAmount - amount));
+  const remainingAmount = Number(transaction.remainingAmount || Math.max(0, amount - paidAmount));
+
+  const refundsList = transaction.refunds || [];
+  const totalRefunded = Number(transaction.totalRefundedAmount || refundsList.reduce((acc, r) => acc + Number(r.amount), 0));
+  const canRefund = (transaction.status === 'completed' || transaction.status === 'overpaid') && overpaidAmount > 0 && totalRefunded < overpaidAmount;
+
   return (
     <Drawer
-      title={<span className="text-lg font-bold text-slate-800">Chi tiết</span>}
+      title={<span className="text-lg font-bold text-slate-800">Chi tiết đơn #{transaction.code}</span>}
       placement="right"
-      width={480}
+      width={520}
       open={open}
       onClose={onClose}
     >
@@ -81,6 +107,7 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
             </span>
           </div>
         )}
+
         {/* Header card */}
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 flex flex-col items-center justify-center text-center space-y-3">
           {transaction.qrCodeUrl ? (
@@ -94,11 +121,11 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
           )}
 
           <div>
-            <h3 className="text-xl font-bold text-slate-800">{formatCurrency(Number(transaction.amount))}</h3>
+            <h3 className="text-xl font-bold text-slate-800">{formatCurrency(amount)}</h3>
             <p className="text-xs text-slate-500 font-medium">Gói {transaction.plan?.name || 'Hội viên'} ({transaction.billingCycle === 'yearly' ? 'Gói theo năm' : 'Gói theo tháng'})</p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-center">
             <div
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
             >
@@ -106,7 +133,7 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
               <span>{statusConfig.label}</span>
             </div>
 
-            {transaction.status === 'completed' && (
+            {(transaction.status === 'completed' || transaction.status === 'overpaid') && (
               <Button
                 type="primary"
                 size="small"
@@ -118,8 +145,38 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
                 Tải hóa đơn
               </Button>
             )}
+
+            {canRefund && onOpenRefund && (
+              <Button
+                type="default"
+                size="small"
+                onClick={() => onOpenRefund(transaction)}
+                icon={<BanknotesIcon className="w-3.5 h-3.5 text-emerald-600" />}
+                className="!rounded-full text-xs font-medium border-emerald-300 text-emerald-700 hover:!border-emerald-500"
+              >
+                Xác nhận hoàn tiền dư
+              </Button>
+            )}
           </div>
         </div>
+
+        {/* Cảnh báo nạp thừa / nạp thiếu */}
+        {transaction.status === 'partially_paid' && (
+          <div className="p-3.5 bg-orange-50 border border-orange-200 rounded-xl text-xs space-y-1 text-orange-900">
+            <span className="font-bold block text-orange-950">⚠️ Đơn hàng nạp thiếu tiền:</span>
+            <div>Đã nạp: <strong className="font-bold">{formatCurrency(paidAmount)}</strong> / Giá trị đơn: <strong className="font-bold">{formatCurrency(amount)}</strong></div>
+            <div className="text-orange-950 font-bold">Còn thiếu: {formatCurrency(remainingAmount)}</div>
+          </div>
+        )}
+
+        {(transaction.status === 'completed' || transaction.status === 'overpaid') && overpaidAmount > 0 && (
+          <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-1 text-emerald-900">
+            <span className="font-bold block text-emerald-950">🎉 Đơn hàng nạp thừa tiền:</span>
+            <div>Số tiền khách đã nạp: <strong className="font-bold">{formatCurrency(paidAmount)}</strong></div>
+            <div>Số tiền thừa ghi nhận: <strong className="font-bold text-emerald-700">{formatCurrency(overpaidAmount)}</strong></div>
+            <div>Đã hoàn trả CSKH: <strong className="font-bold">{formatCurrency(totalRefunded)}</strong></div>
+          </div>
+        )}
 
         {/* Thông tin chi tiết */}
         <Descriptions title="Chi tiết đơn & Đối soát" column={1} bordered size="small" className="bg-white rounded-xl">
@@ -147,6 +204,7 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
               <CopyButton text={transaction.transferContent} tooltipText="Sao chép nội dung CK" successMessage="Đã sao chép nội dung chuyển khoản!" />
             </div>
           </Descriptions.Item>
+
           <Descriptions.Item
             label={
               <span className="inline-flex items-center gap-1.5">
@@ -157,10 +215,24 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
               </span>
             }
           >
-            <span className="font-mono font-semibold text-slate-700">
-              {transaction.paymentRef || <span className="text-slate-400 font-sans italic font-normal">Không có</span>}
+            <div className="flex items-center justify-between">
+              <span className="font-mono font-semibold text-slate-700">
+                {transaction.paymentRef || <span className="text-slate-400 font-sans italic font-normal">Không có</span>}
+              </span>
+              <CopyButton
+                text={transaction.paymentRef}
+                tooltipText="Sao chép mã tham chiếu NH"
+                successMessage="Đã sao chép mã tham chiếu ngân hàng!"
+              />
+            </div>
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Số tiền đã nạp">
+            <span className="font-bold text-slate-900 text-sm">
+              {formatCurrency(paidAmount > 0 ? paidAmount : amount)}
             </span>
           </Descriptions.Item>
+
           <Descriptions.Item label="Người mua">
             <div className="flex flex-col">
               {transaction.user?.name ? (
@@ -195,7 +267,14 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
               </span>
             </div>
           </Descriptions.Item>
-          {transaction.status === 'completed' && (
+
+          {transaction.notes && (
+            <Descriptions.Item label="Nhật ký giao dịch">
+              <p className="text-xs font-mono text-slate-700 whitespace-pre-wrap">{transaction.notes}</p>
+            </Descriptions.Item>
+          )}
+
+          {(transaction.status === 'completed' || transaction.status === 'overpaid') && (
             <Descriptions.Item label="Kênh duyệt">
               {transaction.approvalType === 'manual' ? (
                 <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-700">
@@ -219,47 +298,99 @@ const FormDetail = ({ open, transaction, onClose }: FormDetailProps) => {
             </Descriptions.Item>
           )}
 
-          <Descriptions.Item
-            label={
-              <span className="inline-flex items-center gap-1.5">
-                Thời gian khởi tạo
-                <Tooltip title="Thời điểm giao dịch được tạo trên hệ thống.">
-                  <QuestionMarkCircleIcon className="h-4 w-4 text-slate-400 hover:text-sky-600 transition-colors cursor-help" />
-                </Tooltip>
-              </span>
-            }
-          >
+          <Descriptions.Item label="Thời gian khởi tạo">
             <span className="text-slate-700">{formatDate(transaction.createdAt, true)}</span>
           </Descriptions.Item>
 
-          <Descriptions.Item
-            label={
-              <span className="inline-flex items-center gap-1.5">
-                Thời gian hết hạn
-                <Tooltip title="Thời điểm giao dịch hết hạn.">
-                  <QuestionMarkCircleIcon className="h-4 w-4 text-slate-400 hover:text-sky-600 transition-colors cursor-help" />
-                </Tooltip>
-              </span>
-            }
-          >
+          <Descriptions.Item label="Thời gian hết hạn">
             <span className="text-amber-700 font-medium">{formatDate(transaction.expiredAt, true)}</span>
           </Descriptions.Item>
 
           {transaction.paidAt && (
-            <Descriptions.Item
-              label={
-                <span className="inline-flex items-center gap-1.5">
-                  Thời gian duyệt
-                  <Tooltip title="Thời điểm giao dịch được duyệt xác nhận thanh toán.">
-                    <QuestionMarkCircleIcon className="h-4 w-4 text-slate-400 hover:text-sky-600 transition-colors cursor-help" />
-                  </Tooltip>
-                </span>
-              }
-            >
+            <Descriptions.Item label="Thời gian duyệt">
               <span className="text-emerald-700 font-bold">{formatDate(transaction.paidAt, true)}</span>
             </Descriptions.Item>
           )}
         </Descriptions>
+
+        {/* Lịch sử phiếu hoàn tiền (PaymentRefund[]) */}
+        {refundsList.length > 0 && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+              <BanknotesIcon className="w-4 h-4 text-emerald-600" />
+              <span>Phiếu hoàn tiền CSKH ({refundsList.length})</span>
+            </h4>
+
+            <div className="space-y-3">
+              {refundsList.map((refund: PaymentRefund) => (
+                <div key={refund.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+                  <div className="flex justify-between items-center pb-1.5 border-b border-slate-200">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono font-bold text-sky-600">{refund.code}</span>
+                      {onOpenEditRefund && (
+                        <Tooltip title="Chỉnh sửa thông tin / minh chứng hoàn tiền">
+                          <Button
+                            type="text"
+                            size="small"
+                            icon={<PencilSquareIcon className="w-3.5 h-3.5 text-amber-600 hover:text-amber-700" />}
+                            onClick={() => onOpenEditRefund(refund, transaction)}
+                            className="p-1 h-6 w-6 hover:bg-amber-50 rounded-lg shrink-0 flex items-center justify-center border-none"
+                          />
+                        </Tooltip>
+                      )}
+                    </div>
+                    <span className="font-bold text-emerald-700 text-sm">{formatCurrency(Number(refund.amount))}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-slate-600">
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Mã GD Ngân hàng:</span>
+                      <span className="font-mono font-semibold text-slate-800">{refund.refundRef || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Thời gian hoàn:</span>
+                      <span className="font-medium text-slate-800">{formatDate(refund.createdAt, true)}</span>
+                    </div>
+                  </div>
+
+                  {refund.refundedByUser && (
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Người thực hiện:</span>
+                      <span className="font-semibold text-slate-800">{refund.refundedByUser.name || refund.refundedByUser.email}</span>
+                    </div>
+                  )}
+
+                  {refund.notes && (
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Ghi chú đối soát:</span>
+                      <p className="text-slate-700 italic">{refund.notes}</p>
+                    </div>
+                  )}
+
+                  {refund.proofUrls && refund.proofUrls.length > 0 && (
+                    <div className="pt-1">
+                      <span className="text-slate-400 block text-[10px] mb-1">Minh chứng bill chuyển khoản ({refund.proofUrls.length} ảnh):</span>
+                      <Image.PreviewGroup>
+                        <div className="flex gap-2 flex-wrap">
+                          {refund.proofUrls.map((url, i) => (
+                            <Image
+                              key={i}
+                              src={url}
+                              alt={`Minh chứng ${i + 1}`}
+                              height={48}
+                              width={48}
+                              className="rounded-lg object-cover border border-slate-200"
+                            />
+                          ))}
+                        </div>
+                      </Image.PreviewGroup>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </Drawer>
   );

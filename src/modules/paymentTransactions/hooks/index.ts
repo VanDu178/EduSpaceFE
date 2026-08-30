@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import type { PaymentTransaction, PaymentTransactionParams } from '../types';
+import type { PaymentTransaction, PaymentTransactionParams, ConfirmRefundParams } from '../types';
 import {
   fetchPaymentTransactionsApi,
   approvePaymentTransactionApi,
   cancelPaymentTransactionApi,
+  confirmPaymentRefundApi,
+  downloadInvoicePdfApi,
 } from '../api';
 
 const defaultParam: PaymentTransactionParams = {
@@ -14,6 +16,36 @@ const defaultParam: PaymentTransactionParams = {
   search: '',
 };
 
+export const PAYMENT_TRANSACTIONS_QUERY_KEY = ['paymentTransactions'];
+export const QUERY_KEY = PAYMENT_TRANSACTIONS_QUERY_KEY;
+
+// Hook riêng cho việc tải hóa đơn PDF
+export const useDownloadInvoicePdf = () => {
+  const [downloadingCode, setDownloadingCode] = useState<string | null>(null);
+
+  const downloadPdf = async (code: string) => {
+    setDownloadingCode(code);
+    try {
+      await downloadInvoicePdfApi(code);
+      toast.success('Tải hóa đơn thành công!');
+      return true;
+    } catch (error: any) {
+      console.error('Lỗi khi tải hóa đơn:', error);
+      toast.error(error?.message || 'Không thể tải hóa đơn.');
+      return false;
+    } finally {
+      setDownloadingCode(null);
+    }
+  };
+
+  return {
+    downloadPdf,
+    downloadingCode,
+    isDownloading: (code?: string) => (code ? downloadingCode === code : Boolean(downloadingCode)),
+  };
+};
+
+// Hook chính quản lý danh sách và thao tác giao dịch VietQR
 export const usePaymentTransactions = (initialParams?: PaymentTransactionParams) => {
   const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -27,6 +59,8 @@ export const usePaymentTransactions = (initialParams?: PaymentTransactionParams)
     pageSize: 10,
     total: 0,
   });
+
+  const { downloadPdf, downloadingCode, isDownloading } = useDownloadInvoicePdf();
 
   const fetchTransactions = useCallback(async () => {
     setIsLoading(true);
@@ -81,6 +115,23 @@ export const usePaymentTransactions = (initialParams?: PaymentTransactionParams)
     }
   };
 
+  const handleRefund = async (id: number, refundParams: ConfirmRefundParams) => {
+    try {
+      const res = await confirmPaymentRefundApi(id, refundParams);
+      if (res?.success) {
+        toast.success('🎉 Tạo phiếu hoàn tiền CSKH thành công!');
+        fetchTransactions();
+        return true;
+      } else {
+        toast.error(res?.message || 'Tạo phiếu hoàn tiền thất bại');
+        return false;
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Lỗi khi tạo phiếu hoàn tiền');
+      return false;
+    }
+  };
+
   const handleCancel = async (code: string) => {
     try {
       const res = await cancelPaymentTransactionApi(code);
@@ -110,6 +161,10 @@ export const usePaymentTransactions = (initialParams?: PaymentTransactionParams)
     handleSearch,
     handleStatusFilter,
     handleApprove,
+    handleRefund,
     handleCancel,
+    downloadPdf,
+    downloadingCode,
+    isDownloading,
   };
 };

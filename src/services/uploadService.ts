@@ -45,3 +45,15 @@ export async function uploadMultipleFilesApi(files: File[], folder: string = 'bl
 
   return response.data.data;
 }
+
+/**
+ * Xóa file khỏi Supabase Storage
+ */
+export async function deleteFileApi(urlOrPath: string): Promise<boolean> {
+  const response = await api.delete('/upload', {
+    data: { url: urlOrPath },
+  });
+
+  return response.data.success;
+}
+

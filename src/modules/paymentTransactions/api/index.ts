@@ -3,8 +3,10 @@ import type {
   PaymentTransaction,
   PaymentTransactionParams,
   FetchPaymentTransactionsResponse,
+  ConfirmRefundParams,
 } from '../types';
 import type { ApiResponse } from '../../../types/api';
+import { createPaymentRefundApi } from '../../paymentRefunds';
 
 const BASE_PATH = '/payment-transactions';
 
@@ -16,6 +18,7 @@ export const fetchPaymentTransactionsApi = async (
   if (params?.page) queryParams.page = params.page;
   if (params?.limit) queryParams.limit = params.limit;
   if (params?.status && params.status !== 'all') queryParams.status = params.status;
+  if (params?.refundStatus && params.refundStatus !== 'all') queryParams.refundStatus = params.refundStatus;
   if (params?.search && params.search.trim() !== '') queryParams.search = params.search.trim();
 
   const response = await api.get(`${BASE_PATH}`, { params: queryParams });
@@ -32,6 +35,17 @@ export const approvePaymentTransactionApi = async (
 ): Promise<ApiResponse<PaymentTransaction>> => {
   const response = await api.post(`${BASE_PATH}/${id}/approve`, { paymentRef });
   return response?.data;
+};
+
+// API CSKH Xác nhận tạo phiếu hoàn tiền cho giao dịch nạp dư (gọi qua module paymentRefunds)
+export const confirmPaymentRefundApi = async (
+  txId: number,
+  params: Omit<ConfirmRefundParams, 'paymentTxId'>
+): Promise<ApiResponse<any>> => {
+  return await createPaymentRefundApi({
+    ...params,
+    paymentTxId: txId,
+  });
 };
 
 // API Hủy giao dịch (Admin)
@@ -57,4 +71,3 @@ export const downloadInvoicePdfApi = async (code: string): Promise<void> => {
   link.parentNode?.removeChild(link);
   window.URL.revokeObjectURL(url);
 };
-

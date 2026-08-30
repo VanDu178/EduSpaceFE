@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Button } from 'antd';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import { usePaymentTransactions } from '../hooks/usePaymentTransactions';
+import { usePaymentTransactions } from '../hooks';
 import type { PaymentTransaction } from '../types';
 import FilterBar from '../components/FilterBar';
 import ListPage from '../components/ListPage';
 import FormDetail from '../components/FormDetail';
+import { FormRefundModal } from '../../paymentRefunds';
+import type { PaymentRefund } from '../../paymentRefunds/types';
 
 const PaymentTransactionPage = () => {
   const {
@@ -25,9 +27,26 @@ const PaymentTransactionPage = () => {
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
   const [selectedTransaction, setSelectedTransaction] = useState<PaymentTransaction | null>(null);
 
+  // State Modal Hoàn tiền dư
+  const [isRefundOpen, setIsRefundOpen] = useState<boolean>(false);
+  const [refundTransaction, setRefundTransaction] = useState<PaymentTransaction | null>(null);
+  const [editingRefund, setEditingRefund] = useState<PaymentRefund | null>(null);
+
   const handleViewDetail = (transaction: PaymentTransaction) => {
     setSelectedTransaction(transaction);
     setIsDetailOpen(true);
+  };
+
+  const handleOpenRefund = (transaction: PaymentTransaction) => {
+    setRefundTransaction(transaction);
+    setEditingRefund(null);
+    setIsRefundOpen(true);
+  };
+
+  const handleOpenEditRefund = (refund: PaymentRefund, transaction: PaymentTransaction) => {
+    setRefundTransaction(transaction);
+    setEditingRefund(refund);
+    setIsRefundOpen(true);
   };
 
   return (
@@ -64,6 +83,7 @@ const PaymentTransactionPage = () => {
           onViewDetail={handleViewDetail}
           onApprove={handleApprove}
           onCancel={handleCancel}
+          onOpenRefund={handleOpenRefund}
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,
@@ -78,6 +98,20 @@ const PaymentTransactionPage = () => {
         open={isDetailOpen}
         transaction={selectedTransaction}
         onClose={() => setIsDetailOpen(false)}
+        onOpenRefund={handleOpenRefund}
+        onOpenEditRefund={handleOpenEditRefund}
+      />
+
+      {/* Modal CSKH Hoàn tiền dư */}
+      <FormRefundModal
+        open={isRefundOpen}
+        transaction={refundTransaction}
+        refund={editingRefund}
+        onClose={() => {
+          setIsRefundOpen(false);
+          setEditingRefund(null);
+        }}
+        onSuccess={fetchTransactions}
       />
     </div>
   );

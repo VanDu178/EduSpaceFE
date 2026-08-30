@@ -1,4 +1,9 @@
-export type PaymentTransactionStatus = 'pending' | 'completed' | 'expired' | 'cancelled';
+import type { PaymentRefund, ConfirmRefundParams } from '../../paymentRefunds';
+
+export type PaymentTransactionStatus = 'pending' | 'partially_paid' | 'completed' | 'overpaid' | 'expired' | 'cancelled';
+export type RefundStatus = 'none' | 'unrefunded' | 'partially_refunded' | 'fully_refunded';
+
+export type { PaymentRefund, ConfirmRefundParams };
 
 export interface PaymentTransaction {
   id: number;
@@ -8,9 +13,15 @@ export interface PaymentTransaction {
   paymentAccountId?: number | null;
   billingCycle: 'monthly' | 'yearly';
   amount: number;
+  paidAmount?: number;
+  overpaidAmount?: number;
+  remainingAmount?: number;
+  totalRefundedAmount?: number;
+  notes?: string | null;
   paymentMethod: string;
   transferContent: string;
   status: PaymentTransactionStatus;
+  refundStatus?: RefundStatus;
   approvalType?: 'auto' | 'manual';
   approvedBy?: number | null;
   bankCode?: string | null;
@@ -53,12 +64,14 @@ export interface PaymentTransaction {
       logo?: string;
     };
   };
+  refunds?: PaymentRefund[];
 }
 
 export interface PaymentTransactionParams {
   page?: number;
   limit?: number;
   status?: string;
+  refundStatus?: string;
   search?: string;
 }
 

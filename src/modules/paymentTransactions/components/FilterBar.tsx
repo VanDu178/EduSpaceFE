@@ -22,7 +22,7 @@ const FilterBar = ({ params, setParams }: FilterBarProps) => {
 
       <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
         {/* Lọc Trạng thái */}
-        <div className="w-full sm:w-[200px]">
+        <div className="w-full sm:w-[180px]">
           <Select
             value={params?.status || 'all'}
             onChange={(value) =>
@@ -35,9 +35,32 @@ const FilterBar = ({ params, setParams }: FilterBarProps) => {
             options={[
               { value: 'all', label: 'Tất cả trạng thái' },
               { value: 'pending', label: 'Chờ thanh toán' },
+              { value: 'partially_paid', label: 'Thanh toán thiếu' },
               { value: 'completed', label: 'Đã hoàn tất' },
+              { value: 'overpaid', label: 'Thanh toán dư' },
               { value: 'expired', label: 'Đã hết hạn' },
               { value: 'cancelled', label: 'Đã hủy' },
+            ]}
+            className="w-full"
+          />
+        </div>
+
+        {/* Lọc Trạng thái Hoàn tiền (độc lập) */}
+        <div className="w-full sm:w-[200px]">
+          <Select
+            value={params?.refundStatus || 'all'}
+            onChange={(value) =>
+              setParams((prev) => ({
+                ...prev,
+                refundStatus: value,
+                page: 1,
+              }))
+            }
+            options={[
+              { value: 'all', label: 'Tất cả trạng thái hoàn' },
+              { value: 'unrefunded', label: 'Chưa hoàn tiền dư' },
+              { value: 'partially_refunded', label: 'Đã hoàn một phần' },
+              { value: 'fully_refunded', label: 'Đã hoàn tiền xong' },
             ]}
             className="w-full"
           />

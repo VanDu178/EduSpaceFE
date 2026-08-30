@@ -1,10 +1,10 @@
 import { Table, Popconfirm, Empty, Tooltip, Image, Button } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { CheckCircleIcon, XCircleIcon, ClockIcon, NoSymbolIcon, EyeIcon, QrCodeIcon, UserIcon, CpuChipIcon, QuestionMarkCircleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, ClockIcon, NoSymbolIcon, EyeIcon, QrCodeIcon, UserIcon, CpuChipIcon, QuestionMarkCircleIcon, ArrowDownTrayIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 import type { PaymentTransaction, PaymentTransactionStatus } from '../types';
 import CopyButton from '../../../components/CopyButton';
 import { formatCurrency, formatDate } from '../../../utils/format';
-import { useDownloadInvoicePdf } from '../hooks/useDownloadInvoicePdf';
+import { useDownloadInvoicePdf } from '../hooks';
 
 interface ListPageProps {
   transactions: PaymentTransaction[];
@@ -13,6 +13,7 @@ interface ListPageProps {
   onViewDetail: (transaction: PaymentTransaction) => void;
   onApprove: (id: number) => void;
   onCancel: (code: string) => void;
+  onOpenRefund?: (transaction: PaymentTransaction) => void;
   pagination?: {
     current: number;
     pageSize: number;
@@ -32,11 +33,25 @@ const STATUS_CONFIG: Record<
     border: 'border-amber-200',
     icon: ClockIcon,
   },
+  partially_paid: {
+    label: 'Thanh toán thiếu',
+    color: 'text-orange-700',
+    bg: 'bg-orange-50',
+    border: 'border-orange-200',
+    icon: ClockIcon,
+  },
   completed: {
     label: 'Đã hoàn tất',
     color: 'text-emerald-700',
     bg: 'bg-emerald-50',
     border: 'border-emerald-200',
+    icon: CheckCircleIcon,
+  },
+  overpaid: {
+    label: 'Thanh toán dư',
+    color: 'text-purple-700',
+    bg: 'bg-purple-50',
+    border: 'border-purple-200',
     icon: CheckCircleIcon,
   },
   expired: {
@@ -62,6 +77,7 @@ const ListPage = ({
   onViewDetail,
   onApprove,
   onCancel,
+  onOpenRefund,
   pagination,
 }: ListPageProps) => {
   const { downloadPdf, isDownloading } = useDownloadInvoicePdf();
@@ -165,15 +181,52 @@ const ListPage = ({
     },
     {
       title: 'Số tiền',
-      dataIndex: 'amount',
       key: 'amount',
       width: 140,
       align: 'right',
-      render: (amount: number) => (
+      render: (_, record: PaymentTransaction) => (
         <span className="font-bold text-slate-900 text-xs sm:text-sm">
-          {formatCurrency(Number(amount))}
+          {formatCurrency(record.amount)}
         </span>
       ),
+    },
+    {
+      title: 'Đã thanh toán',
+      key: 'paidAmount',
+      width: 180,
+      align: 'right',
+      render: (_, record: PaymentTransaction) => {
+        const amount = Number(record.amount);
+        const paidAmount = Number(record.paidAmount || 0);
+        const overpaidAmount = Number(record.overpaidAmount || Math.max(0, paidAmount - amount));
+        const remainingAmount = Number(record.remainingAmount || Math.max(0, amount - paidAmount));
+        const totalRefunded = Number(record.totalRefundedAmount || (record.refunds || []).reduce((acc, r) => acc + Number(r.amount), 0));
+        const isFullyRefunded = overpaidAmount > 0 && totalRefunded >= overpaidAmount;
+
+        return (
+          <div className="flex flex-col items-end text-xs">
+            <span className="font-bold text-slate-900 sm:text-sm">
+              {formatCurrency(paidAmount)}
+            </span>
+            {record.status === 'partially_paid' && (
+              <span className="text-[11px] text-orange-700 font-medium italic">
+                Thiếu {formatCurrency(remainingAmount)}
+              </span>
+            )}
+            {(record.status === 'completed' || record.status === 'overpaid') && overpaidAmount > 0 && (
+              isFullyRefunded ? (
+                <span className="inline-block text-purple-700 font-semibold text-[10px]">
+                  Dư {formatCurrency(overpaidAmount)} (Đã hoàn)
+                </span>
+              ) : (
+                <span className="inline-block text-purple-700 font-semibold text-[10px]">
+                  Dư {formatCurrency(overpaidAmount)} (Chờ hoàn)
+                </span>
+              )
+            )}
+          </div>
+        );
+      },
     },
     {
       title: 'Trạng thái',
@@ -201,7 +254,7 @@ const ListPage = ({
       width: 170,
       align: 'center',
       render: (_, record: PaymentTransaction) => {
-        if (record.status !== 'completed') {
+        if (record.status !== 'completed' && record.status !== 'overpaid') {
           return <span className="text-slate-400 text-xs italic">—</span>;
         }
 
@@ -276,93 +329,111 @@ const ListPage = ({
               Hạn: {formatDate(record.expiredAt, true)}
             </span>
           )}
-        </div >
+        </div>
       ),
     },
     {
       title: 'Thao tác',
       key: 'action',
-      width: 160,
+      width: 180,
       align: 'center',
       fixed: 'right',
-      render: (_, record) => (
-        <div className="flex items-center justify-center gap-1.5">
-          <Tooltip title="Xem chi tiết">
-            <Button
-              type="text"
-              size="small"
-              onClick={() => onViewDetail(record)}
-              icon={<EyeIcon className="h-4 w-4 text-slate-500 hover:text-sky-600 transition-colors" />}
-              className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
-            />
-          </Tooltip>
+      render: (_, record) => {
+        const overpaidAmount = Number(record.overpaidAmount || Math.max(0, (record.paidAmount || 0) - record.amount));
+        const totalRefunded = Number(record.totalRefundedAmount || (record.refunds || []).reduce((acc, r) => acc + Number(r.amount), 0));
+        const canRefund = (record.status === 'completed' || record.status === 'overpaid') && overpaidAmount > 0 && totalRefunded < overpaidAmount;
 
-          {record.status === 'completed' && (
-            <Tooltip title="Tải Hóa đơn">
+        return (
+          <div className="flex items-center justify-center gap-1.5">
+            <Tooltip title="Xem chi tiết">
               <Button
                 type="text"
                 size="small"
-                loading={isDownloading(record.code)}
-                onClick={() => downloadPdf(record.code)}
-                icon={<ArrowDownTrayIcon className="h-4 w-4 text-sky-600 hover:text-sky-700 transition-colors" />}
-                className="p-1 hover:bg-sky-50 rounded-lg flex items-center justify-center"
+                onClick={() => onViewDetail(record)}
+                icon={<EyeIcon className="h-4 w-4 text-slate-500 hover:text-sky-600 transition-colors" />}
+                className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
               />
             </Tooltip>
-          )}
 
-          {record.status === 'pending' && (() => {
-            const userActiveSub = (record.user as any)?.subscriptions?.[0];
-            const userActiveTier = userActiveSub?.plan?.tierLevel || 0;
-            const txPlanTier = (record.plan as any)?.tierLevel || 0;
-            const isBlockedByTier = Boolean(userActiveTier > 0 && txPlanTier > 0 && txPlanTier <= userActiveTier);
+            {(record.status === 'completed' || record.status === 'overpaid') && (
+              <Tooltip title="Tải Hóa đơn">
+                <Button
+                  type="text"
+                  size="small"
+                  loading={isDownloading(record.code)}
+                  onClick={() => downloadPdf(record.code)}
+                  icon={<ArrowDownTrayIcon className="h-4 w-4 text-sky-600 hover:text-sky-700 transition-colors" />}
+                  className="p-1 hover:bg-sky-50 rounded-lg flex items-center justify-center"
+                />
+              </Tooltip>
+            )}
 
-            return (
-              <>
-                <Tooltip
-                  title={
-                    isBlockedByTier
-                      ? `Khách hàng đã sở hữu gói ${userActiveSub?.plan?.name || ''}. Không thể duyệt đơn gói cùng cấp hoặc cấp thấp hơn.`
-                      : undefined
-                  }
-                >
-                  <span>
-                    <Popconfirm
-                      title="Xác nhận duyệt giao dịch?"
-                      description={`Bạn có chắc muốn duyệt đơn ${record.code}?`}
-                      onConfirm={() => onApprove(record.id)}
-                      disabled={isApproving || isBlockedByTier}
-                      okText="Duyệt"
-                      cancelText="Hủy"
-                    >
-                      <Button
-                        size='small'
-                        type='primary'
-                        disabled={isApproving || isBlockedByTier}
-                      >
-                        Duyệt
-                      </Button>
-                    </Popconfirm>
-                  </span>
-                </Tooltip>
+            {canRefund && onOpenRefund && (
+              <Tooltip title="Xác nhận CSKH hoàn tiền dư">
+                <Button
+                  type="text"
+                  size="small"
+                  onClick={() => onOpenRefund(record)}
+                  icon={<BanknotesIcon className="h-4 w-4 text-emerald-600 hover:text-emerald-700 transition-colors" />}
+                  className="p-1 hover:bg-emerald-50 rounded-lg flex items-center justify-center"
+                />
+              </Tooltip>
+            )}
 
-                <Popconfirm
-                  title="Hủy đơn này?"
-                  onConfirm={() => onCancel(record.code)}
-                  okText="Đồng ý"
-                  cancelText="Quay lại"
-                >
-                  <Button
-                    size='small'
-                    type='default'
+            {(record.status === 'pending' || record.status === 'partially_paid') && (() => {
+              const userActiveSub = (record.user as any)?.subscriptions?.[0];
+              const userActiveTier = userActiveSub?.plan?.tierLevel || 0;
+              const txPlanTier = (record.plan as any)?.tierLevel || 0;
+              const isBlockedByTier = Boolean(userActiveTier > 0 && txPlanTier > 0 && txPlanTier <= userActiveTier);
+
+              return (
+                <>
+                  <Tooltip
+                    title={
+                      isBlockedByTier
+                        ? `Khách hàng đã sở hữu gói ${userActiveSub?.plan?.name || ''}. Không thể duyệt đơn gói cùng cấp hoặc cấp thấp hơn.`
+                        : undefined
+                    }
                   >
-                    Hủy
-                  </Button>
-                </Popconfirm>
-              </>
-            );
-          })()}
-        </div>
-      ),
+                    <span>
+                      <Popconfirm
+                        title="Xác nhận duyệt giao dịch?"
+                        description={`Bạn có chắc muốn duyệt đơn ${record.code}?`}
+                        onConfirm={() => onApprove(record.id)}
+                        disabled={isApproving || isBlockedByTier}
+                        okText="Duyệt"
+                        cancelText="Hủy"
+                      >
+                        <Button
+                          size="small"
+                          type="primary"
+                          disabled={isApproving || isBlockedByTier}
+                        >
+                          Duyệt
+                        </Button>
+                      </Popconfirm>
+                    </span>
+                  </Tooltip>
+
+                  <Popconfirm
+                    title="Hủy đơn này?"
+                    onConfirm={() => onCancel(record.code)}
+                    okText="Đồng ý"
+                    cancelText="Quay lại"
+                  >
+                    <Button
+                      size="small"
+                      type="default"
+                    >
+                      Hủy
+                    </Button>
+                  </Popconfirm>
+                </>
+              );
+            })()}
+          </div>
+        );
+      },
     },
   ];
 
