@@ -95,14 +95,18 @@ const FormRefundModal = ({
   };
 
   const handleBeforeUpload = (file: File) => {
+    if (fileList.length >= 3) {
+      toast.error('Chỉ được tải lên tối đa 3 ảnh minh chứng!');
+      return Upload.LIST_IGNORE;
+    }
     const isImage = file.type.startsWith('image/');
     if (!isImage) {
       toast.error('Chỉ được chọn tệp định dạng hình ảnh (PNG, JPG, JPEG, WEBP)!');
       return Upload.LIST_IGNORE;
     }
-    const isLt10M = file.size / 1024 / 1024 < 10;
-    if (!isLt10M) {
-      toast.error('Dung lượng tệp ảnh không được vượt quá 10MB!');
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      toast.error('Dung lượng tệp ảnh không được vượt quá 5MB!');
       return Upload.LIST_IGNORE;
     }
     // Ngăn Antd tự động gửi request HTTP upload
@@ -194,10 +198,10 @@ const FormRefundModal = ({
         title={
           <div className="space-y-1">
             <span className="text-base font-bold text-slate-800">
-              {isEditMode ? 'Chỉnh sửa phiếu hoàn tiền CSKH' : 'Xác nhận hoàn tiền dư CSKH'}
+              {isEditMode ? 'Chỉnh sửa phiếu hoàn tiền' : 'Xác nhận hoàn tiền dư'}
             </span>
             <p className="text-xs text-slate-500 font-normal">
-              Đơn hàng <span className="font-mono font-bold text-sky-600">#{transaction.code}</span> (Nạp dư {formatCurrency(overpaidAmount)})
+              Giao dịch <span className="font-mono font-bold text-sky-600">#{transaction.code}</span> (Nạp dư {formatCurrency(overpaidAmount)})
             </p>
           </div>
         }
@@ -213,21 +217,6 @@ const FormRefundModal = ({
           onFinish={handleSubmit}
           className="mt-4 space-y-4"
         >
-          <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-xs space-y-1 text-amber-900">
-            <div className="flex justify-between font-semibold">
-              <span>Tổng tiền nạp dư:</span>
-              <span>{formatCurrency(overpaidAmount)}</span>
-            </div>
-            <div className="flex justify-between text-amber-800">
-              <span>Đã hoàn các đợt khác:</span>
-              <span>{formatCurrency(otherRefundsTotal)}</span>
-            </div>
-            <div className="flex justify-between font-bold text-amber-950 pt-1 border-t border-amber-200/60">
-              <span>Tối đa có thể hoàn đợt này:</span>
-              <span className="text-sm text-emerald-700">{formatCurrency(remainingRefundable)}</span>
-            </div>
-          </div>
-
           <Form.Item
             label="Số tiền hoàn (VNĐ)"
             name="amount"
@@ -250,7 +239,7 @@ const FormRefundModal = ({
           </Form.Item>
 
           <Form.Item
-            label="Mã giao dịch ngân hàng (Ref No / FT)"
+            label="Mã giao dịch ngân hàng"
             name="refundRef"
             rules={[{ required: true, message: 'Vui lòng nhập mã giao dịch ngân hàng hoàn tiền' }]}
           >
@@ -262,9 +251,14 @@ const FormRefundModal = ({
 
           {/* Upload ảnh minh chứng chuyển khoản */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 block">
-              Ảnh minh chứng bill chuyển khoản (1 hoặc nhiều ảnh)
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-slate-700">
+                Ảnh minh chứng bill chuyển khoản
+              </label>
+              <span className="text-[11px] text-slate-400 italic">
+                Tối đa 3 ảnh | Định dạng PNG, JPG, WEBP (&lt; 5MB)
+              </span>
+            </div>
             <Spin spinning={isUploadingFiles} tip="Đang tải ảnh lên Supabase Storage...">
               <Upload
                 listType="picture-card"
@@ -273,9 +267,10 @@ const FormRefundModal = ({
                 onChange={handleChange}
                 beforeUpload={handleBeforeUpload}
                 accept="image/*"
+                maxCount={3}
                 multiple
               >
-                {fileList.length < 8 && (
+                {fileList.length < 3 && (
                   <div className="flex flex-col items-center justify-center text-slate-500 hover:text-sky-600">
                     <PlusOutlined className="text-base mb-1" />
                     <span className="text-[11px] font-medium">Tải ảnh lên</span>
@@ -283,9 +278,6 @@ const FormRefundModal = ({
                 )}
               </Upload>
             </Spin>
-            <p className="text-[11px] text-slate-400 italic">
-              Ảnh được lưu tại thư mục <code className="font-mono text-sky-600">refund-proofs/</code> trên Supabase Storage. Hệ thống tự dọn dẹp ảnh rác khi hủy hoặc thay đổi.
-            </p>
           </div>
 
           <Form.Item label="Ghi chú hoàn tiền" name="notes">

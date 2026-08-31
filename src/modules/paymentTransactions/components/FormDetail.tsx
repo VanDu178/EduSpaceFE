@@ -91,7 +91,7 @@ const FormDetail = ({ open, transaction, onClose, onOpenRefund, onOpenEditRefund
 
   return (
     <Drawer
-      title={<span className="text-lg font-bold text-slate-800">Chi tiết đơn #{transaction.code}</span>}
+      title={<span className="text-lg font-bold text-slate-800">Chi tiết</span>}
       placement="right"
       width={520}
       open={open}
@@ -100,10 +100,10 @@ const FormDetail = ({ open, transaction, onClose, onOpenRefund, onOpenEditRefund
       <div className="space-y-5">
         {isBlockedByTier && (
           <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs space-y-1">
-            <span className="font-bold block text-amber-950">Không thể duyệt đơn này</span>
+            <span className="font-bold block text-amber-950">Không thể duyệt</span>
             <span>
-              Khách hàng đã sở hữu gói <span className="font-bold">{userActiveSub?.plan?.name || 'tương đương'}</span> (Tier {userActiveTier}).
-              Đơn hàng này là gói Tier {txPlanTier} nên hệ thống không cho phép duyệt thanh toán.
+              Khách hàng đã sở hữu gói dịch vụ tương đương hoặc cao hơn.
+              Hệ thống không cho phép duyệt thanh toán.
             </span>
           </div>
         )}
@@ -171,7 +171,7 @@ const FormDetail = ({ open, transaction, onClose, onOpenRefund, onOpenEditRefund
 
         {(transaction.status === 'completed' || transaction.status === 'overpaid') && overpaidAmount > 0 && (
           <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-1 text-emerald-900">
-            <span className="font-bold block text-emerald-950">🎉 Đơn hàng nạp thừa tiền:</span>
+            <span className="font-bold block text-emerald-950">🎉 Giao dịch nạp thừa tiền:</span>
             <div>Số tiền khách đã nạp: <strong className="font-bold">{formatCurrency(paidAmount)}</strong></div>
             <div>Số tiền thừa ghi nhận: <strong className="font-bold text-emerald-700">{formatCurrency(overpaidAmount)}</strong></div>
             <div>Đã hoàn trả CSKH: <strong className="font-bold">{formatCurrency(totalRefunded)}</strong></div>

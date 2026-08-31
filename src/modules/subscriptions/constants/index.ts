@@ -11,18 +11,6 @@ export const STATUS_CONFIG: Record<
     badgeStatus: 'success',
     textColor: 'text-emerald-600',
   },
-  pending_payment: {
-    label: 'Chờ thanh toán',
-    color: 'amber',
-    badgeStatus: 'warning',
-    textColor: 'text-amber-600',
-  },
-  cancelled: {
-    label: 'Đã hủy',
-    color: 'rose',
-    badgeStatus: 'error',
-    textColor: 'text-rose-600',
-  },
   expired: {
     label: 'Hết hạn',
     color: 'slate',

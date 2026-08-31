@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Modal, Form, Select, Input, Button, Upload, Spin, Image } from 'antd';
+import { Modal, Form, Select, Input, DatePicker, Button, Upload, Spin, Image } from 'antd';
 import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
-import type { CreateSubscriptionPayload, BillingCycle } from '../types';
+import type { UserSubscription, UpdateSubscriptionPayload, BillingCycle } from '../types';
 import { PAYMENT_METHOD_OPTIONS } from '../constants';
-import { PAYMENT_METHOD_CODES } from '../../paymentMethods/constants';
 import { useUsersQuery } from '../../users/hooks';
 import { useMembershipPlansQuery } from '../../membershipPlans/hooks';
 import { useActivePaymentMethodsQuery } from '../../paymentMethods/hooks';
@@ -13,14 +13,21 @@ import { USER_ROLE } from '../../../constants/roles';
 import { formatCurrency } from '../../../utils/format';
 import { uploadMultipleFilesApi } from '../../../services/uploadService';
 
-interface FormCreateProps {
+interface FormUpdateProps {
   open: boolean;
+  data: UserSubscription | null;
   submitting: boolean;
   onClose: () => void;
-  onSubmit: (payload: CreateSubscriptionPayload) => Promise<boolean>;
+  onSubmit: (id: number, payload: UpdateSubscriptionPayload) => Promise<boolean>;
 }
 
-const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) => {
+const FormUpdate = ({
+  open,
+  data,
+  submitting,
+  onClose,
+  onSubmit,
+}: FormUpdateProps) => {
   const [form] = Form.useForm();
 
   // Custom hooks truy vấn danh sách người dùng, gói hội viên và phương thức thanh toán active
@@ -48,11 +55,31 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
   const [previewIndex, setPreviewIndex] = useState<number>(0);
 
   useEffect(() => {
-    if (open) {
-      form.resetFields();
-      setFileList([]);
+    if (open && data) {
+      form.setFieldsValue({
+        userId: data.userId,
+        planId: data.planId,
+        billingCycle: data.billingCycle,
+        paymentMethod: data.paymentMethod || undefined,
+        paymentRef: data.paymentRef || '',
+        endDate: data.endDate ? dayjs(data.endDate) : null,
+        notes: data.notes || '',
+      });
+
+      // Load danh sách ảnh minh chứng đã có (nếu có)
+      if (Array.isArray(data.proofUrls) && data.proofUrls.length > 0) {
+        const initialFiles: UploadFile[] = data.proofUrls.map((url, idx) => ({
+          uid: `existing-${idx}`,
+          name: `proof-${idx + 1}.png`,
+          status: 'done',
+          url: url,
+        }));
+        setFileList(initialFiles);
+      } else {
+        setFileList([]);
+      }
     }
-  }, [open, form]);
+  }, [open, data, form]);
 
   // Xử lý xem trước danh sách ảnh minh chứng qua Image.PreviewGroup
   const handlePreview = async (file: UploadFile) => {
@@ -84,41 +111,50 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
       toast.error('Dung lượng tệp ảnh không được vượt quá 5MB!');
       return Upload.LIST_IGNORE;
     }
-    // Ngăn Antd tự động upload ngay lập tức (chờ submit form)
     return false;
   };
 
   const handleFinish = async (values: any) => {
+    if (!data) return;
+
     try {
       setIsUploadingFiles(true);
 
-      // Upload ảnh mới chọn nếu có
+      // Tách các file mới chọn cần upload lên Supabase
       const filesToUpload: File[] = fileList
         .filter((file) => file.originFileObj)
         .map((file) => file.originFileObj as File);
 
-      let proofUrls: string[] = [];
+      // Lấy danh sách URL ảnh cũ còn được giữ lại
+      const existingUrls: string[] = fileList
+        .filter((file) => !file.originFileObj && file.url)
+        .map((file) => file.url as string);
+
+      let newUploadedUrls: string[] = [];
       if (filesToUpload.length > 0) {
         const uploadResults = await uploadMultipleFilesApi(filesToUpload, 'subscription-proofs');
-        proofUrls = uploadResults.map((res) => res.url);
+        newUploadedUrls = uploadResults.map((res) => res.url);
       }
 
-      const payload: CreateSubscriptionPayload = {
+      const finalProofUrls = [...existingUrls, ...newUploadedUrls];
+
+      const payload: UpdateSubscriptionPayload = {
         userId: values.userId ? Number(values.userId) : undefined,
         planId: Number(values.planId),
         billingCycle: values.billingCycle as BillingCycle,
-        paymentMethod: values.paymentMethod,
+        paymentMethod: values.paymentMethod ? String(values.paymentMethod).trim() : undefined,
         paymentRef: values.paymentRef ? String(values.paymentRef).trim() : undefined,
         notes: values.notes ? String(values.notes).trim() : undefined,
-        proofUrls: proofUrls.length > 0 ? proofUrls : undefined,
+        proofUrls: finalProofUrls,
+        endDate: values.endDate ? values.endDate.toISOString() : undefined,
       };
 
-      const success = await onSubmit(payload);
+      const success = await onSubmit(data.id, payload);
       if (success) {
         onClose();
       }
     } catch (err: any) {
-      console.error('Lỗi khi upload ảnh hoặc tạo mới đăng ký gói:', err);
+      console.error('Lỗi khi upload ảnh hoặc cập nhật gói hội viên:', err);
       toast.error('Đã có lỗi xảy ra khi xử lý tệp minh chứng!');
     } finally {
       setIsUploadingFiles(false);
@@ -133,7 +169,7 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
         open={open}
         onCancel={onClose}
         footer={null}
-        title={<span className="text-base font-semibold text-slate-800">Thêm mới</span>}
+        title={<span className="text-base font-semibold text-slate-800">Cập nhật</span>}
         width={620}
         className="top-8"
       >
@@ -141,13 +177,9 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
           form={form}
           layout="vertical"
           onFinish={handleFinish}
-          initialValues={{
-            billingCycle: 'monthly',
-            paymentMethod: PAYMENT_METHOD_CODES.VIETQR,
-          }}
           className="pt-3"
         >
-          {/* Chọn người dùng */}
+          {/* Chọn người dùng nhận gói / thụ hưởng */}
           <Form.Item
             name="userId"
             label={<span className="text-xs font-semibold text-slate-700">Người dùng nhận gói</span>}
@@ -179,7 +211,7 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
               loading={loadingData}
               options={plans.map((p) => ({
                 value: p.id,
-                label: `${p.name} - Theo tháng: ${formatCurrency(p.monthlyPrice)} / Theo năm: ${formatCurrency(p.yearlyPrice)}`,
+                label: `${p.name} - Thường: ${formatCurrency(p.monthlyPrice)} / Năm: ${formatCurrency(p.yearlyPrice)}`,
               }))}
               className="rounded-lg"
             />
@@ -200,6 +232,21 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
               />
             </Form.Item>
 
+            {/* Ngày hết hạn gói / Ngày dừng gói */}
+            <Form.Item
+              name="endDate"
+              label={<span className="text-xs font-semibold text-slate-700">Ngày hết hạn gói</span>}
+              rules={[{ required: true, message: 'Vui lòng chọn ngày hết hạn gói' }]}
+            >
+              <DatePicker
+                format="DD/MM/YYYY"
+                className="w-full rounded-lg"
+                placeholder="Chọn ngày hết hạn gói..."
+              />
+            </Form.Item>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Phương thức thanh toán */}
             <Form.Item
               name="paymentMethod"
@@ -211,24 +258,24 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
                 options={paymentMethodOptions.length > 0 ? paymentMethodOptions : PAYMENT_METHOD_OPTIONS}
               />
             </Form.Item>
+
+            {/* Mã tham chiếu / giao dịch */}
+            <Form.Item
+              name="paymentRef"
+              label={<span className="text-xs font-semibold text-slate-700">Mã giao dịch</span>}
+            >
+              <Input placeholder="Ví dụ: FT2308239912..." />
+            </Form.Item>
           </div>
 
-          {/* Mã tham chiếu / giao dịch */}
-          <Form.Item
-            name="paymentRef"
-            label={<span className="text-xs font-semibold text-slate-700">Mã giao dịch</span>}
-          >
-            <Input placeholder="Ví dụ: FT2308239912..." />
-          </Form.Item>
-
-          {/* Ghi chú / Lý do cấp gói */}
+          {/* Ghi chú / Lý do điều chỉnh */}
           <Form.Item
             name="notes"
-            label={<span className="text-xs font-semibold text-slate-700">Ghi chú / Lý do cấp gói</span>}
+            label={<span className="text-xs font-semibold text-slate-700">Ghi chú / Lý do điều chỉnh</span>}
           >
             <Input.TextArea
               rows={3}
-              placeholder="Nhập ghi chú hoặc lý do cấp gói hội viên..."
+              placeholder="Nhập ghi chú hoặc lý do cấp/điều chỉnh gói hội viên..."
               className="rounded-lg text-sm"
             />
           </Form.Item>
@@ -243,7 +290,7 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
                 Tối đa 5 ảnh | Định dạng PNG, JPG, WEBP (&lt; 5MB)
               </span>
             </div>
-            <Spin spinning={isUploadingFiles} tip="Đang tải ảnh minh chứng...">
+            <Spin spinning={isUploadingFiles} tip="Đang xử lý ảnh minh chứng...">
               <Upload
                 listType="picture-card"
                 fileList={fileList}
@@ -264,7 +311,7 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
             </Spin>
           </Form.Item>
 
-          {/* Footer Actions */}
+          {/* Actions */}
           <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100 mt-6">
             <Button onClick={onClose} disabled={isFormSubmitting}>
               Hủy
@@ -275,7 +322,7 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
               loading={isFormSubmitting}
               className="bg-sky-500 hover:bg-sky-600 shadow-none font-medium"
             >
-              Thêm mới
+              Cập nhật
             </Button>
           </div>
         </Form>
@@ -304,4 +351,4 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
   );
 };
 
-export default FormCreate;
+export default FormUpdate;

@@ -1,11 +1,9 @@
-import { Modal, Tag, Spin, Divider } from 'antd';
+import { Modal, Tag, Spin, Divider, Image } from 'antd';
 import {
   UserIcon,
   SparklesIcon,
   CreditCardIcon,
   CalendarIcon,
-  CheckCircleIcon,
-  XCircleIcon,
   ClockIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
@@ -24,7 +22,10 @@ interface ModalDetailProps {
 const ModalDetail = ({ open, data, loading, onClose }: ModalDetailProps) => {
   if (!data && !loading) return null;
 
-  const statusConfig = data ? STATUS_CONFIG[data.status] : null;
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const isSubActive = data ? new Date(data.endDate).setHours(23, 59, 59, 999) >= startOfToday.getTime() : false;
+  const statusConfig = STATUS_CONFIG[isSubActive ? 'active' : 'expired'];
 
   return (
     <Modal
@@ -54,7 +55,7 @@ const ModalDetail = ({ open, data, loading, onClose }: ModalDetailProps) => {
             </div>
             {statusConfig && (
               <Tag
-                color={statusConfig.color}
+                color={statusConfig.badgeStatus}
                 className="px-3 py-1 text-xs font-semibold rounded-full border-none m-0"
               >
                 {statusConfig.label}
@@ -164,48 +165,29 @@ const ModalDetail = ({ open, data, loading, onClose }: ModalDetailProps) => {
                   <span>{formatDate(data.endDate)}</span>
                 </span>
               </div>
+
+              <div className="flex justify-between items-center py-1 border-b border-slate-100">
+                <span className="text-slate-500 text-xs">Nguồn cấp:</span>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${data.createdType === 'admin' ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}`}>
+                  {data.createdType === 'admin' ? 'Admin cấp' : 'Hệ thống'}
+                </span>
+              </div>
             </div>
 
-            {/* Cancelled Details if any */}
-            {data.status === 'cancelled' && (
-              <div className="bg-rose-50/70 border border-rose-100 rounded-xl p-3 mt-3">
-                <div className="flex items-center space-x-1.5 text-rose-600 text-xs font-semibold mb-1">
-                  <ExclamationTriangleIcon className="h-4 w-4" />
-                  <span>Thông tin hủy đơn</span>
-                </div>
-                <p className="text-xs text-rose-700">
-                  <span className="font-medium">Thời gian hủy:</span> {formatDate(data.cancelledAt, false)}
-                </p>
-                <p className="text-xs text-rose-700 mt-0.5">
-                  <span className="font-medium">Lý do:</span> {data.cancelReason || 'Không ghi rõ'}
-                </p>
-              </div>
-            )}
-
             {/* Admin Manual Allocation & Proof Images Section */}
-            {data.createdType === 'admin' && (
+            {data.createdType === 'admin' && (data.notes || (data.proofUrls && Array.isArray(data.proofUrls) && data.proofUrls.length > 0)) && (
               <div className="bg-purple-50/70 border border-purple-100 rounded-xl p-3.5 mt-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-1.5 text-purple-700 text-xs font-bold">
                     <SparklesIcon className="h-4 w-4 text-purple-600" />
-                    <span>Gói cấp thủ công bởi CSKH Admin</span>
+                    <span>Gói cấp thủ công bởi Admin</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded bg-purple-100 text-purple-800 text-[10px] font-bold border border-purple-200">
-                    Admin Assign
-                  </span>
                 </div>
-
-                {data.createdByUser && (
-                  <p className="text-xs text-purple-900">
-                    <span className="font-medium text-slate-500">Admin cấp gói:</span>{' '}
-                    <strong className="font-semibold text-purple-950">{data.createdByUser.name || data.createdByUser.email}</strong>
-                  </p>
-                )}
 
                 {data.notes && (
                   <div className="text-xs text-purple-900">
                     <span className="font-medium text-slate-500 block mb-0.5">Ghi chú / Lý do cấp bù:</span>
-                    <p className="p-2 bg-white/80 rounded-lg border border-purple-100 text-slate-700 font-mono text-[11px] whitespace-pre-wrap">
+                    <p className="p-2 text-slate-700 font-mono text-[11px] whitespace-pre-wrap">
                       {data.notes}
                     </p>
                   </div>
@@ -214,24 +196,25 @@ const ModalDetail = ({ open, data, loading, onClose }: ModalDetailProps) => {
                 {data.proofUrls && Array.isArray(data.proofUrls) && data.proofUrls.length > 0 && (
                   <div className="pt-2 border-t border-purple-200/60">
                     <span className="text-xs font-bold text-purple-900 block mb-2">
-                      Ảnh minh chứng giao dịch ({data.proofUrls.length} ảnh):
+                      Ảnh minh chứng giao dịch
                     </span>
-                    <div className="flex gap-2.5 flex-wrap">
-                      {data.proofUrls.map((url, i) => (
-                        <a
-                          key={i}
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block w-20 h-20 rounded-xl overflow-hidden border-2 border-purple-200 hover:border-purple-500 hover:shadow-md transition-all group bg-white relative"
-                        >
-                          <img src={url} alt={`Minh chứng ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                          <span className="absolute bottom-0 inset-x-0 bg-purple-900/70 text-white text-[9px] font-mono text-center py-0.5">
-                            Ảnh #{i + 1}
-                          </span>
-                        </a>
-                      ))}
-                    </div>
+                    <Image.PreviewGroup>
+                      <div className="flex gap-2.5 flex-wrap">
+                        {data.proofUrls.map((url, i) => (
+                          <div
+                            key={i}
+                            className="w-20 h-20 rounded-xl overflow-hidden border-2 border-purple-200 hover:border-purple-500 transition-all bg-white relative group"
+                          >
+                            <Image
+                              src={url}
+                              alt={`Minh chứng ${i + 1}`}
+                              wrapperClassName="!w-full !h-full"
+                              className="!w-full !h-full !object-cover group-hover:scale-105 transition-transform"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </Image.PreviewGroup>
                   </div>
                 )}
               </div>

@@ -76,7 +76,7 @@ const ListPage = ({
   isApproving,
   onViewDetail,
   onApprove,
-  onCancel,
+  onCancel: _onCancel,
   onOpenRefund,
   pagination,
 }: ListPageProps) => {
@@ -385,7 +385,7 @@ const ListPage = ({
               const userActiveTier = userActiveSub?.plan?.tierLevel || 0;
               const txPlanTier = (record.plan as any)?.tierLevel || 0;
               const isBlockedByTier = Boolean(userActiveTier > 0 && txPlanTier > 0 && txPlanTier <= userActiveTier);
-              const isExpired = record.status === 'expired' || Boolean(record.expiredAt && new Date(record.expiredAt) < new Date());
+              const isExpired = Boolean(record.expiredAt && new Date(record.expiredAt) < new Date());
               const isDisableApprove = isApproving || isBlockedByTier || isExpired;
 
               let tooltipTitle: string | undefined = undefined;

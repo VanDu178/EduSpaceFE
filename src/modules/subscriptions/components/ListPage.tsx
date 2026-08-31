@@ -159,11 +159,17 @@ const ListPage = ({
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'status',
       key: 'status',
       width: 140,
-      render: (status: SubscriptionStatus) => {
-        const config = STATUS_CONFIG[status] || { label: status, textColor: 'text-slate-600' };
+      align: 'center',
+      render: (_, record) => {
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        const endDateObj = new Date(record.endDate);
+        endDateObj.setHours(23, 59, 59, 999);
+        const isActive = endDateObj.getTime() >= startOfToday.getTime();
+        const computedStatus: SubscriptionStatus = isActive ? 'active' : 'expired';
+        const config = STATUS_CONFIG[computedStatus] || { label: 'Hết hạn', textColor: 'text-slate-500' };
         return (
           <span className={`font-semibold text-xs ${config.textColor}`}>
             {config.label}

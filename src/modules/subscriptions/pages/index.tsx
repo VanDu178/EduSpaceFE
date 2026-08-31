@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from 'antd';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { ListPage, FilterBar, FormCreate, FormUpdateStatus, ModalDetail } from '../components';
+import { ListPage, FilterBar, FormCreate, FormUpdate, ModalDetail } from '../components';
 import PlanModalDetail from '../../membershipPlans/components/ModalDetail';
 import { useMembershipPlanQuery } from '../../membershipPlans/hooks';
 import {
@@ -10,7 +10,7 @@ import {
   useCreateSubscription,
   useUpdateSubscriptionStatus,
   useDeleteSubscription,
-} from '../hooks/useSubscriptions';
+} from '../hooks';
 import type { UserSubscription, UserSubscriptionParams } from '../types';
 
 const defaultParam: UserSubscriptionParams = {
@@ -163,7 +163,7 @@ const SubscriptionPage = () => {
       />
 
       {/* Modal Cập nhật */}
-      <FormUpdateStatus
+      <FormUpdate
         open={isUpdateOpen}
         data={selectedItemForUpdate}
         submitting={updateSubmitting}

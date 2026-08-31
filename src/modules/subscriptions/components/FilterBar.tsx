@@ -35,8 +35,6 @@ const FilterBar = ({ params, setParams }: FilterBarProps) => {
             options={[
               { value: 'all', label: 'Tất cả trạng thái' },
               { value: 'active', label: 'Hoạt động' },
-              { value: 'pending_payment', label: 'Chờ thanh toán' },
-              { value: 'cancelled', label: 'Đã hủy' },
               { value: 'expired', label: 'Hết hạn' },
             ]}
             className="w-full"

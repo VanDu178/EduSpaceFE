@@ -10,11 +10,11 @@ import DetailPage from './modules/blogs/pages/DetailPage';
 import UserListPage from './modules/users/pages';
 import { MembershipPlanListPage } from './modules/membershipPlans';
 import { FeatureListPage } from './modules/features';
-import { SubscriptionListPage } from './modules/subscriptions';
 import { PaymentAccountListPage } from './modules/paymentAccounts';
 import { VietqrBankListPage } from './modules/vietqrBanks';
 import { PaymentTransactionPage } from './modules/paymentTransactions';
 import { PaymentMethodListPage } from './modules/paymentMethods';
+import { SubscriptionListPage } from './modules/subscriptions';
 import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {
