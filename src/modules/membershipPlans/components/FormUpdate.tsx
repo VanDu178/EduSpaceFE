@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Drawer, Form, Input, InputNumber, Select, Switch, Button } from 'antd';
+import { Drawer, Form, Input, InputNumber, Select, Switch, Button, Tooltip } from 'antd';
 import type { MembershipPlan, MembershipPlanPayload } from '../types';
 import { BADGE_OPTIONS } from '../constants';
 import FeatureSelectionSection from './FeatureSelectionSection';
@@ -14,6 +14,7 @@ interface FormUpdateProps {
 
 const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProps) => {
   const [form] = Form.useForm();
+  const isActiveValue = Form.useWatch('isActive', form);
   const [planFeatures, setPlanFeatures] = useState<{ featureId: number; isAvailable: boolean }[]>([]);
 
   useEffect(() => {
@@ -71,6 +72,8 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProp
       console.error('Validation failed:', error);
     }
   };
+
+  const isLocked = Boolean(plan?.hasSubscribers || (plan?.subscriberCount && plan?.subscriberCount > 0));
 
   return (
     <Drawer
@@ -204,7 +207,15 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProp
               valuePropName="checked"
               label={<span className="font-semibold text-slate-700">Kích hoạt ngay</span>}
             >
-              <Switch className="bg-slate-300" />
+              <Tooltip title={isLocked ? "Gói dịch vụ đã có người đăng ký, không thể chuyển đổi trạng thái" : undefined}>
+                <span className="inline-block">
+                  <Switch
+                    disabled={isLocked}
+                    checked={isActiveValue}
+                    onChange={(checked) => form.setFieldValue('isActive', checked)}
+                  />
+                </span>
+              </Tooltip>
             </Form.Item>
           </div>
         </div>
@@ -212,8 +223,7 @@ const FormUpdate = ({ isOpen, onClose, onSave, isLoading, plan }: FormUpdateProp
         {/* Dynamic Feature Switch Selection Section */}
         <FeatureSelectionSection
           initialPlanFeatures={plan?.planFeatures}
-          hasSubscribers={plan?.hasSubscribers}
-          subscriberCount={plan?.subscriberCount}
+          isLocked={isLocked}
           onChange={handleFeatureChange}
         />
       </Form>

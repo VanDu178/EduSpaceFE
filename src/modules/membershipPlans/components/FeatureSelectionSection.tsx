@@ -1,23 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Switch, Spin, Tooltip, Badge } from 'antd';
-import { CheckCircleIcon, XCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
-import dayjs from 'dayjs';
+import { Switch, Spin, Tooltip } from 'antd';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { useFeaturesQuery, FEATURE_STATUS, type Feature } from '../../features';
 import type { PlanFeatureItem } from '../types';
-import ModalSunsetWorkflow from './ModalSunsetWorkflow';
 
 interface PlanFeatureConfig {
   featureId: number;
   isAvailable: boolean;
-  disabledAt?: string | null;
-  compensateDays?: number;
-  notifyReason?: string;
 }
 
 interface FeatureSelectionSectionProps {
   initialPlanFeatures?: PlanFeatureItem[];
-  hasSubscribers?: boolean;
-  subscriberCount?: number;
+  isLocked?: boolean;
   onChange: (planFeatures: PlanFeatureConfig[]) => void;
 }
 
@@ -25,8 +19,7 @@ const EMPTY_PLAN_FEATURES: PlanFeatureItem[] = [];
 
 const FeatureSelectionSection = ({
   initialPlanFeatures = EMPTY_PLAN_FEATURES,
-  hasSubscribers = false,
-  subscriberCount = 0,
+  isLocked = false,
   onChange,
 }: FeatureSelectionSectionProps) => {
   const { data: features = [], isLoading } = useFeaturesQuery({
@@ -36,31 +29,18 @@ const FeatureSelectionSection = ({
   // Map featureId -> PlanFeatureConfig
   const [featureConfigMap, setFeatureConfigMap] = useState<Record<number, PlanFeatureConfig>>({});
 
-  // State quản lý modal Sunset Workflow
-  const [activeSunsetFeature, setActiveSunsetFeature] = useState<Feature | null>(null);
-
   const initialFeaturesJson = JSON.stringify(initialPlanFeatures);
 
-  // Cập nhật khi features hoặc initialPlanFeatures thay đổi
   useEffect(() => {
     if (features.length > 0) {
       const configMap: Record<number, PlanFeatureConfig> = {};
 
       features.forEach((feat) => {
         const existing = initialPlanFeatures.find((pf) => pf.featureId === feat.id);
-        if (existing) {
-          configMap[feat.id] = {
-            featureId: feat.id,
-            isAvailable: existing.isAvailable,
-            disabledAt: existing.disabledAt || null,
-          };
-        } else {
-          configMap[feat.id] = {
-            featureId: feat.id,
-            isAvailable: false,
-            disabledAt: null,
-          };
-        }
+        configMap[feat.id] = {
+          featureId: feat.id,
+          isAvailable: existing ? existing.isAvailable : false,
+        };
       });
 
       setFeatureConfigMap(configMap);
@@ -68,19 +48,17 @@ const FeatureSelectionSection = ({
   }, [features, initialFeaturesJson]);
 
   const handleToggle = (feat: Feature, checked: boolean) => {
-    const currentConfig = featureConfigMap[feat.id];
+    const initialConfig = initialPlanFeatures.find((pf) => pf.featureId === feat.id);
+    const wasInitiallyAvailable = Boolean(initialConfig?.isAvailable);
 
-    // Nếu gạt TẮT một tính năng đang khả dụng VÀ gói có người dùng active
-    if (!checked && currentConfig?.isAvailable && hasSubscribers && subscriberCount > 0) {
-      setActiveSunsetFeature(feat);
+    // Nếu gói đã được sử dụng và tính năng này vốn đã khả dụng, không cho phép tắt
+    if (isLocked && wasInitiallyAvailable && !checked) {
       return;
     }
 
-    // Nếu chuyển BẬT hoặc gói chưa có người dùng
     const nextConfig: PlanFeatureConfig = {
       featureId: feat.id,
       isAvailable: checked,
-      disabledAt: null,
     };
 
     const nextMap = {
@@ -89,39 +67,7 @@ const FeatureSelectionSection = ({
     };
 
     setFeatureConfigMap(nextMap);
-    notifyChange(nextMap);
-  };
-
-  const handleConfirmSunset = (result: {
-    disabledAt: string | null;
-    compensateDays: number;
-    notifyReason: string;
-  }) => {
-    if (!activeSunsetFeature) return;
-
-    const featId = activeSunsetFeature.id;
-    const nextConfig: PlanFeatureConfig = {
-      featureId: featId,
-      // Nếu có disabledAt (hẹn ngày) thì isAvailable vẫn giữ true cho tới ngày đó
-      isAvailable: Boolean(result.disabledAt),
-      disabledAt: result.disabledAt,
-      compensateDays: result.compensateDays,
-      notifyReason: result.notifyReason,
-    };
-
-    const nextMap = {
-      ...featureConfigMap,
-      [featId]: nextConfig,
-    };
-
-    setFeatureConfigMap(nextMap);
-    notifyChange(nextMap);
-    setActiveSunsetFeature(null);
-  };
-
-  const notifyChange = (map: Record<number, PlanFeatureConfig>) => {
-    const list: PlanFeatureConfig[] = Object.values(map);
-    onChange(list);
+    onChange(Object.values(nextMap));
   };
 
   if (isLoading) {
@@ -138,7 +84,9 @@ const FeatureSelectionSection = ({
         <div>
           <h4 className="font-semibold text-slate-800 text-sm">Cấu hình Tính năng & Quyền lợi</h4>
           <p className="text-xs text-slate-500">
-            Bật/tắt công tắc để xác định tính năng đó có khả dụng trong gói hội viên này hay không.
+            {isLocked
+              ? 'Gói hội viên đã được sử dụng: Không thể tắt tính năng đang khả dụng, nhưng vẫn có thể bật thêm tính năng mới.'
+              : 'Bật/tắt công tắc để xác định tính năng đó có khả dụng trong gói hội viên này hay không.'}
           </p>
         </div>
       </div>
@@ -147,38 +95,30 @@ const FeatureSelectionSection = ({
         {features.map((feat) => {
           const config = featureConfigMap[feat.id];
           const isAvailable = Boolean(config?.isAvailable);
-          const disabledAt = config?.disabledAt;
-          const isPendingDisable = Boolean(disabledAt && dayjs(disabledAt).isAfter(dayjs()));
+
+          const initialConfig = initialPlanFeatures.find((pf) => pf.featureId === feat.id);
+          const wasInitiallyAvailable = Boolean(initialConfig?.isAvailable);
+          
+          // Chỉ disable switch đối với tính năng VỐN ĐÃ KHẢ DỤNG khi gói bị locked (không cho tắt)
+          const isSwitchDisabled = isLocked && wasInitiallyAvailable;
 
           return (
             <div
               key={feat.id}
               className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
-                isPendingDisable
-                  ? 'border-amber-300 bg-amber-50/50'
-                  : isAvailable
+                isAvailable
                   ? 'border-sky-200 bg-sky-50/30'
                   : 'border-slate-200 bg-slate-50/50'
               }`}
             >
               <div className="flex items-start space-x-3 pr-2">
-                {isPendingDisable ? (
-                  <ClockIcon className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                ) : isAvailable ? (
+                {isAvailable ? (
                   <CheckCircleIcon className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
                 ) : (
                   <XCircleIcon className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
                 )}
                 <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium text-slate-800 text-sm">{feat.name}</span>
-                    {isPendingDisable && (
-                      <Badge
-                        count={`Hẹn tắt: ${dayjs(disabledAt).format('DD/MM/YYYY')}`}
-                        className="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded-md font-semibold"
-                      />
-                    )}
-                  </div>
+                  <span className="font-medium text-slate-800 text-sm">{feat.name}</span>
                   {feat.description && (
                     <Tooltip title={feat.description} placement="topLeft">
                       <p className="text-xs text-slate-500 mt-0.5 line-clamp-1 cursor-help">
@@ -192,36 +132,32 @@ const FeatureSelectionSection = ({
               <div className="flex items-center space-x-2 shrink-0">
                 <span
                   className={`text-xs font-semibold ${
-                    isPendingDisable
-                      ? 'text-amber-600'
-                      : isAvailable
-                      ? 'text-emerald-600'
-                      : 'text-slate-400'
+                    isAvailable ? 'text-emerald-600' : 'text-slate-400'
                   }`}
                 >
-                  {isPendingDisable ? 'Đang hẹn tắt' : isAvailable ? 'Khả dụng' : 'Không hỗ trợ'}
+                  {isAvailable ? 'Khả dụng' : 'Không hỗ trợ'}
                 </span>
-                <Switch
-                  checked={isAvailable || isPendingDisable}
-                  onChange={(checked) => handleToggle(feat, checked)}
-                  className={isAvailable || isPendingDisable ? 'bg-sky-500' : 'bg-slate-300'}
-                />
+                <Tooltip
+                  title={
+                    isSwitchDisabled
+                      ? 'Gói hội viên đã có người đăng ký hoặc lịch sử giao dịch, không thể tắt tính năng đang khả dụng'
+                      : undefined
+                  }
+                >
+                  <span className="inline-block">
+                    <Switch
+                      disabled={isSwitchDisabled}
+                      checked={isAvailable}
+                      onChange={(checked) => handleToggle(feat, checked)}
+                      className={isAvailable ? 'bg-sky-500' : 'bg-slate-300'}
+                    />
+                  </span>
+                </Tooltip>
               </div>
             </div>
           );
         })}
       </div>
-
-      {/* Modal Sunset Workflow khi tắt tính năng gói có người dùng */}
-      {activeSunsetFeature && (
-        <ModalSunsetWorkflow
-          open={Boolean(activeSunsetFeature)}
-          featureName={activeSunsetFeature.name}
-          subscriberCount={subscriberCount}
-          onCancel={() => setActiveSunsetFeature(null)}
-          onConfirm={handleConfirmSunset}
-        />
-      )}
     </div>
   );
 };
