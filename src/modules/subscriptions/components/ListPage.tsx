@@ -213,16 +213,13 @@ const ListPage = ({
 
             {isAdminCreated ? (
               <>
-                <Tooltip title="Cập nhật gói do Admin cấp">
-                  <Button
-                    type="text"
-                    size="small"
-                    onClick={() => onEdit(record)}
-                    icon={<PencilSquareIcon className="h-4 w-4 text-slate-500 hover:text-sky-600 transition-colors" />}
-                    className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
-                  />
-                </Tooltip>
-
+                <Button
+                  type="text"
+                  size="small"
+                  onClick={() => onEdit(record)}
+                  icon={<PencilSquareIcon className="h-4 w-4 text-slate-500 hover:text-sky-600 transition-colors" />}
+                  className="p-1 hover:bg-slate-100 rounded-lg flex items-center justify-center"
+                />
                 {onDelete && (
                   <Popconfirm
                     title="Xóa gói hội viên thủ công này?"
@@ -232,15 +229,13 @@ const ListPage = ({
                     cancelText="Hủy"
                     okButtonProps={{ danger: true }}
                   >
-                    <Tooltip title="Xóa gói do Admin cấp">
-                      <Button
-                        type="text"
-                        size="small"
-                        danger
-                        icon={<TrashIcon className="h-4 w-4 text-rose-500 hover:text-rose-700 transition-colors" />}
-                        className="p-1 hover:bg-rose-50 rounded-lg flex items-center justify-center"
-                      />
-                    </Tooltip>
+                    <Button
+                      type="text"
+                      size="small"
+                      danger
+                      icon={<TrashIcon className="h-4 w-4 text-rose-500 hover:text-rose-700 transition-colors" />}
+                      className="p-1 hover:bg-rose-50 rounded-lg flex items-center justify-center"
+                    />
                   </Popconfirm>
                 )}
               </>

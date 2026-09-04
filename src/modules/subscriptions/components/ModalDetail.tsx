@@ -5,7 +5,6 @@ import {
   CreditCardIcon,
   CalendarIcon,
   ClockIcon,
-  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import type { UserSubscription } from '../types';
 import { STATUS_CONFIG, BILLING_CYCLE_LABELS, PAYMENT_METHOD_LABELS } from '../constants';

@@ -77,7 +77,7 @@ const ListPage = ({
       dataIndex: 'monthlyPrice',
       key: 'monthlyPrice',
       width: 130,
-      align: 'left',
+      align: 'right',
       render: (price: number) => (
         <span className="font-medium text-slate-800 text-sm">{formatCurrency(price)}</span>
       ),
@@ -87,7 +87,7 @@ const ListPage = ({
       dataIndex: 'yearlyPrice',
       key: 'yearlyPrice',
       width: 130,
-      align: 'left',
+      align: 'right',
       render: (price: number) => (
         <span className="font-medium text-slate-800 text-sm">{formatCurrency(price)}</span>
       ),

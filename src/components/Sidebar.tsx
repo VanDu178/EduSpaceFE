@@ -8,6 +8,7 @@ import {
   ChevronDownIcon,
   AdjustmentsHorizontalIcon,
   TicketIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 import { Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
@@ -31,6 +32,18 @@ interface ParentMenuItem {
 }
 
 const menuTree: ParentMenuItem[] = [
+  {
+    key: 'support-center',
+    title: 'Hỗ trợ CSKH',
+    icon: ChatBubbleLeftRightIcon,
+    items: [
+      {
+        key: 'support-hub',
+        label: 'Live Chat & Ticket Hub',
+        path: '/admin/support',
+      },
+    ],
+  },
   {
     key: 'products-services',
     title: 'Sản phẩm & Dịch vụ',

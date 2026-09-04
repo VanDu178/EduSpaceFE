@@ -1,6 +1,7 @@
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
+import { SocketProvider } from './config/socket/SocketContext';
 import Login from './modules/auth/pages/Login';
 import DashboardPage from './pages/DashboardPage';
 import ListPage from './modules/blogs/pages';
@@ -15,6 +16,7 @@ import { VietqrBankListPage } from './modules/vietqrBanks';
 import { PaymentTransactionPage } from './modules/paymentTransactions';
 import { PaymentMethodListPage } from './modules/paymentMethods';
 import { SubscriptionListPage } from './modules/subscriptions';
+import { SupportCenterPage } from './pages/SupportCenterPage';
 import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {
@@ -30,7 +32,8 @@ const App = () => {
       }}
     >
       <Toaster position="top-right" reverseOrder={false} />
-      <BrowserRouter>
+      <SocketProvider>
+        <BrowserRouter>
         <Routes>
           {/* Route đăng nhập công khai */}
           <Route path="/login" element={<Login />} />
@@ -76,6 +79,9 @@ const App = () => {
             {/* Phân hệ route con quản lý tài khoản thanh toán */}
             <Route path="payment-accounts" element={<PaymentAccountListPage />} />
 
+            {/* Phân hệ Hub tổng hợp Trung tâm hỗ trợ CSKH */}
+            <Route path="support" element={<SupportCenterPage />} />
+
             {/* Phân hệ route con quản lý ngân hàng VietQR */}
             <Route path="vietqr-banks" element={<VietqrBankListPage />} />
           </Route>
@@ -84,9 +90,9 @@ const App = () => {
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </BrowserRouter>
+      </SocketProvider>
     </ConfigProvider>
   );
 };
 
 export default App;
-
