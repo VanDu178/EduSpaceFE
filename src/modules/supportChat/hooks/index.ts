@@ -1,3 +1,4 @@
+import type { ChatFilterParams } from '../types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { chatApi } from '../api';
@@ -13,10 +14,10 @@ export const useAdminStatusQuery = () => {
 };
 
 // Hook lấy hàng đợi danh sách cuộc trò chuyện
-export const useConversationsQuery = (status?: string) => {
+export const useConversationsQuery = (params?: ChatFilterParams) => {
   return useQuery({
-    queryKey: [...CHAT_QUERY_KEY, 'conversations', status],
-    queryFn: () => chatApi.getConversations(status),
+    queryKey: [...CHAT_QUERY_KEY, 'conversations', params?.status, params?.search],
+    queryFn: () => chatApi.getConversations(params),
   });
 };
 
@@ -49,7 +50,8 @@ export const useAcceptConversationMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => chatApi.acceptConversation(id),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: [...CHAT_QUERY_KEY, 'conversation', id] });
       queryClient.invalidateQueries({ queryKey: [...CHAT_QUERY_KEY, 'conversations'] });
       toast.success('Đã tiếp nhận cuộc trò chuyện!');
     },

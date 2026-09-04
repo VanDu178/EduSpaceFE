@@ -2,6 +2,13 @@ export type TicketCategory = 'PAYMENT' | 'ACCOUNT' | 'TECHNICAL' | 'OTHER';
 export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'PENDING_USER' | 'RESOLVED' | 'CLOSED';
 
+export interface TicketFilterParams {
+  status: string;
+  category: string;
+  priority: string;
+  search: string;
+}
+
 export interface TicketUser {
   id: number;
   name?: string | null;

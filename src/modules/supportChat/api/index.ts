@@ -1,10 +1,11 @@
+import type { ChatFilterParams } from '../types';
 import api from '../../../services/api';
 
 const BASE_PATH = '/support';
 
 export const chatApi = {
-  getConversations: async (status?: string) => {
-    const res = await api.get(`${BASE_PATH}/chat/conversations`, { params: { status } });
+  getConversations: async (params?: ChatFilterParams) => {
+    const res = await api.get(`${BASE_PATH}/chat/conversations`, { params });
     return res.data;
   },
 

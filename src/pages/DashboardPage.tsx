@@ -4,6 +4,7 @@ import type { User } from '../modules/users/types';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { useLogoutMutation } from '../modules/auth/hooks';
+import { useSocket } from '../config/socket/SocketContext';
 
 const DashboardPage = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -11,6 +12,7 @@ const DashboardPage = () => {
     return localStorage.getItem('sidebar_collapsed') === 'true';
   });
   const navigate = useNavigate();
+  const { disconnectSocket } = useSocket();
 
   // Load thông tin người dùng từ localStorage khi khởi chạy
   useEffect(() => {
@@ -25,6 +27,7 @@ const DashboardPage = () => {
   }, []);
 
   const logoutMutation = useLogoutMutation(() => {
+    disconnectSocket();
     navigate('/login');
   });
 

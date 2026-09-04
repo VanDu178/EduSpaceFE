@@ -40,3 +40,8 @@ export interface AdminPresenceStatus {
   isOnline: boolean;
   activeAdminId?: number | null;
 }
+
+export interface ChatFilterParams {
+  status?: string;
+  search?: string;
+}

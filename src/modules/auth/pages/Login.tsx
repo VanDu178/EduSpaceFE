@@ -6,10 +6,12 @@ import { useLoginMutation } from '../hooks';
 import type { LoginPayload } from '../types';
 import { handleApiError } from '../../../utils/errorHandler';
 import toast from 'react-hot-toast';
+import { useSocket } from '../../../config/socket/SocketContext';
 
 const Login = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const { connectSocket } = useSocket();
 
   // Kiểm tra xem đã đăng nhập chưa
   useEffect(() => {
@@ -22,6 +24,7 @@ const Login = () => {
   // Khởi tạo login mutation hook
   const loginMutation = useLoginMutation(
     (message) => {
+      connectSocket();
       toast.success(message || 'Đăng nhập thành công!');
       navigate('/admin');
     },

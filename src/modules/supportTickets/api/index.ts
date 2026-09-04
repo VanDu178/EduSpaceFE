@@ -19,8 +19,13 @@ export const ticketApi = {
     return res.data;
   },
 
-  updateTicketStatus: async (id: number, data: { status?: string; priority?: string; category?: string }) => {
-    const res = await api.patch(`${BASE_PATH}/${id}/status`, data);
+  updateTicketStatus: async (id: number, status: string) => {
+    const res = await api.patch(`${BASE_PATH}/${id}/status`, { status });
+    return res.data;
+  },
+
+  updateTicket: async (id: number, data: { priority?: TicketPriority; category?: TicketCategory }) => {
+    const res = await api.patch(`${BASE_PATH}/${id}`, data);
     return res.data;
   },
 

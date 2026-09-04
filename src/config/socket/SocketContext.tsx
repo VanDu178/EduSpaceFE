@@ -1,14 +1,18 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 interface SocketContextValue {
   socket: Socket | null;
   isConnected: boolean;
+  connectSocket: () => void;
+  disconnectSocket: () => void;
 }
 
 const SocketContext = createContext<SocketContextValue>({
   socket: null,
-  isConnected: false
+  isConnected: false,
+  connectSocket: () => { },
+  disconnectSocket: () => { }
 });
 
 interface SocketProviderProps {
@@ -20,18 +24,31 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-    const socketUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+  const disconnectSocket = useCallback(() => {
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+      setSocket(null);
+      setIsConnected(false);
+    }
+  }, []);
+
+  const connectSocket = useCallback(() => {
+    const token = localStorage.getItem('accessToken');
+    const socketUrl = import.meta.env.VITE_API_URL?.replace('/api', '');
 
     if (!token) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-        setSocket(null);
-        setIsConnected(false);
-      }
+      disconnectSocket();
       return;
+    }
+
+    if (socketRef.current && socketRef.current.connected) {
+      return;
+    }
+
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
     }
 
     const socketInstance = io(socketUrl, {
@@ -50,17 +67,18 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     socketInstance.on('disconnect', () => {
       setIsConnected(false);
     });
+  }, [disconnectSocket]);
+
+  useEffect(() => {
+    connectSocket();
 
     return () => {
-      socketInstance.disconnect();
-      socketRef.current = null;
-      setSocket(null);
-      setIsConnected(false);
+      disconnectSocket();
     };
-  }, []);
+  }, [connectSocket, disconnectSocket]);
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected }}>
+    <SocketContext.Provider value={{ socket, isConnected, connectSocket, disconnectSocket }}>
       {children}
     </SocketContext.Provider>
   );

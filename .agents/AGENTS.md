@@ -13,6 +13,14 @@ Tài liệu này quy định các nguyên tắc thiết kế mã nguồn, giao d
 *   **Sử dụng Import Kiểu Dữ Liệu Tách Biệt (verbatimModuleSyntax):**
     *   Bắt buộc dùng `import type` khi nhập các interface hoặc type từ tệp tin khác.
     *   *Ví dụ:* `import type { User } from '../types';`
+*   **Quy chuẩn Giải nén (Destructuring) React Query Mutations:**
+    *   Khi destructure thuộc tính `mutate` thành một tên hàm (ví dụ: `const { isPending: isPendingAddComment, mutate: addTicketCommentMutation } = useAddTicketCommentMutation();`), biến `addTicketCommentMutation` chính là **hàm mutate** (Function), KHÔNG phải là đối tượng mutation object.
+    *   *Đúng:* Gọi trực tiếp `addTicketCommentMutation(data, options)` và sử dụng trực tiếp biến boolean `isPendingAddComment`.
+    *   *Sai:* Gọi `addTicketCommentMutation.mutate(...)` hoặc truy cập `addTicketCommentMutation.isPending` (gây lỗi `undefined` ở runtime do `addTicketCommentMutation` đã là hàm `mutate`).
+*   **Quy chuẩn Quản lý Hằng số & Select Options (Constants & Options Management):**
+    *   Tất cả các hằng số, danh sách tùy chọn Dropdown/Select (ví dụ: `STATUS_OPTIONS`, `CATEGORY_OPTIONS`, `URGENCY_OPTIONS`...), mảng ánh xạ nhãn/màu sắc, cấu hình tĩnh BẮT BUỘC phải đưa vào tệp `constants/index.ts` của phân hệ (module) hoặc `src/constants/` đối với dữ liệu dùng chung toàn ứng dụng.
+    *   Tuyệt đối KHÔNG khai báo cứng (hardcode) các mảng options, enum value, hoặc mảng dữ liệu tĩnh trực tiếp bên trong các file Component, Form, Modal hay Page `.tsx`.
+    *   Khi cần bổ sung, chỉnh sửa nhãn (label), giá trị (value) hoặc màu sắc đại diện, chỉ thực hiện sửa đổi tại duy nhất 1 vị trí tệp `constants` để đảm bảo quản lý tập trung và tránh phải tìm kiếm sửa đổi rải rác.
 
 ---
 

@@ -5,15 +5,17 @@ import type { TicketCategory, TicketPriority } from '../types';
 
 export const TICKET_QUERY_KEY = ['tickets'];
 
-// Hook lấy danh sách Ticket hỗ trợ kèm bộ lọc
 export const useTicketsQuery = (params?: { status?: string; category?: string; priority?: string; search?: string; page?: number; limit?: number }) => {
+  const cleanParams = params
+    ? Object.fromEntries(Object.entries(params).filter(([_, v]) => v !== '' && v !== undefined && v !== null))
+    : undefined;
+
   return useQuery({
-    queryKey: [...TICKET_QUERY_KEY, params],
-    queryFn: () => ticketApi.getTickets(params),
+    queryKey: [...TICKET_QUERY_KEY, cleanParams],
+    queryFn: () => ticketApi.getTickets(cleanParams),
   });
 };
 
-// Hook lấy chi tiết 1 Ticket
 export const useTicketDetailQuery = (id: number | null) => {
   return useQuery({
     queryKey: [...TICKET_QUERY_KEY, 'detail', id],
@@ -22,7 +24,6 @@ export const useTicketDetailQuery = (id: number | null) => {
   });
 };
 
-// Mutation gửi phản hồi/bình luận cho Ticket
 export const useAddTicketCommentMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -38,12 +39,11 @@ export const useAddTicketCommentMutation = () => {
   });
 };
 
-// Mutation cập nhật trạng thái Ticket
 export const useUpdateTicketStatusMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: { status?: string; priority?: string; category?: string } }) =>
-      ticketApi.updateTicketStatus(id, data),
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
+      ticketApi.updateTicketStatus(id, status),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [...TICKET_QUERY_KEY, 'detail', variables.id] });
       queryClient.invalidateQueries({ queryKey: TICKET_QUERY_KEY });
@@ -55,7 +55,6 @@ export const useUpdateTicketStatusMutation = () => {
   });
 };
 
-// Mutation chuyển cuộc chat thành Ticket
 export const useConvertChatToTicketMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({

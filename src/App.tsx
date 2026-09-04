@@ -16,7 +16,7 @@ import { VietqrBankListPage } from './modules/vietqrBanks';
 import { PaymentTransactionPage } from './modules/paymentTransactions';
 import { PaymentMethodListPage } from './modules/paymentMethods';
 import { SubscriptionListPage } from './modules/subscriptions';
-import { SupportCenterPage } from './pages/SupportCenterPage';
+import { SupportCenterPage } from './modules/supportTickets';
 import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {

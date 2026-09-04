@@ -7,3 +7,13 @@ export const CONVERSATION_STATUS_LABELS: Record<ConversationStatus, { label: str
   RESOLVED: { label: 'Hoàn tất', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
   CONVERTED_TO_TICKET: { label: 'Đã tạo Ticket', color: 'bg-slate-200 text-slate-700 border-slate-300' },
 };
+
+export const CHAT_STATUS_OPTIONS = [
+  { value: '', label: 'Tất cả trạng thái' },
+  { value: 'WAITING_AGENT', label: 'Đang chờ' },
+  { value: 'AGENT_HANDLING', label: 'Đang chat' },
+  { value: 'RESOLVED', label: 'Hoàn tất' },
+  { value: 'CONVERTED_TO_TICKET', label: 'Đã tạo Ticket' },
+  { value: 'BOT', label: 'AI Bot' },
+];
+
