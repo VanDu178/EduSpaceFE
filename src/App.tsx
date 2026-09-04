@@ -2,6 +2,7 @@ import { Toaster } from 'react-hot-toast';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import { SocketProvider } from './config/socket/SocketContext';
+import { NotificationProvider } from './config/socket/NotificationContext';
 import Login from './modules/auth/pages/Login';
 import DashboardPage from './pages/DashboardPage';
 import ListPage from './modules/blogs/pages';
@@ -34,62 +35,64 @@ const App = () => {
       <Toaster position="top-right" reverseOrder={false} />
       <SocketProvider>
         <BrowserRouter>
-        <Routes>
-          {/* Route đăng nhập công khai */}
-          <Route path="/login" element={<Login />} />
-          {/* Route quản trị được bảo vệ dạng lồng nhau (Nested Routes) */}
-          <Route
-            path="/admin"
-            element={
-              <PrivateRoute>
-                <DashboardPage />
-              </PrivateRoute>
-            }
-          >
-            {/* Mặc định chuyển hướng sang /admin/blogs */}
-            <Route index element={<Navigate to="blogs" replace />} />
+          <NotificationProvider>
+            <Routes>
+              {/* Route đăng nhập công khai */}
+              <Route path="/login" element={<Login />} />
+              {/* Route quản trị được bảo vệ dạng lồng nhau (Nested Routes) */}
+              <Route
+                path="/admin"
+                element={
+                  <PrivateRoute>
+                    <DashboardPage />
+                  </PrivateRoute>
+                }
+              >
+                {/* Mặc định chuyển hướng sang /admin/blogs */}
+                <Route index element={<Navigate to="blogs" replace />} />
 
-            {/* Điều hướng bài blog */}
-            <Route path="blogs" element={<ListPage />} />
-            <Route path="blogs/create" element={<CreatePage />} />
-            <Route path="blogs/:id" element={<DetailPage />} />
-            <Route path="blogs/:id/edit" element={<UpdatePage />} />
+                {/* Điều hướng bài blog */}
+                <Route path="blogs" element={<ListPage />} />
+                <Route path="blogs/create" element={<CreatePage />} />
+                <Route path="blogs/:id" element={<DetailPage />} />
+                <Route path="blogs/:id/edit" element={<UpdatePage />} />
 
-            {/* Fallback route cũ /admin/posts chuyển sang /admin/blogs */}
-            <Route path="posts/*" element={<Navigate to="/admin/blogs" replace />} />
+                {/* Fallback route cũ /admin/posts chuyển sang /admin/blogs */}
+                <Route path="posts/*" element={<Navigate to="/admin/blogs" replace />} />
 
-            {/* Phân hệ route con quản lý người dùng */}
-            <Route path="users" element={<UserListPage />} />
+                {/* Phân hệ route con quản lý người dùng */}
+                <Route path="users" element={<UserListPage />} />
 
-            {/* Phân hệ route con quản lý gói hội viên */}
-            <Route path="membership-plans" element={<MembershipPlanListPage />} />
+                {/* Phân hệ route con quản lý gói hội viên */}
+                <Route path="membership-plans" element={<MembershipPlanListPage />} />
 
-            {/* Phân hệ route con quản lý tính năng */}
-            <Route path="features" element={<FeatureListPage />} />
+                {/* Phân hệ route con quản lý tính năng */}
+                <Route path="features" element={<FeatureListPage />} />
 
-            {/* Phân hệ route con quản lý lịch sử thanh toán */}
-            <Route path="subscriptions" element={<SubscriptionListPage />} />
+                {/* Phân hệ route con quản lý lịch sử thanh toán */}
+                <Route path="subscriptions" element={<SubscriptionListPage />} />
 
-            {/* Phân hệ route con quản lý phương thức thanh toán */}
-            <Route path="payment-methods" element={<PaymentMethodListPage />} />
+                {/* Phân hệ route con quản lý phương thức thanh toán */}
+                <Route path="payment-methods" element={<PaymentMethodListPage />} />
 
-            {/* Phân hệ route con quản lý giao dịch thanh toán VietQR */}
-            <Route path="payment-transactions" element={<PaymentTransactionPage />} />
+                {/* Phân hệ route con quản lý giao dịch thanh toán VietQR */}
+                <Route path="payment-transactions" element={<PaymentTransactionPage />} />
 
-            {/* Phân hệ route con quản lý tài khoản thanh toán */}
-            <Route path="payment-accounts" element={<PaymentAccountListPage />} />
+                {/* Phân hệ route con quản lý tài khoản thanh toán */}
+                <Route path="payment-accounts" element={<PaymentAccountListPage />} />
 
-            {/* Phân hệ Hub tổng hợp Trung tâm hỗ trợ CSKH */}
-            <Route path="support" element={<SupportCenterPage />} />
+                {/* Phân hệ Hub tổng hợp Trung tâm hỗ trợ CSKH */}
+                <Route path="support" element={<SupportCenterPage />} />
 
-            {/* Phân hệ route con quản lý ngân hàng VietQR */}
-            <Route path="vietqr-banks" element={<VietqrBankListPage />} />
-          </Route>
+                {/* Phân hệ route con quản lý ngân hàng VietQR */}
+                <Route path="vietqr-banks" element={<VietqrBankListPage />} />
+              </Route>
 
-          {/* Redirect mặc định về /admin nếu gõ sai route */}
-          <Route path="*" element={<Navigate to="/admin" replace />} />
-        </Routes>
-      </BrowserRouter>
+              {/* Redirect mặc định về /admin nếu gõ sai route */}
+              <Route path="*" element={<Navigate to="/admin" replace />} />
+            </Routes>
+          </NotificationProvider>
+        </BrowserRouter>
       </SocketProvider>
     </ConfigProvider>
   );

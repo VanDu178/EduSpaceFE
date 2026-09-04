@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import type { User } from '../modules/users/types';
-import { BellIcon, ChevronDownIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { USER_ROLE } from '../constants/roles';
+
+import { NotificationBell } from './NotificationBell';
 
 interface NavbarProps {
   user: User | null;
@@ -38,11 +40,8 @@ const Navbar = ({ user, onLogout }: NavbarProps) => {
       <div className="flex-1"></div>
 
       <div className="flex items-center space-x-4">
-        {/* Nút thông báo */}
-        <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors duration-200 relative">
-          <BellIcon className="h-5 w-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-sky-500 rounded-full"></span>
-        </button>
+        {/* Nút thông báo Quản trị Realtime */}
+        <NotificationBell />
 
         {/* Dropdown thông tin tài khoản */}
         <div className="relative" ref={dropdownRef}>

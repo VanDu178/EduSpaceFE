@@ -5,7 +5,8 @@ import {
   useTicketsQuery,
   useTicketDetailQuery,
   useAddTicketCommentMutation,
-  useUpdateTicketStatusMutation
+  useUpdateTicketStatusMutation,
+  useTicketRealtime
 } from '../hooks';
 
 const DEFAULT_FILTER_PARAMS: TicketFilterParams = {
@@ -17,6 +18,10 @@ const DEFAULT_FILTER_PARAMS: TicketFilterParams = {
 
 export const SupportTicketPage = () => {
   const [filterParams, setFilterParams] = useState<TicketFilterParams>(DEFAULT_FILTER_PARAMS);
+  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+
+  // Kích hoạt Realtime Socket listener cho Admin Ticket List & Detail
+  useTicketRealtime(selectedTicketId);
 
   const { data: ticketsData, isLoading: isLoadingTickets, refetch: refetchTickets } = useTicketsQuery(filterParams);
   const tickets: Ticket[] = ticketsData?.data || [];
@@ -24,7 +29,6 @@ export const SupportTicketPage = () => {
   const { isPending: isPendingAddComment, mutate: addTicketCommentMutation } = useAddTicketCommentMutation();
   const { isPending: isPendingUpdateStatus, mutate: updateTicketStatusMutation } = useUpdateTicketStatusMutation();
 
-  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
   const { data: ticketDetailRes } = useTicketDetailQuery(selectedTicketId);
   const selectedTicket: Ticket | null = ticketDetailRes?.data || null;
 
