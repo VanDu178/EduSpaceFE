@@ -42,3 +42,15 @@ export const TICKET_PRIORITY_OPTIONS: { value: TicketPriority; label: string }[]
   value: key,
   label: TICKET_PRIORITY_LABELS[key].label,
 }));
+
+/**
+ * TẬP TRUNG HÓA TẤT CẢ TÊN SOCKET EVENT CHO TICKET SUPPORT (FE ADMIN)
+ */
+export const TICKET_SOCKET_EVENTS = {
+  COMMENT_ADDED: 'ticket:comment_added',
+  STATUS_CHANGED: 'ticket:status_changed',
+  CREATED: 'ticket:created',
+  UPDATED: 'ticket:updated',
+  JOIN_TICKET: 'join_ticket',
+  LEAVE_TICKET: 'leave_ticket',
+} as const;

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { Ticket } from '../types';
 import { TICKET_STATUS_LABELS, TICKET_CATEGORY_LABELS, TICKET_PRIORITY_LABELS } from '../constants';
 
@@ -6,14 +7,39 @@ interface ListPageProps {
   selectedTicket: Ticket | null;
   isLoadingTickets: boolean;
   onSelectTicket: (id: number) => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  onFetchNextPage?: () => void;
 }
 
 export const ListPage = ({
   tickets,
   selectedTicket,
   isLoadingTickets,
-  onSelectTicket
+  onSelectTicket,
+  hasNextPage,
+  isFetchingNextPage,
+  onFetchNextPage
 }: ListPageProps) => {
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasNextPage || isFetchingNextPage || !onFetchNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onFetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = loadMoreRef.current;
+    observer.observe(currentRef);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, onFetchNextPage]);
+
   return (
     <div className="flex-1 overflow-y-auto p-2 space-y-2 min-h-0">
       {isLoadingTickets && <div className="text-center py-6 text-slate-400 text-xs italic">Đang tải dữ liệu...</div>}
@@ -42,13 +68,12 @@ export const ListPage = ({
               </span>
             </div>
 
-
             <h4 className="text-xs font-semibold text-slate-900 truncate mb-1.5">{t.title}</h4>
-            <p className="text-[11px] text-slate-500 line-clamp-1">
-              Khách hàng: {t.creator?.name || < span className="italic text-slate-400">Khách vãn lai</span>}
+            <p className="text-[11px] text-slate-500 line-clamp-1 mb-1.5">
+              Khách hàng: {t.creator?.name || <span className="italic text-slate-400">Khách vãng lai</span>}
             </p>
             {/* Category & Priority badges */}
-            <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-medium border border-slate-200/60 truncate max-w-[160px]">
                 {categoryLabel}
               </span>
@@ -62,6 +87,17 @@ export const ListPage = ({
           </div>
         );
       })}
-    </div >
+
+      {/* Sentinel element cho Infinite Scroll */}
+      {hasNextPage && (
+        <div ref={loadMoreRef} className="py-3 text-center">
+          {isFetchingNextPage ? (
+            <span className="text-[11px] text-sky-600 font-medium animate-pulse">Đang tải thêm danh sách...</span>
+          ) : (
+            <span className="text-[11px] text-slate-400">Cuộn xuống để xem thêm</span>
+          )}
+        </div>
+      )}
+    </div>
   );
 };

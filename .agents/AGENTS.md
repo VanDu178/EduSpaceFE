@@ -125,3 +125,10 @@ Tài liệu này quy định các nguyên tắc thiết kế mã nguồn, giao d
   1. Sau khi chỉnh sửa hoặc tạo mới mã nguồn, Agent PHẢI tự động chạy lệnh kiểm thử phù hợp với framework của thư mục đó (ví dụ: `npm run test` hoặc lệnh test tương đương) .
   2. Nếu terminal trả về mã lỗi hoặc test fail, Agent không được dừng lại hỏi người dùng . Agent phải tự đọc log lỗi, phân tích nguyên nhân, chỉnh sửa lại mã nguồn và chạy lại lệnh kiểm thử (tối đa 3 lần thử lại) cho đến khi pass .
 
+
+## SKILL: Socket Event Constants Enforcement (FE Admin)
+- **Bắt buộc tập trung hóa tất cả Tên Socket Event vào tệp Constants:**
+  - Mọi hook lắng nghe Socket (`useSocketEvent(...)`) hoặc phát Socket (`socket.emit(...)`) trong toàn bộ phân hệ FE Admin BẮT BUỘC phải sử dụng hằng số xuất ra từ tệp `constants` của module/phân hệ đó hoặc `src/config/socket/socketEvents.ts` (ví dụ: `TICKET_SOCKET_EVENTS.COMMENT_ADDED`).
+  - TUYỆT ĐỐI KHÔNG hardcode chuỗi tên event Socket trực tiếp trong các file hook, component hay page `.tsx`.
+
+

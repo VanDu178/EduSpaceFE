@@ -12,12 +12,17 @@ import toast from 'react-hot-toast';
 import type { Ticket } from '../types';
 import { TICKET_STATUS_OPTIONS } from '../constants';
 
+export interface CommentFile {
+  file: File;
+  url: string;
+}
+
 interface ModalDetailProps {
   selectedTicket: Ticket | null;
   ticketCommentText: string;
-  commentAttachments: string[];
-  setCommentAttachments: React.Dispatch<React.SetStateAction<string[]>>;
-  onRemoveCommentAttachment: (index: number) => void;
+  commentFiles: CommentFile[];
+  setCommentFiles: React.Dispatch<React.SetStateAction<CommentFile[]>>;
+  onRemoveCommentFile: (index: number) => void;
   isSubmittingComment: boolean;
   isUpdatingStatus?: boolean;
   onUpdateTicketStatus: (status?: string) => void;
@@ -28,27 +33,12 @@ interface ModalDetailProps {
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_IMAGES = 3;
 
-const readAsDataURL = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result);
-      } else {
-        reject(new Error('Lỗi chuyển đổi ảnh'));
-      }
-    };
-    reader.onerror = (err) => reject(err);
-    reader.readAsDataURL(file);
-  });
-};
-
 export const ModalDetail = ({
   selectedTicket,
   ticketCommentText,
-  commentAttachments,
-  setCommentAttachments,
-  onRemoveCommentAttachment,
+  commentFiles,
+  setCommentFiles,
+  onRemoveCommentFile,
   isSubmittingComment,
   isUpdatingStatus,
   onUpdateTicketStatus,
@@ -64,14 +54,14 @@ export const ModalDetail = ({
   }
 
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const fileArray = Array.from(files);
     e.target.value = '';
 
-    const remainingSlots = MAX_IMAGES - commentAttachments.length;
+    const remainingSlots = MAX_IMAGES - commentFiles.length;
     if (remainingSlots <= 0) {
       toast.error('Bạn đã đính kèm tối đa 3 hình ảnh.');
       return;
@@ -103,19 +93,16 @@ export const ModalDetail = ({
 
     if (validFiles.length === 0) return;
 
-    try {
-      const dataUrls = await Promise.all(validFiles.map((file) => readAsDataURL(file)));
-      if (dataUrls.length > 0) {
-        setCommentAttachments((prev) => [...prev, ...dataUrls]);
-        toast.success(`Đã thêm ${dataUrls.length} ảnh đính kèm.`);
-      }
-    } catch (err) {
-      console.error('Error reading image files:', err);
-      toast.error('Có lỗi xảy ra khi đọc file ảnh.');
-    }
+    const newFiles: CommentFile[] = validFiles.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+
+    setCommentFiles((prev) => [...prev, ...newFiles]);
+    toast.success(`Đã thêm ${newFiles.length} ảnh đính kèm.`);
   };
 
-  const isMaxReached = commentAttachments.length >= MAX_IMAGES;
+  const isMaxReached = commentFiles.length >= MAX_IMAGES;
 
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl flex flex-col h-full overflow-hidden p-4">
@@ -164,7 +151,7 @@ export const ModalDetail = ({
           {/* Comments Timeline List */}
           <div>
             {(!selectedTicket.comments || selectedTicket.comments.length === 0) ? (
-              <div className="bg-slate-50 border border-dashed border-slate-200/80 p-6 rounded-2xl text-center text-xs italic text-slate-400">
+              <div className="text-center text-xs italic text-slate-400">
                 Chưa có phản hồi nào cho Yêu cầu này.
               </div>
             ) : (
@@ -269,16 +256,16 @@ export const ModalDetail = ({
       {selectedTicket.status !== 'CLOSED' ? (
         <form onSubmit={onAddTicketComment} className="pt-2 space-y-2 flex-shrink-0">
           {/* Attachment Image Preview Thumbnails */}
-          {commentAttachments.length > 0 && (
+          {commentFiles.length > 0 && (
             <Image.PreviewGroup>
               <div className="flex flex-wrap gap-2 pb-2 border-b border-slate-100">
-                {commentAttachments.map((url, idx) => (
+                {commentFiles.map((item, idx) => (
                   <div
                     key={idx}
                     className="relative border border-slate-200/80 rounded-xl overflow-hidden w-14 h-14 bg-slate-100 group"
                   >
                     <Image
-                      src={url}
+                      src={item.url}
                       alt={`attachment-${idx}`}
                       width="100%"
                       height="100%"
@@ -291,7 +278,7 @@ export const ModalDetail = ({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        onRemoveCommentAttachment(idx);
+                        onRemoveCommentFile(idx);
                       }}
                       className="absolute top-1 right-1 z-10 bg-slate-900/70 hover:bg-rose-600 text-white rounded-full p-1 cursor-pointer transition disabled:pointer-events-none"
                       title="Xóa ảnh"
@@ -300,7 +287,7 @@ export const ModalDetail = ({
                     </button>
                   </div>
                 ))}
-                {commentAttachments.length < MAX_IMAGES && (
+                {commentFiles.length < MAX_IMAGES && (
                   <label
                     htmlFor="admin-ticket-image-upload"
                     className="w-14 h-14 border-2 border-dashed border-slate-200 hover:border-sky-400 hover:bg-sky-50/50 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-sky-600 cursor-pointer transition"
@@ -344,7 +331,7 @@ export const ModalDetail = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  if (!isSubmittingComment && (ticketCommentText.trim() || commentAttachments.length > 0)) {
+                  if (!isSubmittingComment && (ticketCommentText.trim() || commentFiles.length > 0)) {
                     onAddTicketComment(e);
                   }
                 }
@@ -356,7 +343,7 @@ export const ModalDetail = ({
             {/* Send Button */}
             <button
               type="submit"
-              disabled={isSubmittingComment || (!ticketCommentText.trim() && commentAttachments.length === 0)}
+              disabled={isSubmittingComment || (!ticketCommentText.trim() && commentFiles.length === 0)}
               className="flex items-center justify-center w-8 h-8 rounded-full bg-sky-600 hover:bg-sky-700 text-white transition shrink-0 disabled:pointer-events-none disabled:opacity-40 disabled:cursor-not-allowed border border-sky-500"
               title="Gửi phản hồi"
             >

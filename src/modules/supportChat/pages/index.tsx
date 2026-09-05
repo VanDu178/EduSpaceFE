@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import type { SupportConversation, SupportMessage, ChatFilterParams } from '../types';
-import { ConversationsQueue, ChatWindow, AdminPresenceToggle, FilterBar } from '../components';
+import { ConversationsQueue, ChatWindow, FilterBar } from '../components';
 import {
-  useAdminStatusQuery,
   useConversationsQuery,
   useConversationDetailQuery,
   useAcceptConversationMutation,
@@ -14,7 +12,6 @@ import { useSocket, useSocketEvent } from '../../../config/socket/SocketContext'
 
 export interface SupportChatPageProps {
   onOpenConvertModal?: (conversation: SupportConversation) => void;
-  showHeader?: boolean;
 }
 
 const defaultFilterParams: ChatFilterParams = {
@@ -22,11 +19,8 @@ const defaultFilterParams: ChatFilterParams = {
   search: ''
 }
 
-export const SupportChatPage = ({ onOpenConvertModal, showHeader = true }: SupportChatPageProps = {}) => {
+export const SupportChatPage = ({ onOpenConvertModal }: SupportChatPageProps = {}) => {
   const [filterParams, setFilterParams] = useState<ChatFilterParams>(defaultFilterParams);
-  const { data: adminStatusData } = useAdminStatusQuery();
-  const isAdminOnline = Boolean(adminStatusData?.data?.isOnline);
-
   const { data: conversationsData, isLoading: isLoadingConversations, refetch: refetchConversations } = useConversationsQuery(filterParams);
   const conversations: SupportConversation[] = conversationsData?.data || [];
 
@@ -53,6 +47,7 @@ export const SupportChatPage = ({ onOpenConvertModal, showHeader = true }: Suppo
   });
 
   useSocketEvent<{ conversationId: number; message: SupportMessage }>('new_message', (data) => {
+    if (!data || !data.message) return;
     if (selectedConversation && selectedConversation.id === data.conversationId) {
       setChatMessages((prev) => {
         if (prev.some((m) => m.id === data.message.id)) return prev;
@@ -121,17 +116,6 @@ export const SupportChatPage = ({ onOpenConvertModal, showHeader = true }: Suppo
 
   return (
     <div className="flex flex-col h-[calc(100vh-110px)] overflow-hidden text-slate-800">
-      {showHeader && (
-        <div className="flex items-center justify-between gap-4 mb-3 flex-shrink-0">
-          <div className="flex items-center space-x-2">
-            <ChatBubbleLeftRightIcon className="w-6 h-6 text-sky-600" />
-            <h1 className="text-xl font-bold text-slate-800 tracking-tight">Quản lý kênh chat</h1>
-          </div>
-
-          <AdminPresenceToggle isAdminOnline={isAdminOnline} />
-        </div>
-      )}
-
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-0 overflow-hidden">
         <div className="lg:col-span-4 h-full flex flex-col overflow-hidden bg-white border border-slate-200/80 rounded-2xl">
           <FilterBar filterParams={filterParams} onFilterChange={setFilterParams} />

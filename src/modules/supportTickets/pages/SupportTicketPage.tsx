@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import type { Ticket, TicketFilterParams } from '../types';
-import { FilterBar, ListPage, ModalDetail } from '../components';
+import { FilterBar, ListPage, ModalDetail, type CommentFile } from '../components';
+import { uploadMultipleFilesApi } from '../../../services/uploadService';
 import {
   useTicketsQuery,
   useTicketDetailQuery,
@@ -23,17 +25,31 @@ export const SupportTicketPage = () => {
   // Kích hoạt Realtime Socket listener cho Admin Ticket List & Detail
   useTicketRealtime(selectedTicketId);
 
-  const { data: ticketsData, isLoading: isLoadingTickets, refetch: refetchTickets } = useTicketsQuery(filterParams);
-  const tickets: Ticket[] = ticketsData?.data || [];
+  const {
+    data: ticketsData,
+    isLoading: isLoadingTickets,
+    refetch: refetchTickets,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useTicketsQuery(filterParams);
+
+  const rawTickets: Ticket[] = ticketsData?.pages.flatMap((page) => page?.data || []) || [];
+  const ticketsMap = new Map<number, Ticket>();
+  rawTickets.forEach((t) => ticketsMap.set(t.id, t));
+  const tickets = Array.from(ticketsMap.values());
 
   const { isPending: isPendingAddComment, mutate: addTicketCommentMutation } = useAddTicketCommentMutation();
   const { isPending: isPendingUpdateStatus, mutate: updateTicketStatusMutation } = useUpdateTicketStatusMutation();
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   const { data: ticketDetailRes } = useTicketDetailQuery(selectedTicketId);
   const selectedTicket: Ticket | null = ticketDetailRes?.data || null;
 
   const [ticketCommentText, setTicketCommentText] = useState('');
-  const [commentAttachments, setCommentAttachments] = useState<string[]>([]);
+  const [commentFiles, setCommentFiles] = useState<CommentFile[]>([]);
+
+  const isSubmittingComment = isPendingAddComment || isUploadingImages;
 
   const handleFilterChange = (field: keyof TicketFilterParams, value: string) => {
     setFilterParams((prev) => ({ ...prev, [field]: value }));
@@ -47,29 +63,53 @@ export const SupportTicketPage = () => {
     setSelectedTicketId(ticketId);
   };
 
-  const handleRemoveCommentAttachment = (index: number) => {
-    setCommentAttachments((prev) => prev.filter((_, i) => i !== index));
+  const handleRemoveCommentFile = (index: number) => {
+    setCommentFiles((prev) => {
+      const target = prev[index];
+      if (target?.url) {
+        URL.revokeObjectURL(target.url);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
-  const handleAddTicketComment = (e: React.FormEvent) => {
+  const handleAddTicketComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!ticketCommentText.trim() && commentAttachments.length === 0) || !selectedTicket || isPendingAddComment) return;
+    if ((!ticketCommentText.trim() && commentFiles.length === 0) || !selectedTicket || isSubmittingComment) return;
 
-    addTicketCommentMutation(
-      {
-        id: selectedTicket.id,
-        data: {
-          content: ticketCommentText.trim(),
-          attachments: commentAttachments.length > 0 ? commentAttachments : undefined
-        }
-      },
-      {
-        onSuccess: () => {
-          setTicketCommentText('');
-          setCommentAttachments([]);
-        }
+    try {
+      setIsUploadingImages(true);
+
+      // 1. Upload ảnh đính kèm lên Supabase Storage với folder 'support-tickets'
+      let uploadedUrls: string[] = [];
+      if (commentFiles.length > 0) {
+        const rawFiles = commentFiles.map((item) => item.file);
+        const uploadResults = await uploadMultipleFilesApi(rawFiles, 'support-tickets');
+        uploadedUrls = uploadResults.map((item) => item.url).filter(Boolean);
       }
-    );
+
+      // 2. Gửi phản hồi kèm theo mảng Public URL ảnh
+      addTicketCommentMutation(
+        {
+          id: selectedTicket.id,
+          data: {
+            content: ticketCommentText.trim(),
+            attachments: uploadedUrls.length > 0 ? uploadedUrls : undefined
+          }
+        },
+        {
+          onSuccess: () => {
+            setTicketCommentText('');
+            commentFiles.forEach((item) => URL.revokeObjectURL(item.url));
+            setCommentFiles([]);
+          }
+        }
+      );
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || 'Có lỗi xảy ra khi tải ảnh lên hệ thống');
+    } finally {
+      setIsUploadingImages(false);
+    }
   };
 
   const handleUpdateTicketStatus = (statusValue?: string) => {
@@ -93,6 +133,9 @@ export const SupportTicketPage = () => {
             selectedTicket={selectedTicket}
             isLoadingTickets={isLoadingTickets}
             onSelectTicket={handleSelectTicket}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onFetchNextPage={fetchNextPage}
           />
         </div>
 
@@ -101,10 +144,10 @@ export const SupportTicketPage = () => {
           <ModalDetail
             selectedTicket={selectedTicket}
             ticketCommentText={ticketCommentText}
-            commentAttachments={commentAttachments}
-            setCommentAttachments={setCommentAttachments}
-            onRemoveCommentAttachment={handleRemoveCommentAttachment}
-            isSubmittingComment={isPendingAddComment}
+            commentFiles={commentFiles}
+            setCommentFiles={setCommentFiles}
+            onRemoveCommentFile={handleRemoveCommentFile}
+            isSubmittingComment={isSubmittingComment}
             isUpdatingStatus={isPendingUpdateStatus}
             onUpdateTicketStatus={handleUpdateTicketStatus}
             onCommentTextChange={setTicketCommentText}

@@ -1,4 +1,4 @@
 export { FilterBar } from './FilterBar';
 export { ListPage } from './ListPage';
-export { ModalDetail } from './ModalDetail';
+export { ModalDetail, type CommentFile } from './ModalDetail';
 export { ModalConvert } from './ModalConvert';

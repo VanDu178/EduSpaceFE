@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import toast from 'react-hot-toast';
 import { useSocketEvent } from './SocketContext';
 import notificationService, { type NotificationItem } from '../../services/notificationService';
-import { TicketIcon } from '@heroicons/react/24/outline';
+import { TicketIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
 interface NotificationContextValue {
   notifications: NotificationItem[];
@@ -140,6 +140,72 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
             });
           } catch (err) {
             console.error('[NotificationContext Admin] Window notification error:', err);
+          }
+        }
+      },
+      [playNotificationSound]
+    )
+  );
+
+  // Handle incoming Realtime Support Chat Notice for Admin
+  useSocketEvent<{
+    conversationId: number;
+    user?: { id: number; name?: string; email?: string; avatarUrl?: string };
+    message?: { id: number; content: string; createdAt: string };
+  }>(
+    'user_new_message_notice',
+    useCallback(
+      (data) => {
+        if (!data || !data.message) return;
+
+        const senderName = data.user?.name || data.user?.email || 'Khách hàng';
+        const title = `Tin nhắn CSKH từ ${senderName}`;
+        const content = data.message.content || '[Tệp đính kèm]';
+
+        // Sound alert
+        playNotificationSound();
+
+        // Toast notification UI
+        toast.custom(
+          (t) => (
+            <div
+              onClick={() => {
+                toast.dismiss(t.id);
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/support-chat';
+                }
+              }}
+              className={`${
+                t.visible ? 'animate-enter' : 'animate-leave'
+              } max-w-sm w-full bg-white shadow-xl rounded-2xl pointer-events-auto border border-emerald-100 p-4 flex gap-3 items-start backdrop-blur-md cursor-pointer hover:bg-emerald-50/50 transition-colors`}
+            >
+              <div className="p-2 bg-emerald-50 rounded-xl shrink-0 text-emerald-600">
+                <ChatBubbleLeftRightIcon className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-slate-900 line-clamp-1">{title}</p>
+                <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{content}</p>
+              </div>
+            </div>
+          ),
+          { duration: 6000 }
+        );
+
+        // Window Notification
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+          try {
+            const winNoti = new Notification(title, {
+              body: content,
+              icon: data.user?.avatarUrl || '/logo.png',
+            });
+            winNoti.onclick = () => {
+              window.focus();
+              if (typeof window !== 'undefined') {
+                window.location.href = '/support-chat';
+              }
+            };
+          } catch (err) {
+            console.error('[NotificationContext Admin] Chat window notification error:', err);
           }
         }
       },

@@ -1,18 +1,24 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { ticketApi } from '../api';
 import type { TicketCategory, TicketPriority } from '../types';
 
 export const TICKET_QUERY_KEY = ['tickets'];
 
-export const useTicketsQuery = (params?: { status?: string; category?: string; priority?: string; search?: string; page?: number; limit?: number }) => {
+export const useTicketsQuery = (params?: { status?: string; category?: string; priority?: string; search?: string; limit?: number }) => {
   const cleanParams = params
     ? Object.fromEntries(Object.entries(params).filter(([_, v]) => v !== '' && v !== undefined && v !== null))
     : undefined;
 
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: [...TICKET_QUERY_KEY, cleanParams],
-    queryFn: () => ticketApi.getTickets(cleanParams),
+    queryFn: ({ pageParam }) =>
+      ticketApi.getTickets({
+        ...cleanParams,
+        cursor: pageParam as number | undefined
+      }),
+    initialPageParam: undefined as number | undefined,
+    getNextPageParam: (lastPage) => lastPage?.pagination?.nextCursor ?? undefined
   });
 };
 
@@ -58,7 +64,7 @@ export const useUpdateTicketStatusMutation = () => {
 export const useConvertChatToTicketMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { conversationId: number; title: string; category?: TicketCategory; priority?: TicketPriority }) =>
+    mutationFn: (data: { conversationId: number; title: string; description?: string; category?: TicketCategory; priority?: TicketPriority; attachments?: string[] }) =>
       ticketApi.convertChatToTicket(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: TICKET_QUERY_KEY });

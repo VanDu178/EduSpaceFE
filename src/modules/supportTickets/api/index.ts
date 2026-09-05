@@ -4,7 +4,7 @@ import type { TicketCategory, TicketPriority } from '../types';
 const BASE_PATH = '/support/tickets';
 
 export const ticketApi = {
-  getTickets: async (params?: { status?: string; category?: string; priority?: string; search?: string; page?: number; limit?: number }) => {
+  getTickets: async (params?: { status?: string; category?: string; priority?: string; search?: string; page?: number; limit?: number; cursor?: number }) => {
     const res = await api.get(`${BASE_PATH}`, { params });
     return res.data;
   },
@@ -29,7 +29,7 @@ export const ticketApi = {
     return res.data;
   },
 
-  convertChatToTicket: async (data: { conversationId: number; title: string; category?: TicketCategory; priority?: TicketPriority }) => {
+  convertChatToTicket: async (data: { conversationId: number; title: string; description?: string; category?: TicketCategory; priority?: TicketPriority; attachments?: string[] }) => {
     const res = await api.post('/support/chat/convert-to-ticket', data);
     return res.data;
   }
