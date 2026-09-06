@@ -55,6 +55,11 @@ const menuTree: ParentMenuItem[] = [
         path: '/admin/blogs',
       },
       {
+        key: 'videos',
+        label: 'Video',
+        path: '/admin/videos',
+      },
+      {
         key: 'membership-plans',
         label: 'Gói hội viên',
         path: '/admin/membership-plans',

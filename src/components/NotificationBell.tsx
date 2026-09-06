@@ -153,7 +153,7 @@ export const NotificationBell: React.FC = () => {
       onOpenChange={setOpen}
       placement="bottomRight"
       overlayClassName="notification-bell-popover"
-      styles={{ container: { padding: 0, backgroundColor: 'transparent' } }}
+      styles={{ body: { padding: 0, backgroundColor: 'transparent' } }}
     >
       <button
         type="button"

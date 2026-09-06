@@ -60,6 +60,19 @@ export const formatDate = (
   }
 };
 
+/**
+ * Định dạng thời lượng từ giây sang phút:giây (Ví dụ: 125s -> "02:05")
+ * @param seconds Số giây (number | undefined | null)
+ * @returns Chuỗi thời lượng dạng "mm:ss" (Ví dụ: "00:00" hoặc "02:05")
+ */
+export const formatTime = (seconds?: number | null): string => {
+  if (!seconds || seconds <= 0) return '00:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
+
+
 
 
 

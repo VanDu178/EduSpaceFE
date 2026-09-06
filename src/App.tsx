@@ -18,6 +18,7 @@ import { PaymentTransactionPage } from './modules/paymentTransactions';
 import { PaymentMethodListPage } from './modules/paymentMethods';
 import { SubscriptionListPage } from './modules/subscriptions';
 import { SupportCenterPage } from './modules/supportTickets';
+import { VideoListPage } from './modules/videos';
 import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {
@@ -56,6 +57,9 @@ const App = () => {
                 <Route path="blogs/create" element={<CreatePage />} />
                 <Route path="blogs/:id" element={<DetailPage />} />
                 <Route path="blogs/:id/edit" element={<UpdatePage />} />
+
+                {/* Phân hệ route con quản lý Video */}
+                <Route path="videos" element={<VideoListPage />} />
 
                 {/* Fallback route cũ /admin/posts chuyển sang /admin/blogs */}
                 <Route path="posts/*" element={<Navigate to="/admin/blogs" replace />} />
