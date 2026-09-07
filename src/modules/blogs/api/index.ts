@@ -4,9 +4,9 @@ import type { ApiResponse, PaginatedData } from '../../../types/api';
 
 const BASE_PATH = '/blogs';
 
-// API lấy danh sách bài blog
+// API lấy danh sách bài blog (Admin)
 export const fetchBlogsApi = async (params?: Params): Promise<PaginatedData<{ blogs: Blog[] }>> => {
-  const response = await api.get(`${BASE_PATH}`, { params });
+  const response = await api.get(`${BASE_PATH}/admin`, { params });
   if (response?.data?.success) {
     return response?.data?.data;
   }

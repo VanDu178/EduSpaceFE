@@ -16,12 +16,12 @@ export const fetchVideoTypesApi = async (): Promise<{ videoTypes: VideoType[] }>
 };
 
 /**
- * API lấy danh sách Video (Có phân trang, lọc, tìm kiếm)
+ * API lấy danh sách Video cho Admin (Có phân trang, lọc, tìm kiếm)
  */
 export const fetchVideosApi = async (
   params?: VideoQueryParams
 ): Promise<PaginatedData<{ videos: Video[] }>> => {
-  const response = await api.get(`${BASE_PATH}`, { params });
+  const response = await api.get(`${BASE_PATH}/admin`, { params });
   if (response?.data?.success) {
     return response.data.data;
   }
@@ -29,10 +29,10 @@ export const fetchVideosApi = async (
 };
 
 /**
- * API lấy chi tiết 1 Video theo ID
+ * API lấy chi tiết 1 Video theo ID (Admin)
  */
 export const fetchVideoByIdApi = async (id: string): Promise<{ video: Video }> => {
-  const response = await api.get(`${BASE_PATH}/${id}`);
+  const response = await api.get(`${BASE_PATH}/id/${id}`);
   if (response?.data?.success) {
     return response.data.data;
   }
