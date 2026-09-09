@@ -10,6 +10,7 @@ export const useAdminStatusQuery = () => {
   return useQuery({
     queryKey: [...CHAT_QUERY_KEY, 'adminStatus'],
     queryFn: () => chatApi.getAdminStatus(),
+
   });
 };
 
