@@ -5,7 +5,8 @@ import { PlusOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
 import { useCreatePaymentRefundMutation, useUpdatePaymentRefundMutation } from '../hooks';
 import type { PaymentRefund, ConfirmRefundParams, UpdateRefundParams } from '../types';
-import { uploadMultipleFilesApi } from '../../../services/uploadService';
+import { validateImageFile, PROOFS_UPLOAD_CONFIG, uploadMultipleFilesApi, FOLDER_NAME } from '../../upload';
+
 import { formatCurrency } from '../../../utils/format';
 
 interface FormRefundModalProps {
@@ -94,24 +95,20 @@ const FormRefundModal = ({
     setFileList(newFileList);
   };
 
-  const handleBeforeUpload = (file: File) => {
+  const handleBeforeUpload = async (file: File) => {
     if (fileList.length >= 3) {
       toast.error('Chỉ được tải lên tối đa 3 ảnh minh chứng!');
       return Upload.LIST_IGNORE;
     }
-    const isImage = file.type.startsWith('image/');
-    if (!isImage) {
-      toast.error('Chỉ được chọn tệp định dạng hình ảnh (PNG, JPG, JPEG, WEBP)!');
-      return Upload.LIST_IGNORE;
-    }
-    const isLt5M = file.size / 1024 / 1024 < 5;
-    if (!isLt5M) {
-      toast.error('Dung lượng tệp ảnh không được vượt quá 5MB!');
+    const result = await validateImageFile(file, PROOFS_UPLOAD_CONFIG);
+    if (!result.isValid) {
+      toast.error(result.message || 'Tệp không hợp lệ!');
       return Upload.LIST_IGNORE;
     }
     // Ngăn Antd tự động gửi request HTTP upload
     return false;
   };
+
 
   const handleSubmit = async (values: any) => {
     try {
@@ -130,7 +127,7 @@ const FormRefundModal = ({
 
       // 2. Upload các tệp mới chọn lên Supabase Storage ở thư mục riêng 'refund-proofs'
       if (newFilesToUpload.length > 0) {
-        const uploadResults = await uploadMultipleFilesApi(newFilesToUpload, 'refund-proofs');
+        const uploadResults = await uploadMultipleFilesApi(newFilesToUpload, FOLDER_NAME.REFUND_PROOFS);
         newlyUploadedUrls = uploadResults.map((res) => res.url);
       }
 
@@ -208,7 +205,7 @@ const FormRefundModal = ({
         open={open}
         onCancel={onClose}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
         width={540}
       >
         <Form
@@ -256,7 +253,7 @@ const FormRefundModal = ({
                 Ảnh minh chứng bill chuyển khoản
               </label>
               <span className="text-[11px] text-slate-400 italic">
-                Tối đa 3 ảnh | Định dạng PNG, JPG, WEBP (&lt; 5MB)
+                {PROOFS_UPLOAD_CONFIG.HINT_TEXT}
               </span>
             </div>
             <Spin spinning={isUploadingFiles} tip="Đang tải ảnh lên Supabase Storage...">
@@ -266,7 +263,7 @@ const FormRefundModal = ({
                 onPreview={handlePreview}
                 onChange={handleChange}
                 beforeUpload={handleBeforeUpload}
-                accept="image/*"
+                accept={PROOFS_UPLOAD_CONFIG.ACCEPT_STRING}
                 maxCount={3}
                 multiple
               >

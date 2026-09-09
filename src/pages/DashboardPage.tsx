@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { useLogoutMutation } from '../modules/auth/hooks';
 import { useSocket } from '../config/socket/SocketContext';
+import { FloatingUploadProgress } from '../modules/upload';
 
 const DashboardPage = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -58,6 +59,9 @@ const DashboardPage = () => {
         <main className="p-5 flex-1 flex flex-col overflow-y-auto">
           <Outlet />
         </main>
+
+        {/* Widget Tiến độ Upload Toàn Cục */}
+        <FloatingUploadProgress />
       </div>
     </div>
   );

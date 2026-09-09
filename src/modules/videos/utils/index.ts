@@ -1,3 +1,6 @@
+import dayjs from 'dayjs';
+
+
 /**
  * Chuyển đổi chuỗi văn bản (tiêu đề, tên) thành URL slug không dấu
  * @param text Chuỗi văn bản cần chuyển đổi (string)
@@ -36,27 +39,39 @@ export const getDirectVideoUrl = (path: string): string => {
   return `${baseUrl}/storage/v1/object/public/${bucketName}/${cleanPath}`;
 };
 
-import dayjs from 'dayjs';
-
 /**
- * Tự động trích xuất thời lượng (tính bằng số giây) từ file Video tải lên
- * @param file Đối tượng File video đã chọn từ máy tính
+ * Helper tạo URL API Dynamic HLS Playlist
+ * @param identifier ID (UUID) hoặc Slug của Video
+ * @param isSlug Cờ xác định identifier là Slug hay ID
  */
-export const getVideoDurationFromFile = (file: File): Promise<number> => {
-  return new Promise((resolve) => {
-    const video = document.createElement('video');
-    video.preload = 'metadata';
-    video.onloadedmetadata = () => {
-      window.URL.revokeObjectURL(video.src);
-      const duration = Math.round(video.duration);
-      resolve(Number.isNaN(duration) ? 0 : duration);
-    };
-    video.onerror = () => {
-      resolve(0);
-    };
-    video.src = URL.createObjectURL(file);
-  });
+export const getHlsPlaylistUrl = (identifier: string, isSlug: boolean = false): string => {
+  if (!identifier) return '';
+
+  if (identifier.startsWith('http://') || identifier.startsWith('https://')) {
+    return identifier;
+  }
+
+  if (identifier.startsWith('bunny://')) {
+    const raw = identifier.replace('bunny://', '').trim();
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      return raw;
+    }
+    const guidMatch = raw.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+    const videoId = guidMatch ? guidMatch[0] : raw;
+    const cdnDomain = import.meta.env.VITE_BUNNY_CDN_HOSTNAME || 'vz-d7209424-caf.b-cdn.net';
+    return `https://${cdnDomain}/${videoId}/playlist.m3u8`;
+  }
+
+  const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const cleanApiUrl = rawApiUrl.replace(/\/+$/, '');
+
+  if (isSlug) {
+    return `${cleanApiUrl}/videos/slug/${identifier}/playlist.m3u8`;
+  }
+  return `${cleanApiUrl}/videos/id/${identifier}/playlist.m3u8`;
 };
+
+
 
 /**
  * Chuyển đổi số giây thành đối tượng Dayjs (định dạng HH:mm:ss) cho TimePicker
@@ -80,5 +95,4 @@ export const dayjsToSeconds = (timeObj?: any): number => {
   if (!t.isValid()) return 0;
   return t.hour() * 3600 + t.minute() * 60 + t.second();
 };
-
 

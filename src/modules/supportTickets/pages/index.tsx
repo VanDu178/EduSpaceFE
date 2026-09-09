@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form } from 'antd';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSocketEvent } from '../../../config/socket/SocketContext';
-import { uploadMultipleFilesApi, deleteFileApi } from '../../../services/uploadService';
+import { uploadMultipleFilesApi, deleteFileApi, FOLDER_NAME } from '../../upload';
 import {
   SupportChatPage,
   AdminPresenceToggle,
@@ -142,7 +142,7 @@ export const SupportCenterPage = () => {
 
       if (previewFiles.length > 0) {
         const rawFiles = previewFiles.map((item) => item.file);
-        const uploadResults = await uploadMultipleFilesApi(rawFiles, 'support-tickets');
+        const uploadResults = await uploadMultipleFilesApi(rawFiles, FOLDER_NAME.SUPPORT_TICKETS);
         uploadedUrls = uploadResults.map((item) => item.url).filter(Boolean);
       }
 

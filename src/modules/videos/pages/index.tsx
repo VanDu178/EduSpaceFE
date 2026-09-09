@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from 'antd';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import type { Video, VideoPayload, VideoQueryParams } from '../types';
+import type { VideoPayload, VideoQueryParams } from '../types';
 import {
   useVideosQuery,
   useVideoTypesQuery,
@@ -10,19 +10,24 @@ import {
   useUpdateVideoStatusMutation,
   useUpdateVideoAccessMutation,
   useDeleteVideoMutation,
+  useSyncVideoStatusMutation,
+  useVideoRealtime,
 } from '../hooks';
 import { FormCreate, FormUpdate, PreviewModal, FilterBar, ListPage } from '../components';
 import { DEFAULT_PARAMS } from '../constants';
 
 const VideoListPage = () => {
+  // Lắng nghe sự kiện socket realtime từ Bunny Stream Webhook
+  useVideoRealtime();
+
   // Pagination & Filter Params State
   const [params, setParams] = useState<VideoQueryParams>(DEFAULT_PARAMS);
 
   // Modal States
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
-  const [editingVideo, setEditingVideo] = useState<Video | null>(null);
-  const [previewVideo, setPreviewVideo] = useState<Video | null>(null);
+  const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
+  const [previewVideoId, setPreviewVideoId] = useState<string | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState<boolean>(false);
 
   // Queries & Mutations from custom hooks
@@ -37,14 +42,19 @@ const VideoListPage = () => {
   const videos = videosData?.videos || [];
   const total = videosData?.pagination?.total || 0;
 
+  // Fallback video object từ danh sách nạp tức thì cho modal
+  const activeEditingVideo = videos.find((v) => v.id === editingVideoId) || null;
+  const activePreviewVideo = videos.find((v) => v.id === previewVideoId) || null;
+
   const { isPending: isPendingCreate, mutateAsync: createVideoMutation } = useCreateVideoMutation();
   const { isPending: isPendingUpdate, mutateAsync: updateVideoMutation } = useUpdateVideoMutation();
   const { isPending: isPendingStatus, mutate: updateVideoStatusMutation } = useUpdateVideoStatusMutation();
   const { isPending: isPendingAccess, mutate: updateVideoAccessMutation } = useUpdateVideoAccessMutation();
   const { isPending: isPendingDelete, mutate: deleteVideoMutation } = useDeleteVideoMutation();
+  const { isPending: isPendingSync, mutate: syncVideoStatusMutation } = useSyncVideoStatusMutation();
 
   const isFormOpen = isCreateModalOpen || isUpdateModalOpen;
-  const isMutating = isPendingCreate || isPendingUpdate || isPendingStatus || isPendingAccess || isPendingDelete;
+  const isMutating = isPendingCreate || isPendingUpdate || isPendingStatus || isPendingAccess || isPendingDelete || isPendingSync;
   const isBusy = isFormOpen || isMutating;
 
   // Submit Form Tạo mới Video
@@ -54,8 +64,8 @@ const VideoListPage = () => {
 
   // Submit Form Cập nhật Video
   const handleUpdateSubmit = async (payload: VideoPayload) => {
-    if (editingVideo) {
-      await updateVideoMutation({ id: editingVideo.id, payload });
+    if (editingVideoId) {
+      await updateVideoMutation({ id: editingVideoId, payload });
     }
   };
 
@@ -74,9 +84,10 @@ const VideoListPage = () => {
     deleteVideoMutation(id);
   };
 
-  const activePreviewVideo = previewVideo
-    ? videos.find((v) => v.id === previewVideo.id) || previewVideo
-    : null;
+  // Đồng bộ thủ công trạng thái HLS từ Bunny Stream
+  const handleSyncStatus = (id: string) => {
+    syncVideoStatusMutation(id);
+  };
 
   return (
     <div className="space-y-6 flex flex-col flex-1 h-full overflow-hidden">
@@ -113,17 +124,18 @@ const VideoListPage = () => {
         onPageChange={(p, l) => {
           setParams((prev) => ({ ...prev, page: p, limit: l }));
         }}
-        onPreview={(video) => {
-          setPreviewVideo(video);
+        onPreview={(id) => {
+          setPreviewVideoId(id);
           setIsPreviewModalOpen(true);
         }}
-        onEdit={(video) => {
-          setEditingVideo(video);
+        onEdit={(id) => {
+          setEditingVideoId(id);
           setIsUpdateModalOpen(true);
         }}
         onDelete={handleDelete}
         onStatusChange={handleStatusChange}
         onAccessChange={handleAccessChange}
+        onSyncStatus={handleSyncStatus}
       />
 
       {/* Form Modal Tạo mới */}
@@ -137,23 +149,28 @@ const VideoListPage = () => {
       {/* Form Modal Cập nhật */}
       <FormUpdate
         open={isUpdateModalOpen}
-        video={editingVideo}
+        videoId={editingVideoId}
+        initialVideo={activeEditingVideo}
         videoTypes={videoTypes}
         onSubmit={handleUpdateSubmit}
         onClose={() => {
           setIsUpdateModalOpen(false);
-          setEditingVideo(null);
+          setEditingVideoId(null);
         }}
       />
 
       {/* Preview Modal xem trước */}
       <PreviewModal
         open={isPreviewModalOpen}
-        video={activePreviewVideo}
-        onClose={() => setIsPreviewModalOpen(false)}
-        onEdit={(video) => {
+        videoId={previewVideoId}
+        initialVideo={activePreviewVideo}
+        onClose={() => {
           setIsPreviewModalOpen(false);
-          setEditingVideo(video);
+          setPreviewVideoId(null);
+        }}
+        onEdit={(id) => {
+          setIsPreviewModalOpen(false);
+          setEditingVideoId(id);
           setIsUpdateModalOpen(true);
         }}
         onAccessChange={handleAccessChange}

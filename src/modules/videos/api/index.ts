@@ -88,3 +88,12 @@ export const deleteVideoApi = async (id: string): Promise<ApiResponse<{ id: stri
   const response = await api.delete(`${BASE_PATH}/${id}`);
   return response?.data;
 };
+
+/**
+ * API đồng bộ thủ công trạng thái xử lý HLS của Video với Bunny Stream
+ */
+export const syncVideoStatusApi = async (id: string): Promise<ApiResponse<{ video: Video }>> => {
+  const response = await api.post(`${BASE_PATH}/${id}/sync-status`);
+  return response?.data;
+};
+

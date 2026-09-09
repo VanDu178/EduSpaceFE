@@ -14,7 +14,9 @@ import type { FormInstance } from 'antd';
 import type { BlogType } from '../../blogTypes';
 import type { Blog, BlogPayload } from '../types';
 import ModalPreview from './ModalPreview';
-import { uploadSingleFileApi } from '../../../services/uploadService';
+import { processImageFileSelect, BLOG_BANNER_UPLOAD_CONFIG, FOLDER_NAME, uploadSingleFileApi } from '../../upload';
+
+
 import { BLOG_STATUS, BLOG_STATUS_OPTIONS } from '../constants';
 import { generateSlug } from '../utils';
 
@@ -103,27 +105,16 @@ const FormUpdate = ({
     form.setFieldValue('slug', generated);
   };
 
-  const handleSelectBanner = (file: File) => {
-    const isImage = file.type.startsWith('image/');
-    if (!isImage) {
-      toast.error('Vui lòng chọn file hình ảnh hợp lệ (PNG, JPG, WEBP, GIF)!');
-      return;
-    }
-    const isLt5M = file.size / 1024 / 1024 < 5;
-    if (!isLt5M) {
-      toast.error('Dung lượng ảnh bìa không được vượt quá 5MB!');
-      return;
-    }
+  const handleSelectBanner = async (file: File) => {
+    const result = await processImageFileSelect(file, bannerPreviewUrl, BLOG_BANNER_UPLOAD_CONFIG);
+    if (!result) return;
 
-    if (bannerPreviewUrl && bannerPreviewUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(bannerPreviewUrl);
-    }
-
-    const previewUrl = URL.createObjectURL(file);
-    setBannerFile(file);
-    setBannerPreviewUrl(previewUrl);
+    setBannerFile(result.file);
+    setBannerPreviewUrl(result.localBlobUrl);
     setIsBannerRemoved(false);
   };
+
+
 
   const handleRemoveBanner = () => {
     if (bannerPreviewUrl && bannerPreviewUrl.startsWith('blob:')) {
@@ -140,7 +131,7 @@ const FormUpdate = ({
     if (bannerFile) {
       setIsUploadingBanner(true);
       try {
-        const res = await uploadSingleFileApi(bannerFile, 'blogs');
+        const res = await uploadSingleFileApi(bannerFile, FOLDER_NAME.BLOGS);
         finalBannerUrl = res.url;
       } catch (err: any) {
         toast.error("Đã xảy ra vấn đề khi cập nhật bài viết. Vui lòng thử lại!");
@@ -404,7 +395,7 @@ const FormUpdate = ({
                     </div>
                   ) : (
                     <Upload.Dragger
-                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      accept={BLOG_BANNER_UPLOAD_CONFIG.ACCEPT_STRING}
                       showUploadList={false}
                       disabled={isLoading}
                       beforeUpload={(file) => {
@@ -417,7 +408,7 @@ const FormUpdate = ({
                         <div className="flex flex-col items-center py-2">
                           <ArrowUpTrayIcon className="h-5 w-5 text-slate-400 mb-1" />
                           <span className="text-xs font-medium text-slate-600">Tải ảnh bìa</span>
-                          <span className="text-[10px] text-slate-400">PNG, JPG, WEBP, GIF (Tối đa 5MB)</span>
+                          <span className="text-[10px] text-slate-400">{BLOG_BANNER_UPLOAD_CONFIG.HINT_TEXT}</span>
                         </div>
                       </Spin>
                     </Upload.Dragger>

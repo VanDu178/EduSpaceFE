@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { Input, Select } from 'antd';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import type { VideoType, VideoQueryParams } from '../types';
-import { STATUS_OPTIONS, SOURCE_TYPE_OPTIONS } from '../constants';
+import { STATUS_OPTIONS, SOURCE_TYPE_OPTIONS, PROCESS_STATUS_OPTIONS } from '../constants';
 
 interface FilterBarProps {
   videoTypes: VideoType[];
@@ -20,7 +20,7 @@ export const FilterBar = ({ videoTypes, params, setParams, disabled = false }: F
       </span>
 
       <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-        <div className="w-full sm:w-[180px]">
+        <div className="w-full sm:w-[160px]">
           <Select
             placeholder="Tất cả loại"
             allowClear
@@ -39,7 +39,7 @@ export const FilterBar = ({ videoTypes, params, setParams, disabled = false }: F
           </Select>
         </div>
 
-        <div className="w-full sm:w-[180px]">
+        <div className="w-full sm:w-[160px]">
           <Select
             placeholder="Tất cả nguồn"
             allowClear
@@ -58,9 +58,9 @@ export const FilterBar = ({ videoTypes, params, setParams, disabled = false }: F
           </Select>
         </div>
 
-        <div className="w-full sm:w-[180px]">
+        <div className="w-full sm:w-[160px]">
           <Select
-            placeholder="Tất cả trạng thái"
+            placeholder="Trạng thái hiển thị"
             allowClear
             disabled={disabled}
             className="w-full"
@@ -70,6 +70,25 @@ export const FilterBar = ({ videoTypes, params, setParams, disabled = false }: F
             }}
           >
             {STATUS_OPTIONS.map((opt) => (
+              <Select.Option key={opt.value} value={opt.value}>
+                {opt.label}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+
+        <div className="w-full sm:w-[160px]">
+          <Select
+            placeholder="Trạng thái Xử lý"
+            allowClear
+            disabled={disabled}
+            className="w-full"
+            value={params.processStatus}
+            onChange={(val) => {
+              setParams((prev) => ({ ...prev, processStatus: val, page: 1 }));
+            }}
+          >
+            {PROCESS_STATUS_OPTIONS.map((opt) => (
               <Select.Option key={opt.value} value={opt.value}>
                 {opt.label}
               </Select.Option>

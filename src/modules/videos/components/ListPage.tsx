@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Table, Button, Select, Switch, Popconfirm, Tooltip, Empty } from 'antd';
+import { Table, Button, Select, Switch, Popconfirm, Tooltip, Empty, Spin } from 'antd';
 import {
   PlayIcon,
   PencilSquareIcon,
   TrashIcon,
   VideoCameraIcon,
   EyeIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import type { ColumnsType } from 'antd/es/table';
 import type { Video, VideoType } from '../types';
@@ -14,6 +15,10 @@ import {
   SOURCE_TYPE_LABELS,
   SOURCE_TYPE_COLOR_MAP,
   VIDEO_STATUS_COLOR_MAP,
+  VIDEO_PROCESS_STATUS,
+  VIDEO_PROCESS_STATUS_CONFIG,
+  PROCESSING_EDIT_DISABLED_TOOLTIP,
+  PROCESSING_DELETE_DISABLED_TOOLTIP,
   getVideoTypeColors,
 } from '../constants';
 import { ModalAccess } from './ModalAccess';
@@ -28,11 +33,12 @@ interface ListPageProps {
   total: number;
   disabled?: boolean;
   onPageChange: (page: number, limit: number) => void;
-  onPreview: (video: Video) => void;
-  onEdit: (video: Video) => void;
+  onPreview: (id: string) => void;
+  onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, newStatus: string) => void;
   onAccessChange: (id: string, isPremium: boolean, teaserDuration?: number) => void;
+  onSyncStatus?: (id: string) => void;
 }
 
 export const ListPage = ({
@@ -48,6 +54,7 @@ export const ListPage = ({
   onDelete,
   onStatusChange,
   onAccessChange,
+  onSyncStatus,
 }: ListPageProps) => {
   // Modal state cho việc chuyển quyền truy cập trả phí và cài thời lượng xem thử
   const [selectedVideoForAccess, setSelectedVideoForAccess] = useState<Video | null>(null);
@@ -96,7 +103,7 @@ export const ListPage = ({
         <div
           className={`relative w-14 h-9 rounded overflow-hidden bg-slate-900 border border-slate-200/80 group flex items-center justify-center mx-auto ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
             }`}
-          onClick={() => !disabled && onPreview(record)}
+          onClick={() => !disabled && onPreview(record.id)}
         >
           {thumb ? (
             <img src={thumb} alt={record.title} className="w-full h-full object-cover group-hover:opacity-80 transition-opacity" />
@@ -178,54 +185,95 @@ export const ListPage = ({
       key: 'isPremium',
       width: 150,
       align: 'center',
-      render: (isPremium: boolean, record: Video) => (
-        <div className="flex items-center justify-center !space-x-2">
-          <Switch
-            size="small"
-            checked={isPremium}
-            disabled={disabled}
-            onChange={(checked) => {
-              if (checked) {
-                // Từ Free lên Trả phí -> Mở Modal chọn thời lượng xem thử
-                setSelectedVideoForAccess(record);
-                setIsTeaserModalOpen(true);
-              } else {
-                // Từ Trả phí về Free -> Cập nhật trực tiếp không qua Modal
-                onAccessChange(record.id, false);
-              }
-            }}
-          />
-          <span className={`text-xs ${isPremium ? 'font-semibold text-amber-600' : 'font-medium text-slate-500'}`}>
-            {isPremium ? 'Trả phí' : 'Miễn phí'}
-          </span>
-        </div>
-      ),
+      render: (isPremium: boolean, record: Video) => {
+        const isProcessing = record.processStatus === VIDEO_PROCESS_STATUS.PROCESSING;
+        const isSwitchDisabled = disabled || isProcessing;
+        return (
+          <div className="flex items-center justify-center !space-x-2">
+            <Switch
+              size="small"
+              checked={isPremium}
+              disabled={isSwitchDisabled}
+              onChange={(checked) => {
+                if (checked) {
+                  // Từ Free lên Trả phí -> Mở Modal chọn thời lượng xem thử
+                  setSelectedVideoForAccess(record);
+                  setIsTeaserModalOpen(true);
+                } else {
+                  // Từ Trả phí về Free -> Cập nhật trực tiếp không qua Modal
+                  onAccessChange(record.id, false);
+                }
+              }}
+            />
+            <span className={`text-xs ${isPremium ? 'font-semibold text-amber-600' : 'font-medium text-slate-500'}`}>
+              {isPremium ? 'Trả phí' : 'Miễn phí'}
+            </span>
+          </div>
+        );
+      },
     },
     {
-      title: 'Trạng thái',
+      title: 'Trạng thái hiển thị',
       dataIndex: 'status',
       key: 'status',
       width: 140,
       align: 'center',
-      render: (status: 'draft' | 'published' | 'archived', record: Video) => (
-        <Select
-          size="small"
-          value={status}
-          disabled={disabled}
-          onChange={(val) => onStatusChange(record.id, val)}
-          className="w-full text-xs"
-          variant="borderless"
-          popupMatchSelectWidth={false}
-          options={STATUS_OPTIONS.map((opt) => ({
-            value: opt.value,
-            label: (
-              <span className={`font-semibold text-xs ${VIDEO_STATUS_COLOR_MAP[opt.value]?.textColor || opt.textColor}`}>
-                {opt.label}
-              </span>
-            ),
-          }))}
-        />
-      ),
+      render: (status: 'draft' | 'published' | 'archived', record: Video) => {
+        const isProcessing = record.processStatus === VIDEO_PROCESS_STATUS.PROCESSING;
+        const isSelectDisabled = disabled || isProcessing;
+        return (
+          <Select
+            size="small"
+            value={status}
+            disabled={isSelectDisabled}
+            onChange={(val) => onStatusChange(record.id, val)}
+            className="w-full text-xs"
+            variant="borderless"
+            popupMatchSelectWidth={false}
+            options={STATUS_OPTIONS.map((opt) => ({
+              value: opt.value,
+              label: (
+                <span className={`font-semibold text-xs ${VIDEO_STATUS_COLOR_MAP[opt.value]?.textColor || opt.textColor}`}>
+                  {opt.label}
+                </span>
+              ),
+            }))}
+          />
+        );
+      },
+    },
+    {
+      title: 'Xử lý Media',
+      dataIndex: 'processStatus',
+      key: 'processStatus',
+      width: 150,
+      align: 'center',
+      render: (pStatus: 'processing' | 'ready' | 'failed' | undefined, record: Video) => {
+        if (record.sourceType === 'youtube') {
+          return <span className="text-xs font-semibold text-rose-600">YouTube</span>;
+        }
+        const config = VIDEO_PROCESS_STATUS_CONFIG[pStatus || 'ready'] || VIDEO_PROCESS_STATUS_CONFIG.ready;
+        return (
+          <div className="flex items-center justify-center gap-1.5">
+            {pStatus === 'processing' && <Spin size="small" />}
+            <span className={`font-semibold text-xs ${config.textColor}`}>
+              {config.label}
+            </span>
+            {onSyncStatus && (
+              <Tooltip title="Kiểm tra & đồng bộ trạng thái">
+                <Button
+                  type="text"
+                  size="small"
+                  disabled={disabled}
+                  icon={<ArrowPathIcon className="h-3.5 w-3.5 text-slate-400 hover:text-sky-600 transition-colors" />}
+                  onClick={() => onSyncStatus(record.id)}
+                  className="p-0.5 h-auto flex items-center justify-center border-none"
+                />
+              </Tooltip>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: 'Thao tác',
@@ -233,48 +281,52 @@ export const ListPage = ({
       width: 180,
       fixed: 'right',
       align: 'center',
-      render: (_: any, record: Video) => (
-        <div className="flex items-center justify-center space-x-2">
-          <Tooltip title="Xem chi tiết">
-            <Button
-              type="text"
-              disabled={disabled}
-              icon={<EyeIcon className="h-4 w-4 text-sky-600" />}
-              onClick={() => onPreview(record)}
-              className="hover:bg-sky-50 flex items-center justify-center"
-            />
-          </Tooltip>
-
-          <Tooltip title="Cập nhật">
-            <Button
-              type="text"
-              disabled={disabled}
-              icon={<PencilSquareIcon className="h-4 w-4 text-amber-600" />}
-              onClick={() => onEdit(record)}
-              className="hover:bg-amber-50 flex items-center justify-center"
-            />
-          </Tooltip>
-
-          <Popconfirm
-            title="Xác nhận xóa"
-            description="Bạn có chắc chắn muốn xóa bản ghi này?"
-            onConfirm={() => onDelete(record.id)}
-            disabled={disabled}
-            okText="Đồng ý"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
-          >
-            <Tooltip title="Xóa">
+      render: (_: any, record: Video) => {
+        const isProcessing = record.processStatus === VIDEO_PROCESS_STATUS.PROCESSING;
+        const isEditDisabled = disabled || isProcessing;
+        return (
+          <div className="flex items-center justify-center space-x-2">
+            <Tooltip title="Xem chi tiết">
               <Button
                 type="text"
                 disabled={disabled}
-                icon={<TrashIcon className="h-4 w-4 text-rose-600" />}
-                className="hover:bg-rose-50 flex items-center justify-center"
+                icon={<EyeIcon className="h-4 w-4 text-sky-600" />}
+                onClick={() => onPreview(record.id)}
+                className="hover:bg-sky-50 flex items-center justify-center"
               />
             </Tooltip>
-          </Popconfirm>
-        </div>
-      ),
+
+            <Tooltip title={isProcessing ? PROCESSING_EDIT_DISABLED_TOOLTIP : 'Cập nhật'}>
+              <Button
+                type="text"
+                disabled={isEditDisabled}
+                icon={<PencilSquareIcon className={`h-4 w-4 ${isEditDisabled ? 'text-slate-300' : 'text-amber-600'}`} />}
+                onClick={() => onEdit(record.id)}
+                className="hover:bg-amber-50 flex items-center justify-center disabled:opacity-50"
+              />
+            </Tooltip>
+
+            <Popconfirm
+              title="Xác nhận xóa"
+              description="Bạn có chắc chắn muốn xóa bản ghi này?"
+              onConfirm={() => onDelete(record.id)}
+              disabled={disabled || isProcessing}
+              okText="Đồng ý"
+              cancelText="Hủy"
+              okButtonProps={{ danger: true }}
+            >
+              <Tooltip title={isProcessing ? PROCESSING_DELETE_DISABLED_TOOLTIP : 'Xóa'}>
+                <Button
+                  type="text"
+                  disabled={disabled || isProcessing}
+                  icon={<TrashIcon className={`h-4 w-4 ${disabled || isProcessing ? 'text-slate-300' : 'text-rose-600'}`} />}
+                  className="hover:bg-rose-50 flex items-center justify-center disabled:opacity-50"
+                />
+              </Tooltip>
+            </Popconfirm>
+          </div>
+        );
+      },
     },
   ];
 

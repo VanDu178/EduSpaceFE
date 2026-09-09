@@ -28,6 +28,7 @@ export interface Video {
   thumbnailUrl?: string | null;
   isPremium: boolean;
   status: 'draft' | 'published' | 'archived';
+  processStatus?: 'processing' | 'ready' | 'failed';
   videoTypeId: number;
   videoType?: VideoType;
   creator?: VideoCreator | null;
@@ -48,6 +49,7 @@ export interface VideoPayload {
   thumbnailUrl?: string | null;
   isPremium?: boolean;
   status?: 'draft' | 'published' | 'archived';
+  processStatus?: 'processing' | 'ready' | 'failed';
   videoTypeId: number;
 }
 
@@ -58,6 +60,7 @@ export interface VideoQueryParams {
   videoTypeId?: number;
   sourceType?: 'direct_upload' | 'youtube';
   status?: 'draft' | 'published' | 'archived';
+  processStatus?: 'processing' | 'ready' | 'failed';
   isPremium?: boolean;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';

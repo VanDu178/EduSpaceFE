@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Drawer,
   Form,
@@ -12,13 +12,12 @@ import {
   Tooltip,
   Spin,
 } from 'antd';
-import toast from 'react-hot-toast';
+
 import {
   LinkIcon,
   CloudArrowUpIcon,
   PhotoIcon,
   XMarkIcon,
-  CheckCircleIcon,
   QuestionMarkCircleIcon,
   VideoCameraIcon,
   PlayIcon,
@@ -28,13 +27,18 @@ import {
   STATUS_OPTIONS,
   SOURCE_TYPE_OPTIONS,
   DEFAULT_VIDEO_FORM_VALUES,
-  THUMBNAIL_UPLOAD_CONFIG,
-  VIDEO_UPLOAD_CONFIG,
   YOUTUBE_ID_REGEX,
   SOURCE_TYPES,
 } from '../constants';
-import { generateSlug, getDirectVideoUrl, getVideoDurationFromFile, secondsToDayjs, dayjsToSeconds } from '../utils';
-import { uploadSingleFileApi } from '../../../services/uploadService';
+import toast from 'react-hot-toast';
+import {
+  generateSlug,
+  getDirectVideoUrl,
+  dayjsToSeconds,
+  secondsToDayjs,
+} from '../utils';
+import { useUpload, THUMBNAIL_UPLOAD_CONFIG, VIDEO_UPLOAD_CONFIG, processImageFileSelect, processVideoFileSelect } from '../../upload';
+
 
 interface FormCreateProps {
   open: boolean;
@@ -51,83 +55,173 @@ export const FormCreate = ({
 }: FormCreateProps) => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
-  const [uploadingVideo, setUploadingVideo] = useState(false);
-  const [uploadingThumb, setUploadingThumb] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
   const [storagePath, setStoragePath] = useState<string>('');
   const [isSlugTouched, setIsSlugTouched] = useState(false);
-  const [isPreviewingDirectVideo, setIsPreviewingDirectVideo] = useState(false);
+
+  // Instant Blob URL State (Spec Mục 0: Preview tức thì <5ms)
+  const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
+  const [videoBlobUrl, setVideoBlobUrl] = useState<string>('');
+  const [selectedThumbFile, setSelectedThumbFile] = useState<File | null>(null);
+  const [thumbBlobUrl, setThumbBlobUrl] = useState<string>('');
+
+  // Hook quản lý upload Video & Thumbnail từ module upload dùng chung
+  const {
+    uploadingThumb,
+    handleUploadVideoFile,
+    handleUploadThumbnail,
+  } = useUpload();
 
   // Theo dõi giá trị sourceType, youtubeVideoId & isPremium từ Form ant design
   const sourceType = Form.useWatch('sourceType', form) || DEFAULT_VIDEO_FORM_VALUES.sourceType;
   const youtubeVideoId = Form.useWatch('youtubeVideoId', form);
   const isPremium = Form.useWatch('isPremium', form);
   const isYoutubeValid = YOUTUBE_ID_REGEX.test(youtubeVideoId || '');
-  const isBusy = submitting || uploadingVideo || uploadingThumb;
+  const isBusy = submitting || uploadingThumb;
+
+  const clearSelectedVideo = () => {
+    if (videoBlobUrl) {
+      URL.revokeObjectURL(videoBlobUrl);
+    }
+    setVideoBlobUrl('');
+    setSelectedVideoFile(null);
+    setStoragePath('');
+  };
+
+  const clearSelectedThumb = () => {
+    if (thumbBlobUrl) {
+      URL.revokeObjectURL(thumbBlobUrl);
+    }
+    setThumbBlobUrl('');
+    setSelectedThumbFile(null);
+    setThumbnailUrl('');
+  };
+
+  // Cleanup Object Blob URLs khi component unmount để chống rò rỉ RAM bộ nhớ
+  useEffect(() => {
+    return () => {
+      if (videoBlobUrl) URL.revokeObjectURL(videoBlobUrl);
+      if (thumbBlobUrl) URL.revokeObjectURL(thumbBlobUrl);
+    };
+  }, [videoBlobUrl, thumbBlobUrl]);
 
   // Reset state tạm khi đóng drawer
   const handleDrawerClose = () => {
     if (isBusy) return;
     form.resetFields();
-    setThumbnailUrl('');
-    setStoragePath('');
+    clearSelectedVideo();
+    clearSelectedThumb();
     setIsSlugTouched(false);
-    setIsPreviewingDirectVideo(false);
     onClose();
   };
 
-  // Xử lý upload file Video trực tiếp lên Storage
-  const handleUploadVideoFile = async (file: File) => {
-    const isLtMax = file.size / 1024 / 1024 < VIDEO_UPLOAD_CONFIG.MAX_SIZE_MB;
-    if (!isLtMax) {
-      toast.error(`Dung lượng file video phải nhỏ hơn ${VIDEO_UPLOAD_CONFIG.DISPLAY_SIZE_TEXT}!`);
-      return false;
-    }
+  // Callback chọn file Video -> Tự tạo Blob URL xem trước ngay lập tức (<5ms, 0 KB network)
+  const onSelectVideoFile = async (file: File) => {
+    const res = await processVideoFileSelect(file, videoBlobUrl);
+    if (!res) return false;
 
-    setUploadingVideo(true);
-    try {
-      // Tự động đo thời lượng video trên trình duyệt
-      const extractedDuration = await getVideoDurationFromFile(file);
-      if (extractedDuration > 0) {
-        form.setFieldValue('durationTime', secondsToDayjs(extractedDuration));
-      }
+    setVideoBlobUrl(res.localBlobUrl);
+    setSelectedVideoFile(res.file);
+    setStoragePath('');
 
-      const res = await uploadSingleFileApi(file, 'videos');
-      setStoragePath(res.url || res.path);
-      setIsPreviewingDirectVideo(false);
-      toast.success('Tải file video lên thành công!');
-    } catch (err: any) {
-      console.error('Upload video error:', err);
-      toast.error(err?.response?.data?.message || 'Upload file video thất bại!');
-    } finally {
-      setUploadingVideo(false);
+    if (res.extractedDuration > 0) {
+      form.setFieldValue('durationTime', secondsToDayjs(res.extractedDuration));
     }
+    return false;
   };
 
-  // Xử lý upload Thumbnail (chỉ áp dụng với Nguồn tải lên trực tiếp)
-  const handleUploadThumbnail = async (file: File) => {
-    const isLt5M = file.size / 1024 / 1024 < THUMBNAIL_UPLOAD_CONFIG.MAX_SIZE_MB;
-    if (!isLt5M) {
-      toast.error(`Dung lượng ảnh đại diện phải nhỏ hơn ${THUMBNAIL_UPLOAD_CONFIG.MAX_SIZE_MB}MB!`);
-      return false;
-    }
+  // Callback chọn file Thumbnail -> Tự tạo Blob URL xem trước ảnh đại diện
+  const onSelectThumbFile = async (file: File) => {
+    const res = await processImageFileSelect(file, thumbBlobUrl);
+    if (!res) return false;
 
-    setUploadingThumb(true);
-    try {
-      const res = await uploadSingleFileApi(file, 'thumbnails');
-      setThumbnailUrl(res.url);
-      toast.success('Tải ảnh đại diện thành công!');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Upload ảnh thất bại!');
-    } finally {
-      setUploadingThumb(false);
-    }
+    setThumbBlobUrl(res.localBlobUrl);
+    setSelectedThumbFile(res.file);
+    setThumbnailUrl('');
+    return false;
   };
 
-  // Submit Form
+  // Submit Form: Tiến hành upload video khi Submit nếu có selected file
   const handleFinish = async (values: any) => {
     setSubmitting(true);
     try {
+      let finalStoragePath = storagePath;
+      let finalThumbnailUrl = thumbnailUrl;
+
+      if (values.sourceType === SOURCE_TYPES.DIRECT_UPLOAD) {
+        if (!selectedVideoFile && !finalStoragePath) {
+          toast.error('Vui lòng chọn video!');
+          return;
+        }
+
+        // 1. Chuẩn bị payload dữ liệu video
+        const duration = dayjsToSeconds(values.durationTime);
+        const teaserDuration = values.isPremium ? dayjsToSeconds(values.teaserTime) : 0;
+
+        const buildPayload = (vStoragePath: string, vThumbUrl?: string | null): VideoPayload => ({
+          title: values.title,
+          slug: generateSlug(values.slug || ''),
+          description: values.description,
+          sourceType: values.sourceType,
+          youtubeVideoId: null,
+          storagePath: vStoragePath,
+          duration,
+          teaserDuration,
+          thumbnailUrl: vThumbUrl !== undefined ? vThumbUrl : (finalThumbnailUrl || null),
+          isPremium: values.isPremium,
+          status: values.status,
+          videoTypeId: values.videoTypeId,
+        });
+
+        // 2. Nếu chọn file video mới -> Chạy upload ngầm & hoãn upload thumbnail tới khi TUS xong
+        if (selectedVideoFile) {
+          const thumbFileToUpload = selectedThumbFile;
+          const existingThumbUrl = thumbnailUrl;
+
+          handleDrawerClose();
+          // Chạy upload video ngầm qua Global Zustand Store
+          handleUploadVideoFile(
+            selectedVideoFile,
+            async (uploadedPath) => {
+              try {
+                let resolvedThumbUrl = existingThumbUrl;
+
+                // Tải thumbnail lên Supabase NGAY TRƯỚC KHI tạo bản ghi DB
+                if (thumbFileToUpload) {
+                  const uploadedThumb = await handleUploadThumbnail(thumbFileToUpload);
+                  if (uploadedThumb && typeof uploadedThumb === 'string') {
+                    resolvedThumbUrl = uploadedThumb;
+                  }
+                }
+
+                const payload = buildPayload(uploadedPath, resolvedThumbUrl);
+                await onSubmit(payload);
+                toast.success('Thêm video mới thành công!');
+              } catch (dbErr: any) {
+                console.error('Thêm video mới thất bại');
+                throw dbErr;
+              }
+            },
+          );
+          return;
+        }
+
+        // Nếu giữ nguyên video cũ (không chọn file mới) -> Upload thumbnail ngay nếu có chọn thumbnail mới
+        if (selectedThumbFile) {
+          const uploadedThumb = await handleUploadThumbnail(selectedThumbFile);
+          if (!uploadedThumb || typeof uploadedThumb !== 'string') {
+            return;
+          }
+          finalThumbnailUrl = uploadedThumb;
+        }
+
+        const payload = buildPayload(finalStoragePath, finalThumbnailUrl);
+        await onSubmit(payload);
+        handleDrawerClose();
+        return;
+      }
+
+      // Xử lý nguồn YouTube
       const duration = dayjsToSeconds(values.durationTime);
       const teaserDuration = values.isPremium ? dayjsToSeconds(values.teaserTime) : 0;
 
@@ -136,11 +230,11 @@ export const FormCreate = ({
         slug: generateSlug(values.slug || ''),
         description: values.description,
         sourceType: values.sourceType,
-        youtubeVideoId: values.sourceType === SOURCE_TYPES.YOUTUBE ? values.youtubeVideoId?.trim() || null : null,
-        storagePath: values.sourceType === SOURCE_TYPES.DIRECT_UPLOAD ? storagePath : null,
+        youtubeVideoId: values.youtubeVideoId?.trim() || null,
+        storagePath: null,
         duration,
         teaserDuration,
-        thumbnailUrl: values.sourceType === SOURCE_TYPES.YOUTUBE ? null : (thumbnailUrl || null),
+        thumbnailUrl: null,
         isPremium: values.isPremium,
         status: values.status,
         videoTypeId: values.videoTypeId,
@@ -149,11 +243,11 @@ export const FormCreate = ({
       await onSubmit(payload);
       handleDrawerClose();
     } catch (err: any) {
-      console.error('Submit create form error:', err);
     } finally {
       setSubmitting(false);
     }
   };
+
 
   // Giá trị khởi tạo mặc định cho Form
   const initialValues = {
@@ -297,7 +391,7 @@ export const FormCreate = ({
               <Radio.Group className="w-full">
                 <div className="grid grid-cols-2 gap-1.5">
                   {SOURCE_TYPE_OPTIONS.map((opt) => {
-                    const isYoutube = opt.value === 'youtube';
+                    const isYoutube = opt.value === SOURCE_TYPES.YOUTUBE;
                     const isActive = sourceType === opt.value;
                     return (
                       <label
@@ -321,7 +415,7 @@ export const FormCreate = ({
               </Radio.Group>
             </Form.Item>
 
-            {sourceType === 'youtube' ? (
+            {sourceType === SOURCE_TYPES.YOUTUBE ? (
               <Form.Item
                 name="youtubeVideoId"
                 label={
@@ -333,7 +427,7 @@ export const FormCreate = ({
                   </span>
                 }
                 rules={[
-                  { required: sourceType === 'youtube', message: 'Vui lòng nhập 11 ký tự YouTube Video ID' },
+                  { required: sourceType === SOURCE_TYPES.YOUTUBE, message: 'Vui lòng nhập 11 ký tự YouTube Video ID' },
                   { pattern: YOUTUBE_ID_REGEX, message: 'ID Video YouTube phải chứa đúng 11 ký tự' },
                 ]}
                 className="mb-0"
@@ -356,62 +450,29 @@ export const FormCreate = ({
                   </label>
                 </div>
 
-                {storagePath ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-emerald-200/80 bg-emerald-50/40">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                          <VideoCameraIcon className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-slate-800 m-0 truncate font-mono">{storagePath}</p>
-                          <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-1 mt-0.5">
-                            <CheckCircleIcon className="w-3 h-3" /> Đã tải lên thành công
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={<PlayIcon className="w-4 h-4 text-sky-600" />}
-                          onClick={() => setIsPreviewingDirectVideo(!isPreviewingDirectVideo)}
-                          className="hover:bg-sky-50 text-sky-600 text-xs font-medium rounded-lg flex items-center gap-1 px-2 h-8"
-                        >
-                          {isPreviewingDirectVideo ? 'Ẩn xem trước' : 'Xem trước'}
-                        </Button>
-                        <Button
-                          type="text"
-                          size="small"
-                          disabled={isBusy}
-                          icon={<XMarkIcon className="w-4 h-4 text-slate-400 hover:text-rose-600" />}
-                          onClick={() => {
-                            if (isBusy) return;
-                            setStoragePath('');
-                            setIsPreviewingDirectVideo(false);
-                          }}
-                          className="hover:bg-rose-50 rounded-lg h-8 w-8 p-0"
-                          title="Xóa video"
-                        />
-                      </div>
-                    </div>
-
-                    {isPreviewingDirectVideo && (
-                      <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black border border-slate-800">
-                        <video
-                          src={getDirectVideoUrl(storagePath)}
-                          controls
-                          autoPlay
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    )}
+                {videoBlobUrl || storagePath ? (
+                  <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black border border-slate-800 group">
+                    <video
+                      src={videoBlobUrl || getDirectVideoUrl(storagePath)}
+                      controls
+                      className="w-full h-full object-contain"
+                    />
+                    <button
+                      type="button"
+                      disabled={isBusy}
+                      onClick={() => !isBusy && clearSelectedVideo()}
+                      className="absolute top-2.5 right-2.5 z-10 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                      title="Xóa video"
+                    >
+                      <XMarkIcon className="w-4 h-4 stroke-[2.5]" />
+                      <span>Xóa video</span>
+                    </button>
                   </div>
                 ) : (
                   <Upload
                     disabled={isBusy}
                     beforeUpload={(file) => {
-                      handleUploadVideoFile(file);
+                      onSelectVideoFile(file);
                       return false;
                     }}
                     showUploadList={false}
@@ -419,29 +480,20 @@ export const FormCreate = ({
                     className="w-full block [&_.ant-upload-select]:!w-full [&_.ant-upload-select]:!block [&_.ant-upload]:!w-full"
                   >
                     <div className="w-full border-2 border-dashed border-slate-200 hover:border-sky-400 bg-slate-50/60 hover:bg-sky-50/30 rounded-xl p-4 transition-all flex flex-col items-center justify-center cursor-pointer text-center group">
-                      {uploadingVideo ? (
-                        <div className="flex flex-col items-center py-2 text-sky-600">
-                          <Spin size="small" />
-                          <span className="text-xs font-medium mt-2">Đang tải video lên...</span>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="w-9 h-9 rounded-full bg-slate-100 group-hover:bg-sky-100 text-slate-400 group-hover:text-sky-600 flex items-center justify-center mb-2 transition-colors">
-                            <VideoCameraIcon className="w-5 h-5" />
-                          </div>
-                          <p className="text-xs font-semibold text-slate-700 group-hover:text-sky-600 transition-colors m-0">
-                            Nhấp hoặc kéo thả để tải video lên
-                          </p>
-                          <div className="flex items-center justify-center gap-2 mt-2">
-                            <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200/60">
-                              {VIDEO_UPLOAD_CONFIG.FORMATS_TEXT}
-                            </span>
-                            <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200/60">
-                              Tối đa {VIDEO_UPLOAD_CONFIG.DISPLAY_SIZE_TEXT}
-                            </span>
-                          </div>
-                        </>
-                      )}
+                      <div className="w-9 h-9 rounded-full bg-slate-100 group-hover:bg-sky-100 text-slate-400 group-hover:text-sky-600 flex items-center justify-center mb-2 transition-colors">
+                        <VideoCameraIcon className="w-5 h-5" />
+                      </div>
+                      <p className="text-xs font-semibold text-slate-700 group-hover:text-sky-600 transition-colors m-0">
+                        Nhấp hoặc kéo thả để xem trước & tải video lên
+                      </p>
+                      <div className="flex items-center justify-center gap-2 mt-2">
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200/60">
+                          {VIDEO_UPLOAD_CONFIG.FORMATS_TEXT}
+                        </span>
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200/60">
+                          Tối đa {VIDEO_UPLOAD_CONFIG.DISPLAY_SIZE_TEXT}
+                        </span>
+                      </div>
                     </div>
                   </Upload>
                 )}
@@ -463,7 +515,7 @@ export const FormCreate = ({
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 m-0">Thiết lập</h4>
             </div>
 
-            {sourceType === 'youtube' ? (
+            {sourceType === SOURCE_TYPES.YOUTUBE ? (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-slate-700 flex items-center">
@@ -509,14 +561,14 @@ export const FormCreate = ({
                   </label>
                 </div>
 
-                {thumbnailUrl ? (
+                {thumbBlobUrl || thumbnailUrl ? (
                   <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-slate-200/80 group bg-slate-900">
-                    <img src={thumbnailUrl} alt="Thumbnail preview" className="w-full h-full object-cover" />
+                    <img src={thumbBlobUrl || thumbnailUrl} alt="Thumbnail preview" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-slate-900/20 group-hover:bg-slate-900/40 transition-colors" />
                     <button
                       type="button"
                       disabled={isBusy}
-                      onClick={() => !isBusy && setThumbnailUrl('')}
+                      onClick={() => !isBusy && clearSelectedThumb()}
                       className="absolute top-2.5 right-2.5 z-10 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Xóa ảnh đại diện"
                     >
@@ -528,10 +580,11 @@ export const FormCreate = ({
                   <Upload
                     disabled={isBusy}
                     beforeUpload={(file) => {
-                      handleUploadThumbnail(file);
+                      onSelectThumbFile(file);
                       return false;
                     }}
                     showUploadList={false}
+
                     accept={THUMBNAIL_UPLOAD_CONFIG.ACCEPT_STRING}
                     className="w-full block [&_.ant-upload-select]:!w-full [&_.ant-upload-select]:!block [&_.ant-upload]:!w-full"
                   >

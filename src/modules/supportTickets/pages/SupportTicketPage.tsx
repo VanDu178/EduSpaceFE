@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import type { Ticket, TicketFilterParams } from '../types';
 import { FilterBar, ListPage, ModalDetail, type CommentFile } from '../components';
-import { uploadMultipleFilesApi } from '../../../services/uploadService';
+import { uploadMultipleFilesApi, FOLDER_NAME } from '../../upload';
 import {
   useTicketsQuery,
   useTicketDetailQuery,
@@ -84,7 +84,7 @@ export const SupportTicketPage = () => {
       let uploadedUrls: string[] = [];
       if (commentFiles.length > 0) {
         const rawFiles = commentFiles.map((item) => item.file);
-        const uploadResults = await uploadMultipleFilesApi(rawFiles, 'support-tickets');
+        const uploadResults = await uploadMultipleFilesApi(rawFiles, FOLDER_NAME.SUPPORT_TICKETS);
         uploadedUrls = uploadResults.map((item) => item.url).filter(Boolean);
       }
 

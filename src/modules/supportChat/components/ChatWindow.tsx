@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Spin, Image } from 'antd';
 import { ArrowsRightLeftIcon, PaperAirplaneIcon, PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { SupportConversation, SupportMessage } from '../types';
-import { uploadSingleFileApi, deleteFileApi } from '../../../services/uploadService';
+import { uploadSingleFileApi, deleteFileApi, FOLDER_NAME } from '../../upload';
 
 interface ChatWindowProps {
   selectedConversation: SupportConversation | null;
@@ -66,7 +66,7 @@ export const ChatWindow = ({
 
     try {
       setIsUploadingImage(true);
-      const res = await uploadSingleFileApi(file, 'support-chat');
+      const res = await uploadSingleFileApi(file, FOLDER_NAME.SUPPORT_CHAT);
       if (res?.url) {
         setPendingAttachments((prev) => [...prev, res.url]);
       }

@@ -48,7 +48,7 @@ export const ModalAccess = ({
       footer={null}
       centered
       width={440}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form
         form={form}

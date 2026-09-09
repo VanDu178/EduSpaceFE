@@ -59,6 +59,40 @@ export const VIDEO_STATUS_CONFIG = {
   },
 } as const;
 
+export const VIDEO_PROCESS_STATUS = {
+  PROCESSING: "processing",
+  READY: "ready",
+  FAILED: "failed",
+} as const;
+
+export const VIDEO_PROCESS_STATUS_CONFIG = {
+  processing: {
+    value: VIDEO_PROCESS_STATUS.PROCESSING,
+    label: 'Đang xử lý',
+    tagColor: 'processing',
+    textColor: 'text-sky-600',
+  },
+  ready: {
+    value: VIDEO_PROCESS_STATUS.READY,
+    label: 'Sẵn sàng',
+    tagColor: 'success',
+    textColor: 'text-emerald-600',
+  },
+  failed: {
+    value: VIDEO_PROCESS_STATUS.FAILED,
+    label: 'Lỗi xử lý',
+    tagColor: 'error',
+    textColor: 'text-rose-600',
+  },
+} as const;
+
+export const PROCESS_STATUS_OPTIONS = Object.values(VIDEO_PROCESS_STATUS_CONFIG).map((item) => ({
+  value: item.value,
+  label: item.label,
+  color: item.tagColor,
+  textColor: item.textColor,
+}));
+
 export const VIDEO_TYPE_CONFIG = [
   {
     code: VIDEO_TYPE.ACADEMY,
@@ -139,25 +173,16 @@ export const DEFAULT_VIDEO_FORM_VALUES = {
   teaserDurationTime: null,
 };
 
-export const THUMBNAIL_UPLOAD_CONFIG = {
-  MAX_SIZE_MB: 5,
-  MAX_COUNT: 1,
-  ACCEPTED_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
-  ACCEPT_STRING: 'image/jpeg,image/jpg,image/png,image/webp',
-  FORMATS_TEXT: 'JPG, PNG, WEBP',
-  HINT_TEXT: 'Tối đa 1 ảnh (JPG, PNG, WEBP), dung lượng tối đa 5MB.',
-};
-
-export const VIDEO_UPLOAD_CONFIG = {
-  MAX_SIZE_MB: 1024,
-  DISPLAY_SIZE_TEXT: '1GB',
-  MAX_COUNT: 1,
-  ACCEPTED_TYPES: ['video/mp4', 'video/webm', 'video/quicktime'],
-  ACCEPT_STRING: 'video/mp4,video/webm,video/quicktime',
-  FORMATS_TEXT: 'MP4, WEBM, MOV',
-  HINT_TEXT: 'Tối đa 1 video (MP4, WEBM, MOV), dung lượng tối đa 1GB.',
-};
-
 export const YOUTUBE_ID_REGEX = /^[a-zA-Z0-9_-]{11}$/;
+
+export const VIDEO_SOCKET_EVENTS = {
+  PROCESS_STATUS_UPDATED: 'video:process_status_updated',
+} as const;
+
+export const PROCESSING_EDIT_DISABLED_TOOLTIP = 'Video đang trong quá trình xử lý, không thể cập nhật';
+export const PROCESSING_DELETE_DISABLED_TOOLTIP = 'Video đang trong quá trình xử lý, không thể xóa';
+
+
+
 
 

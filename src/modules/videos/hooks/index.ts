@@ -3,11 +3,13 @@ import toast from 'react-hot-toast';
 import {
   fetchVideosApi,
   fetchVideoTypesApi,
+  fetchVideoByIdApi,
   createVideoApi,
   updateVideoApi,
   updateVideoStatusApi,
   updateVideoAccessApi,
   deleteVideoApi,
+  syncVideoStatusApi,
 } from '../api';
 import type { Video, VideoType, VideoPayload, VideoQueryParams } from '../types';
 import type { PaginatedData } from '../../../types/api';
@@ -32,6 +34,20 @@ export const useVideosQuery = (params?: VideoQueryParams) => {
   });
 };
 
+// Hook lấy chi tiết 1 video theo ID
+export const useVideoDetailQuery = (
+  id: string | null,
+  enabled: boolean = true,
+  initialVideo?: Video | null
+) => {
+  return useQuery<{ video: Video }>({
+    queryKey: [...QUERY_KEY, 'detail', id],
+    queryFn: () => fetchVideoByIdApi(id!),
+    enabled: !!id && enabled,
+    initialData: initialVideo ? { video: initialVideo } : undefined,
+  });
+};
+
 // Hook mutation tạo video mới
 export const useCreateVideoMutation = () => {
   const queryClient = useQueryClient();
@@ -39,10 +55,9 @@ export const useCreateVideoMutation = () => {
     mutationFn: (payload: VideoPayload) => createVideoApi(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-      toast.success('Thêm mới thành công!');
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.message || err?.message || 'Thao tác thất bại!');
+      throw err;
     },
   });
 };
@@ -54,10 +69,9 @@ export const useUpdateVideoMutation = () => {
     mutationFn: ({ id, payload }: { id: string; payload: VideoPayload }) => updateVideoApi(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-      toast.success('Cập nhật thông tin thành công!');
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.message || err?.message || 'Thao tác thất bại!');
+      throw err;
     },
   });
 };
@@ -107,3 +121,28 @@ export const useDeleteVideoMutation = () => {
     },
   });
 };
+
+// Hook mutation đồng bộ trạng thái xử lý HLS từ Bunny Stream
+export const useSyncVideoStatusMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => syncVideoStatusApi(id),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      const processStatus = res?.data?.video?.processStatus;
+      if (processStatus === 'ready') {
+        toast.success('Đồng bộ thành công: Video đã được xử lý thành công');
+      } else if (processStatus === 'failed') {
+        toast.error('Đồng bộ thành công: Video bị lỗi xử lý');
+      } else {
+        toast.success('Video vẫn đang trong quá trình xử lý');
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || err?.message || 'Không thể đồng bộ trạng thái video!');
+    },
+  });
+};
+
+export * from './useVideoRealtime';
+

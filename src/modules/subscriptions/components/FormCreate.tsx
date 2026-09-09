@@ -11,7 +11,8 @@ import { useMembershipPlansQuery } from '../../membershipPlans/hooks';
 import { useActivePaymentMethodsQuery } from '../../paymentMethods/hooks';
 import { USER_ROLE } from '../../../constants/roles';
 import { formatCurrency } from '../../../utils/format';
-import { uploadMultipleFilesApi } from '../../../services/uploadService';
+import { validateImageFile, PROOFS_UPLOAD_CONFIG, uploadMultipleFilesApi, FOLDER_NAME } from '../../upload';
+
 
 interface FormCreateProps {
   open: boolean;
@@ -69,24 +70,20 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
     setFileList(newFileList);
   };
 
-  const handleBeforeUpload = (file: File) => {
-    if (fileList.length >= 5) {
-      toast.error('Chỉ được tải lên tối đa 5 ảnh minh chứng!');
+  const handleBeforeUpload = async (file: File) => {
+    if (fileList.length >= PROOFS_UPLOAD_CONFIG.MAX_COUNT) {
+      toast.error(`Chỉ được tải lên tối đa ${PROOFS_UPLOAD_CONFIG.MAX_COUNT} ảnh minh chứng!`);
       return Upload.LIST_IGNORE;
     }
-    const isImage = file.type.startsWith('image/');
-    if (!isImage) {
-      toast.error('Chỉ được chọn tệp định dạng hình ảnh (PNG, JPG, JPEG, WEBP)!');
-      return Upload.LIST_IGNORE;
-    }
-    const isLt5M = file.size / 1024 / 1024 < 5;
-    if (!isLt5M) {
-      toast.error('Dung lượng tệp ảnh không được vượt quá 5MB!');
+    const result = await validateImageFile(file, PROOFS_UPLOAD_CONFIG);
+    if (!result.isValid) {
+      toast.error(result.message || 'Tệp không hợp lệ!');
       return Upload.LIST_IGNORE;
     }
     // Ngăn Antd tự động upload ngay lập tức (chờ submit form)
     return false;
   };
+
 
   const handleFinish = async (values: any) => {
     try {
@@ -99,7 +96,7 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
 
       let proofUrls: string[] = [];
       if (filesToUpload.length > 0) {
-        const uploadResults = await uploadMultipleFilesApi(filesToUpload, 'subscription-proofs');
+        const uploadResults = await uploadMultipleFilesApi(filesToUpload, FOLDER_NAME.SUBSCRIPTION_PROOFS);
         proofUrls = uploadResults.map((res) => res.url);
       }
 
@@ -240,7 +237,7 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
                 Ảnh minh chứng giao dịch
               </span>
               <span className="text-[11px] text-slate-400 font-normal italic">
-                Tối đa 5 ảnh | Định dạng PNG, JPG, WEBP (&lt; 5MB)
+                {PROOFS_UPLOAD_CONFIG.HINT_TEXT}
               </span>
             </div>
             <Spin spinning={isUploadingFiles} tip="Đang tải ảnh minh chứng...">
@@ -250,11 +247,11 @@ const FormCreate = ({ open, submitting, onClose, onSubmit }: FormCreateProps) =>
                 onPreview={handlePreview}
                 onChange={handleChange}
                 beforeUpload={handleBeforeUpload}
-                accept="image/*"
+                accept={PROOFS_UPLOAD_CONFIG.ACCEPT_STRING}
                 multiple
                 className="proof-uploader"
               >
-                {fileList.length >= 5 ? null : (
+                {fileList.length >= PROOFS_UPLOAD_CONFIG.MAX_COUNT ? null : (
                   <div className="flex flex-col items-center justify-center text-slate-500 hover:text-sky-600 transition-colors">
                     <PlusIcon className="h-5 w-5 mb-1" />
                     <span className="text-xs font-medium">Tải ảnh lên</span>
