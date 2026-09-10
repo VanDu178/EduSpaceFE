@@ -29,6 +29,8 @@ export interface SupportConversation {
   status: ConversationStatus;
   lastMessage?: string | null;
   lastSender?: SenderType | null;
+  userUnreadCount?: number;
+  agentUnreadCount?: number;
   createdAt: string;
   updatedAt: string;
   user?: ChatUser;
@@ -42,6 +44,6 @@ export interface AdminPresenceStatus {
 }
 
 export interface ChatFilterParams {
-  status?: string;
-  search?: string;
+  status?: string | null;
+  search?: string | null;
 }

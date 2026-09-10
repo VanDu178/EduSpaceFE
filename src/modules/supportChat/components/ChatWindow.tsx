@@ -3,6 +3,7 @@ import { Spin, Image } from 'antd';
 import { ArrowsRightLeftIcon, PaperAirplaneIcon, PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { SupportConversation, SupportMessage } from '../types';
 import { uploadSingleFileApi, deleteFileApi, FOLDER_NAME } from '../../upload';
+import { CHAT_STATUS, SENDER_TYPE } from '../constants';
 
 interface ChatWindowProps {
   selectedConversation: SupportConversation | null;
@@ -71,7 +72,6 @@ export const ChatWindow = ({
         setPendingAttachments((prev) => [...prev, res.url]);
       }
     } catch (err) {
-      console.error('Lỗi upload ảnh:', err);
     } finally {
       setIsUploadingImage(false);
     }
@@ -84,7 +84,7 @@ export const ChatWindow = ({
       try {
         await deleteFileApi(targetUrl);
       } catch (err) {
-        console.error('Lỗi xóa file ảnh khỏi storage:', err);
+        throw err;
       }
     }
   };
@@ -110,12 +110,12 @@ export const ChatWindow = ({
       <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
         <div>
           <h4 className="text-sm font-bold text-slate-900">
-            {selectedConversation.user?.name || selectedConversation.user?.email}
+            {selectedConversation.user?.name || "Khách hàng vãng lai"}
           </h4>
         </div>
 
         <div className="flex items-center space-x-2">
-          {selectedConversation.status === 'WAITING_AGENT' && (
+          {selectedConversation.status === CHAT_STATUS.WAITING_AGENT && (
             <button
               onClick={() => onAcceptConversation(selectedConversation.id)}
               className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg cursor-pointer"
@@ -124,14 +124,14 @@ export const ChatWindow = ({
             </button>
           )}
 
-          {selectedConversation.status === 'AGENT_HANDLING' && (
+          {selectedConversation.status === CHAT_STATUS.AGENT_HANDLING && (
             <>
               <button
                 onClick={onOpenConvertModal}
                 className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 text-xs font-medium rounded-lg cursor-pointer flex items-center space-x-1"
               >
                 <ArrowsRightLeftIcon className="w-3.5 h-3.5" />
-                <span>Tạo Ticket</span>
+                <span>Chuyển thành yêu cầu hỗ trợ</span>
               </button>
               <button
                 onClick={() => onResolveConversation(selectedConversation.id)}
@@ -159,16 +159,16 @@ export const ChatWindow = ({
             {chatMessages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex flex-col ${msg.senderType === 'AGENT' ? 'items-end' : msg.senderType === 'SYSTEM' ? 'items-center' : 'items-start'
+                className={`flex flex-col ${msg.senderType === SENDER_TYPE.AGENT ? 'items-end' : msg.senderType === SENDER_TYPE.SYSTEM ? 'items-center' : 'items-start'
                   }`}
               >
-                {msg.senderType === 'SYSTEM' ? (
+                {msg.senderType === SENDER_TYPE.SYSTEM ? (
                   <div className="bg-slate-200 text-slate-600 text-[11px] px-2.5 py-0.5 rounded-full border border-slate-300 my-1 font-medium">
                     {msg.content}
                   </div>
                 ) : (
                   <div
-                    className={`max-w-[75%] p-2.5 rounded-xl text-xs ${msg.senderType === 'AGENT'
+                    className={`max-w-[75%] p-2.5 rounded-xl text-xs ${msg.senderType === SENDER_TYPE.AGENT
                       ? 'bg-sky-600 text-white rounded-br-none border border-sky-500'
                       : 'bg-white text-slate-800 rounded-bl-none border border-slate-200'
                       }`}
@@ -199,7 +199,7 @@ export const ChatWindow = ({
       </div>
 
       {/* Bottom Input */}
-      {selectedConversation.status === 'AGENT_HANDLING' ? (
+      {selectedConversation.status === CHAT_STATUS.AGENT_HANDLING && (
         <form onSubmit={handleSubmit} className="p-2.5 bg-white border-t border-slate-200 flex flex-col space-y-2 flex-shrink-0">
           {/* Pending Attachments Preview */}
           {pendingAttachments.length > 0 && (
@@ -255,9 +255,20 @@ export const ChatWindow = ({
             </button>
           </div>
         </form>
-      ) : (
+      )}
+      {selectedConversation.status === CHAT_STATUS.WAITING_AGENT && (
         <div className="p-3 bg-slate-50 border-t border-slate-200 text-center text-xs text-slate-500 flex-shrink-0">
           Bấm <strong>"Tiếp Nhận Chat"</strong> ở trên để bắt đầu nhắn tin với Khách hàng.
+        </div>
+      )}
+      {selectedConversation.status === CHAT_STATUS.CONVERTED_TO_TICKET && (
+        <div className="p-3 bg-slate-50 border-t border-slate-200 text-center text-xs text-slate-500 flex-shrink-0">
+          Cuộc trò chuyện đã được chuyển thành <strong>"yêu cầu hoặc hỗ trợ"</strong>.
+        </div>
+      )}
+      {selectedConversation.status === CHAT_STATUS.RESOLVED && (
+        <div className="p-3 bg-slate-50 border-t border-slate-200 text-center text-xs text-slate-500 flex-shrink-0">
+          Cuộc trò chuyện đã được <strong>"hoàn tất"</strong>.
         </div>
       )}
     </div>

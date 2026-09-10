@@ -10,7 +10,8 @@ import {
 import { Image, Select } from 'antd';
 import toast from 'react-hot-toast';
 import type { Ticket } from '../types';
-import { TICKET_STATUS_OPTIONS } from '../constants';
+import { TICKET_STATUS, TICKET_ATTACHMENT_LIMITS } from '../constants';
+import { getTicketStatusOptions } from '../utils';
 
 export interface CommentFile {
   file: File;
@@ -29,9 +30,6 @@ interface ModalDetailProps {
   onCommentTextChange: (text: string) => void;
   onAddTicketComment: (e: React.FormEvent) => void;
 }
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const MAX_IMAGES = 3;
 
 export const ModalDetail = ({
   selectedTicket,
@@ -61,9 +59,9 @@ export const ModalDetail = ({
     const fileArray = Array.from(files);
     e.target.value = '';
 
-    const remainingSlots = MAX_IMAGES - commentFiles.length;
+    const remainingSlots = TICKET_ATTACHMENT_LIMITS.MAX_COUNT - commentFiles.length;
     if (remainingSlots <= 0) {
-      toast.error('Bạn đã đính kèm tối đa 3 hình ảnh.');
+      toast.error(`Bạn đã đính kèm tối đa ${TICKET_ATTACHMENT_LIMITS.MAX_COUNT} hình ảnh.`);
       return;
     }
 
@@ -83,8 +81,8 @@ export const ModalDetail = ({
         continue;
       }
 
-      if (file.size > MAX_FILE_SIZE) {
-        toast.error(`File "${file.name}" vượt quá dung lượng 5MB.`);
+      if (file.size > TICKET_ATTACHMENT_LIMITS.MAX_SIZE_BYTES) {
+        toast.error(`File "${file.name}" vượt quá dung lượng ${TICKET_ATTACHMENT_LIMITS.MAX_SIZE_MB}MB.`);
         continue;
       }
 
@@ -102,7 +100,7 @@ export const ModalDetail = ({
     toast.success(`Đã thêm ${newFiles.length} ảnh đính kèm.`);
   };
 
-  const isMaxReached = commentFiles.length >= MAX_IMAGES;
+  const isMaxReached = commentFiles.length >= TICKET_ATTACHMENT_LIMITS.MAX_COUNT;
 
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl flex flex-col h-full overflow-hidden p-4">
@@ -118,12 +116,12 @@ export const ModalDetail = ({
         <div className="flex items-center shrink-0 self-start sm:self-center">
           <Select
             value={selectedTicket.status}
-            options={TICKET_STATUS_OPTIONS}
+            options={getTicketStatusOptions(selectedTicket.status)}
             onChange={(value) => {
               onUpdateTicketStatus(value);
             }}
             loading={isUpdatingStatus}
-            disabled={isUpdatingStatus}
+            disabled={isUpdatingStatus || selectedTicket.status === TICKET_STATUS.CLOSED}
             className="w-36 sm:w-40 text-xs"
           />
         </div>
@@ -287,7 +285,7 @@ export const ModalDetail = ({
                     </button>
                   </div>
                 ))}
-                {commentFiles.length < MAX_IMAGES && (
+                {commentFiles.length < TICKET_ATTACHMENT_LIMITS.MAX_COUNT && (
                   <label
                     htmlFor="admin-ticket-image-upload"
                     className="w-14 h-14 border-2 border-dashed border-slate-200 hover:border-sky-400 hover:bg-sky-50/50 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-sky-600 cursor-pointer transition"
@@ -315,7 +313,7 @@ export const ModalDetail = ({
             {/* Upload Image Icon Button */}
             <label
               htmlFor="admin-ticket-image-upload"
-              title={isMaxReached ? 'Đã đạt tối đa 3 ảnh' : 'Đính kèm hình ảnh (Tối đa 3 ảnh, 5MB/ảnh)'}
+              title={isMaxReached ? `Đã đạt tối đa ${TICKET_ATTACHMENT_LIMITS.MAX_COUNT} ảnh` : `Đính kèm hình ảnh (Tối đa ${TICKET_ATTACHMENT_LIMITS.MAX_COUNT} ảnh, ${TICKET_ATTACHMENT_LIMITS.MAX_SIZE_MB}MB/ảnh)`}
               className={`flex items-center justify-center w-8 h-8 rounded-full text-sky-600 hover:bg-sky-100/70 cursor-pointer transition shrink-0 ${isSubmittingComment || isMaxReached ? 'pointer-events-none opacity-40 cursor-not-allowed' : ''
                 }`}
             >

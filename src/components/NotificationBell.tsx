@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Popover, Badge, Spin, Empty } from 'antd';
+import { Popover, Badge, Spin, Empty, Tooltip } from 'antd';
 import {
   BellIcon,
   CheckIcon,
   TicketIcon,
   InformationCircleIcon,
+  SpeakerWaveIcon,
+  SpeakerXMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useNotification } from '../config/socket/NotificationContext';
 import type { NotificationItem } from '../services/notificationService';
@@ -17,6 +19,8 @@ export const NotificationBell: React.FC = () => {
     notifications,
     unreadCount,
     isLoading,
+    soundEnabled,
+    toggleSoundEnabled,
     markAsRead,
     requestWindowPermission,
     permissionState,
@@ -28,6 +32,30 @@ export const NotificationBell: React.FC = () => {
     }
     setOpen(false);
     if (item.link) {
+      try {
+        const dummyUrl = new URL(item.link, 'http://localhost');
+        const path = dummyUrl.pathname;
+        const params = new URLSearchParams(dummyUrl.search);
+        const tabParam = params.get('tab');
+        const ticketIdParam = params.get('ticketId');
+        const chatIdParam = params.get('chatId') || params.get('conversationId');
+
+        if (path === '/admin/support' || path === '/support') {
+          const targetTab = tabParam || (ticketIdParam ? 'tickets' : 'chat');
+          const targetId = ticketIdParam ? Number(ticketIdParam) : (chatIdParam ? Number(chatIdParam) : undefined);
+
+          navigate(path, {
+            state: {
+              targetTab,
+              targetId,
+            },
+          });
+          return;
+        }
+      } catch {
+        // Fallback nếu parse URL gặp lỗi
+      }
+
       const targetPath = item.link.startsWith('/') ? item.link : `/${item.link}`;
       navigate(targetPath);
     }

@@ -9,7 +9,7 @@ import {
 
 interface FilterBarProps {
   params: TicketFilterParams;
-  onFilterChange: (field: keyof TicketFilterParams, value: string) => void;
+  onFilterChange: (field: keyof TicketFilterParams, value: string | null) => void;
   onLoadTickets: () => void;
   onClearFilters: () => void;
 }
@@ -22,49 +22,40 @@ export const FilterBar = ({
 }: FilterBarProps) => {
   const isAnyFilterActive = Boolean(params.status || params.category || params.priority || params.search);
 
-  const statusOptions = [
-    { value: '', label: 'Tất cả trạng thái' },
-    ...TICKET_STATUS_OPTIONS
-  ];
-
-  const categoryOptions = [
-    { value: '', label: 'Tất cả loại' },
-    ...TICKET_CATEGORY_OPTIONS
-  ];
-
-  const priorityOptions = [
-    { value: '', label: 'Tất cả độ khẩn' },
-    ...TICKET_PRIORITY_OPTIONS
-  ];
-
   return (
     <div className="p-3 border-b border-slate-200/80 bg-white flex-shrink-0 space-y-2.5">
       {/* Row 1: 3 Filters (Status, Category, Priority) */}
       <div className="grid grid-cols-3 gap-2 text-xs">
         <Select
-          value={params.status}
+          placeholder="Trạng thái"
+          allowClear
+          value={params.status || undefined}
           onChange={(value) => {
-            onFilterChange('status', value);
+            onFilterChange('status', value || null);
           }}
-          options={statusOptions}
+          options={TICKET_STATUS_OPTIONS}
           className="w-full text-xs"
         />
 
         <Select
-          value={params.category}
+          placeholder="Loại"
+          allowClear
+          value={params.category || undefined}
           onChange={(value) => {
-            onFilterChange('category', value);
+            onFilterChange('category', value || null);
           }}
-          options={categoryOptions}
+          options={TICKET_CATEGORY_OPTIONS}
           className="w-full text-xs"
         />
 
         <Select
-          value={params.priority}
+          placeholder="Độ khẩn cấp"
+          allowClear
+          value={params.priority || undefined}
           onChange={(value) => {
-            onFilterChange('priority', value);
+            onFilterChange('priority', value || null);
           }}
-          options={priorityOptions}
+          options={TICKET_PRIORITY_OPTIONS}
           className="w-full text-xs"
         />
       </div>

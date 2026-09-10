@@ -77,4 +77,14 @@ export const useConvertChatToTicketMutation = () => {
   });
 };
 
+export const useMarkTicketAsReadMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => ticketApi.markAsRead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TICKET_QUERY_KEY });
+    },
+  });
+};
+
 export * from './useTicketRealtime';

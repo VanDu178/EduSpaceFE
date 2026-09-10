@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Form } from 'antd';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSocketEvent } from '../../../config/socket/SocketContext';
@@ -12,14 +13,31 @@ import {
 import type { SupportConversation } from '../../supportChat';
 import { ModalConvert } from '../components';
 import type { PreviewFile } from '../components/ModalConvert';
-import { useConvertChatToTicketMutation } from '../hooks';
-import type { TicketCategory, TicketPriority } from '../types';
+import { useConvertChatToTicketMutation, useTicketsQuery } from '../hooks';
+import type { TicketCategory, TicketPriority, Ticket } from '../types';
 import { SupportTicketPage } from './SupportTicketPage';
+import {
+  SUPPORT_CENTER_TABS,
+  DEFAULT_CONVERT_FORM_VALUES,
+  TICKET_ATTACHMENT_LIMITS,
+  TICKET_SOCKET_EVENTS,
+  type SupportCenterTab
+} from '../constants';
+import { CHAT_STATUS } from '../../supportChat/constants';
 
 export { SupportTicketPage, SupportTicketPage as TicketListPage } from './SupportTicketPage';
 
 export const SupportCenterPage = () => {
-  const [activeTab, setActiveTab] = useState<'chat' | 'tickets'>('chat');
+  const [activeTab, setActiveTab] = useState<SupportCenterTab>(SUPPORT_CENTER_TABS.CHAT);
+  const location = useLocation();
+
+  useEffect(() => {
+    const state = location.state as { targetTab?: SupportCenterTab; targetId?: number } | null;
+    if (state?.targetTab && Object.values(SUPPORT_CENTER_TABS).includes(state.targetTab)) {
+      setActiveTab(state.targetTab);
+    }
+  }, [location.state]);
+
   const queryClient = useQueryClient();
   const [convertForm] = Form.useForm();
 
@@ -28,7 +46,7 @@ export const SupportCenterPage = () => {
   const isAdminOnline = Boolean(adminStatusData?.data?.isOnline);
 
   // Đồng bộ Realtime trạng thái Online từ Socket event
-  useSocketEvent<{ isOnline: boolean; activeAdminCount: number }>('admin_presence_updated', (data) => {
+  useSocketEvent<{ isOnline: boolean; activeAdminCount: number }>(TICKET_SOCKET_EVENTS.ADMIN_PRESENCE_UPDATED, (data) => {
     queryClient.setQueryData(['supportChat', 'adminStatus'], (old: any) => {
       if (!old) return { success: true, data: { isOnline: data.isOnline, activeAdminCount: data.activeAdminCount } };
       return {
@@ -44,7 +62,11 @@ export const SupportCenterPage = () => {
 
   const { data: conversationsData } = useConversationsQuery();
   const conversations: SupportConversation[] = conversationsData?.data || [];
-  const waitingCount = conversations.filter((c) => c.status === 'WAITING_AGENT').length;
+  const unreadChatCount = conversations.filter((c) => (c.agentUnreadCount || 0) > 0 || c.status === CHAT_STATUS.WAITING_AGENT).length;
+
+  const { data: ticketsData } = useTicketsQuery();
+  const rawTickets: Ticket[] = ticketsData?.pages.flatMap((page) => page?.data || []) || [];
+  const unreadTicketCount = rawTickets.filter((t) => (t.assigneeUnreadCount || 0) > 0 || t.status === 'OPEN').length;
 
   // Convert Chat to Ticket Modal States & Mutation
   const [showConvertModal, setShowConvertModal] = useState(false);
@@ -58,12 +80,7 @@ export const SupportCenterPage = () => {
     setSelectedConversation(conv);
     setShowConvertModal(true);
     convertForm.resetFields();
-    convertForm.setFieldsValue({
-      title: '',
-      category: 'TECHNICAL',
-      priority: 'MEDIUM',
-      description: ''
-    });
+    convertForm.setFieldsValue(DEFAULT_CONVERT_FORM_VALUES);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,10 +90,10 @@ export const SupportCenterPage = () => {
     const fileArray = Array.from(files);
     e.target.value = '';
 
-    const remainingSlots = 3 - previewFiles.length;
+    const remainingSlots = TICKET_ATTACHMENT_LIMITS.MAX_COUNT - previewFiles.length;
     if (remainingSlots <= 0) {
       convertForm.setFields([
-        { name: 'attachments', errors: ['Bạn đã đính kèm tối đa 3 hình ảnh.'] }
+        { name: 'attachments', errors: [`Bạn đã đính kèm tối đa ${TICKET_ATTACHMENT_LIMITS.MAX_COUNT} hình ảnh.`] }
       ]);
       return;
     }
@@ -94,8 +111,8 @@ export const SupportCenterPage = () => {
         continue;
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        fileErrorMsg = `File "${file.name}" vượt quá dung lượng 5MB.`;
+      if (file.size > TICKET_ATTACHMENT_LIMITS.MAX_SIZE_BYTES) {
+        fileErrorMsg = `File "${file.name}" vượt quá dung lượng ${TICKET_ATTACHMENT_LIMITS.MAX_SIZE_MB}MB.`;
         continue;
       }
 
@@ -204,40 +221,45 @@ export const SupportCenterPage = () => {
       {/* Navigation Tabs */}
       <div className="flex border-b border-slate-200 mb-3 text-xs sm:text-sm flex-shrink-0">
         <button
-          onClick={() => setActiveTab('chat')}
-          className={`py-2 px-4 font-semibold flex items-center space-x-2 border-b-2 cursor-pointer transition ${activeTab === 'chat'
+          onClick={() => setActiveTab(SUPPORT_CENTER_TABS.CHAT)}
+          className={`py-2 px-4 font-semibold flex items-center space-x-2 border-b-2 cursor-pointer transition ${activeTab === SUPPORT_CENTER_TABS.CHAT
             ? 'border-sky-600 text-sky-600 bg-white rounded-t-lg'
             : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
         >
           <span>Live chat</span>
-          {waitingCount > 0 && (
-            <span className="bg-amber-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
-              {waitingCount}
+          {unreadChatCount > 0 && (
+            <span className="bg-emerald-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold animate-pulse">
+              {unreadChatCount}
             </span>
           )}
         </button>
 
         <button
-          onClick={() => setActiveTab('tickets')}
-          className={`py-2 px-4 font-semibold flex items-center space-x-2 border-b-2 cursor-pointer transition ${activeTab === 'tickets'
+          onClick={() => setActiveTab(SUPPORT_CENTER_TABS.TICKETS)}
+          className={`py-2 px-4 font-semibold flex items-center space-x-2 border-b-2 cursor-pointer transition ${activeTab === SUPPORT_CENTER_TABS.TICKETS
             ? 'border-sky-600 text-sky-600 bg-white rounded-t-lg'
             : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
         >
           <span>Quản lý yêu cầu hỗ trợ</span>
+          {unreadTicketCount > 0 && (
+            <span className="bg-sky-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+              {unreadTicketCount}
+            </span>
+          )}
         </button>
       </div>
 
       {/* TAB 1: Support Chat Page (from supportChat module) */}
-      {activeTab === 'chat' && (
+      {activeTab === SUPPORT_CENTER_TABS.CHAT && (
         <SupportChatPage
           onOpenConvertModal={handleOpenConvertModal}
         />
       )}
 
       {/* TAB 2: Support Ticket Management Page Component */}
-      {activeTab === 'tickets' && <SupportTicketPage />}
+      {activeTab === SUPPORT_CENTER_TABS.TICKETS && <SupportTicketPage />}
 
       {/* Convert Chat to Ticket Modal */}
       <ModalConvert

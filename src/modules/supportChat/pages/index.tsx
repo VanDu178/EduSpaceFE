@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { SupportConversation, SupportMessage, ChatFilterParams } from '../types';
 import { ConversationsQueue, ChatWindow, FilterBar } from '../components';
 import {
@@ -6,17 +7,20 @@ import {
   useConversationDetailQuery,
   useAcceptConversationMutation,
   useSendChatMessageMutation,
-  useResolveConversationMutation
+  useResolveConversationMutation,
+  useMarkConversationAsReadMutation
 } from '../hooks';
 import { useSocket, useSocketEvent } from '../../../config/socket/SocketContext';
+import { useNotification, playNotificationChime } from '../../../config/socket/NotificationContext';
+import { CHAT_SOCKET_EVENTS } from '../constants';
 
 export interface SupportChatPageProps {
   onOpenConvertModal?: (conversation: SupportConversation) => void;
 }
 
 const defaultFilterParams: ChatFilterParams = {
-  status: '',
-  search: ''
+  status: null,
+  search: null
 }
 
 export const SupportChatPage = ({ onOpenConvertModal }: SupportChatPageProps = {}) => {
@@ -27,27 +31,65 @@ export const SupportChatPage = ({ onOpenConvertModal }: SupportChatPageProps = {
   const { mutate: acceptConversationMutation } = useAcceptConversationMutation();
   const { isPending: isPendingSendMessage, mutate: sendMessageMutation } = useSendChatMessageMutation();
   const { mutate: resolveConversationMutation } = useResolveConversationMutation();
+  const { mutate: markConversationAsReadMutation } = useMarkConversationAsReadMutation();
 
+  const { setActiveChatId } = useNotification();
   const [selectedConversation, setSelectedConversation] = useState<SupportConversation | null>(null);
   const [chatMessages, setChatMessages] = useState<SupportMessage[]>([]);
   const [chatInputText, setChatInputText] = useState('');
 
-  const { data: conversationDetailData, isLoading: isLoadingMessages } = useConversationDetailQuery(selectedConversation?.id || null);
+  const { socket } = useSocket();
+  const location = useLocation();
+  const locationState = location.state as { targetTab?: string; targetId?: number } | null;
+  const targetId = locationState?.targetId;
+
+  // Sync activeChatId to NotificationContext to suppress redundant global toast/sound
+  useEffect(() => {
+    setActiveChatId(selectedConversation?.id || null);
+    return () => {
+      setActiveChatId(null);
+    };
+  }, [selectedConversation?.id, setActiveChatId]);
+
+  // Lấy chi tiết cuộc trò chuyện nếu đã chọn hoặc có targetId từ notification state
+  const targetConversationId = selectedConversation?.id || (locationState?.targetTab === 'chat' || !locationState?.targetTab ? targetId : null) || null;
+  const { data: conversationDetailData, isLoading: isLoadingMessages } = useConversationDetailQuery(targetConversationId);
 
   useEffect(() => {
-    if (conversationDetailData?.data?.messages) {
-      setChatMessages(conversationDetailData.data.messages);
+    if (conversationDetailData?.data) {
+      if (conversationDetailData.data.messages) {
+        setChatMessages(conversationDetailData.data.messages);
+      }
+      if (!selectedConversation || selectedConversation.id !== conversationDetailData.data.id) {
+        setSelectedConversation(conversationDetailData.data);
+      }
     }
   }, [conversationDetailData]);
 
-  const { socket } = useSocket();
+  // Đồng bộ chọn conversation khi conversations queue sẵn sàng hoặc targetId thay đổi
+  useEffect(() => {
+    if (targetId && (locationState?.targetTab === 'chat' || !locationState?.targetTab)) {
+      setFilterParams(defaultFilterParams);
+      refetchConversations();
+      const found = conversations.find((c) => c.id === targetId);
+      if (found) {
+        setSelectedConversation(found);
+        if (socket) {
+          socket.emit(CHAT_SOCKET_EVENTS.JOIN_CONVERSATION, { conversationId: found.id });
+        }
+        // Clean up location.state after consuming targetId
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [targetId, conversations, locationState?.targetTab, socket, refetchConversations]);
 
-  useSocketEvent('user_new_message_notice', () => {
+  useSocketEvent(CHAT_SOCKET_EVENTS.CONVERSATION_UPDATED, () => {
     refetchConversations();
   });
 
-  useSocketEvent<{ conversationId: number; message: SupportMessage }>('new_message', (data) => {
+  useSocketEvent<{ conversationId: number; message: SupportMessage }>(CHAT_SOCKET_EVENTS.NEW_MESSAGE, (data) => {
     if (!data || !data.message) return;
+
     if (selectedConversation && selectedConversation.id === data.conversationId) {
       setChatMessages((prev) => {
         if (prev.some((m) => m.id === data.message.id)) return prev;
@@ -58,8 +100,11 @@ export const SupportChatPage = ({ onOpenConvertModal }: SupportChatPageProps = {
 
   const handleSelectConversation = (conv: SupportConversation) => {
     setSelectedConversation(conv);
+    if ((conv.agentUnreadCount || 0) > 0) {
+      markConversationAsReadMutation(conv.id);
+    }
     if (socket) {
-      socket.emit('join_conversation', { conversationId: conv.id });
+      socket.emit(CHAT_SOCKET_EVENTS.JOIN_CONVERSATION, { conversationId: conv.id });
     }
   };
 
@@ -93,7 +138,7 @@ export const SupportChatPage = ({ onOpenConvertModal }: SupportChatPageProps = {
               return [...prev, res.data];
             });
             if (socket) {
-              socket.emit('send_message', {
+              socket.emit(CHAT_SOCKET_EVENTS.SEND_MESSAGE, {
                 conversationId: selectedConversation.id,
                 content: text,
                 attachments

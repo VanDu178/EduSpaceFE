@@ -33,7 +33,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     }
   }, []);
 
-  const connectSocket = useCallback(() => {
+  const connectSocket = useCallback((forceRefresh = false) => {
     const token = localStorage.getItem('accessToken');
     const socketUrl = import.meta.env.VITE_API_URL?.replace('/api', '');
 
@@ -42,7 +42,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       return;
     }
 
-    if (socketRef.current && socketRef.current.connected) {
+    if (!forceRefresh && socketRef.current && socketRef.current.connected) {
       return;
     }
 
@@ -67,12 +67,31 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     socketInstance.on('disconnect', () => {
       setIsConnected(false);
     });
+
+    socketInstance.on('connect_error', (err) => {
+      console.warn('[SocketContext] Connection error:', err.message);
+      setIsConnected(false);
+    });
   }, [disconnectSocket]);
 
   useEffect(() => {
     connectSocket();
 
+    const handleTokenRefreshed = () => {
+      // Khi Access Token được refresh thành công, tự động kết nối lại Socket với token mới
+      connectSocket(true);
+    };
+
+    const handleLogout = () => {
+      disconnectSocket();
+    };
+
+    window.addEventListener('auth:token_refreshed', handleTokenRefreshed);
+    window.addEventListener('auth:logout', handleLogout);
+
     return () => {
+      window.removeEventListener('auth:token_refreshed', handleTokenRefreshed);
+      window.removeEventListener('auth:logout', handleLogout);
       disconnectSocket();
     };
   }, [connectSocket, disconnectSocket]);

@@ -47,6 +47,7 @@ export const ListPage = ({
         <div className="text-center py-10 text-slate-400 text-xs italic">Không có dữ liệu</div>
       )}
       {tickets.map((t) => {
+        const isUnread = (t.assigneeUnreadCount || 0) > 0;
         const statusInfo = TICKET_STATUS_LABELS[t.status];
         const categoryLabel = TICKET_CATEGORY_LABELS[t.category] || t.category;
         const priorityInfo = TICKET_PRIORITY_LABELS[t.priority];
@@ -55,11 +56,22 @@ export const ListPage = ({
           <div
             key={t.id}
             onClick={() => onSelectTicket(t.id)}
-            className={`p-3 rounded-xl border cursor-pointer transition ${selectedTicket?.id === t.id ? 'bg-sky-50/80 border-sky-500' : 'bg-white hover:bg-slate-50 border-slate-200/80'
+            className={`p-3 rounded-xl border cursor-pointer transition ${selectedTicket?.id === t.id
+              ? 'bg-sky-50/80 border-sky-500 shadow-sm'
+              : isUnread
+                ? 'bg-sky-50/50 hover:bg-sky-50/90 border-sky-300 shadow-sm'
+                : 'bg-white hover:bg-slate-50 border-slate-200/80'
               }`}
           >
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-mono text-sky-700 font-bold text-xs">#{t.code}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-sky-700 font-bold text-xs">#{t.code}</span>
+                {isUnread && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-700 border border-sky-300 animate-pulse">
+                    Phản hồi mới
+                  </span>
+                )}
+              </div>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${statusInfo ? `${statusInfo.bgClass} ${statusInfo.textClass}` : 'bg-slate-100 border-slate-200 text-slate-600'
                   }`}
@@ -68,7 +80,7 @@ export const ListPage = ({
               </span>
             </div>
 
-            <h4 className="text-xs font-semibold text-slate-900 truncate mb-1.5">{t.title}</h4>
+            <h4 className={`text-xs truncate mb-1.5 ${isUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-800'}`}>{t.title}</h4>
             <p className="text-[11px] text-slate-500 line-clamp-1 mb-1.5">
               Khách hàng: {t.creator?.name || <span className="italic text-slate-400">Khách vãng lai</span>}
             </p>

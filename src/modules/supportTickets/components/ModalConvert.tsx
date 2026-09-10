@@ -3,7 +3,12 @@ import { XMarkIcon, TicketIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import { Image, Input, Select, Form, Button } from 'antd';
 import type { FormInstance } from 'antd';
 import type { TicketCategory, TicketPriority } from '../types';
-import { TICKET_CATEGORY_OPTIONS, TICKET_PRIORITY_OPTIONS } from '../constants';
+import {
+  TICKET_CATEGORY_OPTIONS,
+  TICKET_PRIORITY_OPTIONS,
+  DEFAULT_CONVERT_FORM_VALUES,
+  TICKET_ATTACHMENT_LIMITS
+} from '../constants';
 
 const { TextArea } = Input;
 
@@ -28,8 +33,6 @@ interface ModalConvertProps {
   }) => void;
 }
 
-const MAX_IMAGES = 3;
-
 export const ModalConvert = ({
   open,
   form,
@@ -42,7 +45,7 @@ export const ModalConvert = ({
 }: ModalConvertProps) => {
   if (!open) return null;
 
-  const isMaxReached = previewFiles.length >= MAX_IMAGES;
+  const isMaxReached = previewFiles.length >= TICKET_ATTACHMENT_LIMITS.MAX_COUNT;
 
   return (
     <div
@@ -79,10 +82,7 @@ export const ModalConvert = ({
           form={form}
           layout="vertical"
           onFinish={onSubmit}
-          initialValues={{
-            category: 'TECHNICAL',
-            priority: 'MEDIUM',
-          }}
+          initialValues={DEFAULT_CONVERT_FORM_VALUES}
           className="flex flex-col flex-1 overflow-hidden min-h-0"
         >
           {/* Scrollable Form Body */}
@@ -152,7 +152,7 @@ export const ModalConvert = ({
                 <div className="flex items-center justify-between w-full">
                   <span className="text-xs font-semibold text-slate-800">Hình ảnh minh họa đính kèm</span>
                   <span className="text-[11px] font-mono text-sky-700 font-bold bg-sky-100 px-1.5 py-0.5 rounded-md">
-                    {previewFiles.length}/{MAX_IMAGES}
+                    {previewFiles.length}/{TICKET_ATTACHMENT_LIMITS.MAX_COUNT}
                   </span>
                 </div>
               }
@@ -193,7 +193,7 @@ export const ModalConvert = ({
                         ))}
                       </div>
                       <span className="text-slate-400">•</span>
-                      <span className="text-slate-600 font-medium">Tối đa 5MB/ảnh</span>
+                      <span className="text-slate-600 font-medium">Tối đa {TICKET_ATTACHMENT_LIMITS.MAX_SIZE_MB}MB/ảnh</span>
                     </div>
                   </label>
                 )}

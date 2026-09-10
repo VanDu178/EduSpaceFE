@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSocket, useSocketEvent } from '../../../config/socket/SocketContext';
 import { TICKET_QUERY_KEY } from './index';
 import { TICKET_SOCKET_EVENTS } from '../constants';
+import { playNotificationChime } from '../../../config/socket/NotificationContext';
 
 const DEBOUNCE_DELAY = 500; // 500ms window để gom nhóm bão sự kiện socket
 
@@ -44,6 +45,7 @@ export function useTicketRealtime(ticketId?: number | null) {
 
   // Realtime comment mới
   useSocketEvent<any>(TICKET_SOCKET_EVENTS.COMMENT_ADDED, (data) => {
+    playNotificationChime();
     const targetId = data?.ticketId || ticketId;
     if (targetId) {
       queryClient.invalidateQueries({ queryKey: [...TICKET_QUERY_KEY, 'detail', targetId] });

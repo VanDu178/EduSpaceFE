@@ -1,9 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import type { User } from '../modules/users/types';
-import { ChevronDownIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import {
+  ChevronDownIcon,
+  ArrowRightOnRectangleIcon,
+  SpeakerWaveIcon,
+  SpeakerXMarkIcon,
+} from '@heroicons/react/24/outline';
 import { USER_ROLE } from '../constants/roles';
-
 import { NotificationBell } from './NotificationBell';
+import { useNotification } from '../config/socket/NotificationContext';
 
 interface NavbarProps {
   user: User | null;
@@ -13,6 +18,7 @@ interface NavbarProps {
 const Navbar = ({ user, onLogout }: NavbarProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { soundEnabled, toggleSoundEnabled } = useNotification();
 
   const getRoleLabel = (role?: string) => {
     switch (role?.toLowerCase()) {
@@ -61,7 +67,7 @@ const Navbar = ({ user, onLogout }: NavbarProps) => {
 
           {/* Floating Dropdown Card */}
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl z-50 py-2.5 animate-in fade-in slide-in-from-top-3 duration-200">
+            <div className="absolute right-0 mt-2 w-60 bg-white border border-slate-200 rounded-2xl z-50 py-2.5 animate-in fade-in slide-in-from-top-3 duration-200 shadow-xl">
               {/* Profile Details */}
               <div className="px-4 py-2">
                 <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Tài khoản</p>
@@ -74,6 +80,36 @@ const Navbar = ({ user, onLogout }: NavbarProps) => {
 
               <hr className="border-slate-100 my-2" />
 
+              {/* Sound Notification Toggle */}
+              <div className="px-2">
+                <button
+                  onClick={() => {
+                    toggleSoundEnabled();
+                  }}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors duration-150 cursor-pointer"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    {soundEnabled ? (
+                      <SpeakerWaveIcon className="h-4 w-4 text-sky-600 animate-pulse shrink-0" />
+                    ) : (
+                      <SpeakerXMarkIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                    )}
+                    <span>Âm thanh thông báo</span>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition-colors ${
+                      soundEnabled
+                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-200/60'
+                        : 'bg-slate-100 text-slate-400 border border-slate-200/60'
+                    }`}
+                  >
+                    {soundEnabled ? 'Bật' : 'Tắt'}
+                  </span>
+                </button>
+              </div>
+
+              <hr className="border-slate-100 my-2" />
+
               {/* Logout Button */}
               <div className="px-2">
                 <button
@@ -81,7 +117,7 @@ const Navbar = ({ user, onLogout }: NavbarProps) => {
                     setIsDropdownOpen(false);
                     onLogout();
                   }}
-                  className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-left text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold transition-colors duration-150 cursor-pointer"
+                  className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold transition-colors duration-150 cursor-pointer"
                 >
                   <ArrowRightOnRectangleIcon className="h-4.5 w-4.5" />
                   <span>Đăng xuất</span>

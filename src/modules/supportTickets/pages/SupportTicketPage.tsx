@@ -1,26 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import type { Ticket, TicketFilterParams } from '../types';
 import { FilterBar, ListPage, ModalDetail, type CommentFile } from '../components';
 import { uploadMultipleFilesApi, FOLDER_NAME } from '../../upload';
+import { DEFAULT_TICKET_FILTER_PARAMS } from '../constants';
 import {
   useTicketsQuery,
   useTicketDetailQuery,
   useAddTicketCommentMutation,
   useUpdateTicketStatusMutation,
+  useMarkTicketAsReadMutation,
   useTicketRealtime
 } from '../hooks';
 
-const DEFAULT_FILTER_PARAMS: TicketFilterParams = {
-  status: '',
-  category: '',
-  priority: '',
-  search: ''
-};
-
 export const SupportTicketPage = () => {
-  const [filterParams, setFilterParams] = useState<TicketFilterParams>(DEFAULT_FILTER_PARAMS);
+  const [filterParams, setFilterParams] = useState<TicketFilterParams>(DEFAULT_TICKET_FILTER_PARAMS);
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const location = useLocation();
 
   // Kích hoạt Realtime Socket listener cho Admin Ticket List & Detail
   useTicketRealtime(selectedTicketId);
@@ -34,6 +31,15 @@ export const SupportTicketPage = () => {
     isFetchingNextPage
   } = useTicketsQuery(filterParams);
 
+  useEffect(() => {
+    const state = location.state as { targetTab?: string; targetId?: number } | null;
+    if (state?.targetId && (state.targetTab === 'tickets' || !state.targetTab)) {
+      setFilterParams(DEFAULT_TICKET_FILTER_PARAMS);
+      setSelectedTicketId(state.targetId);
+      refetchTickets();
+    }
+  }, [location.state, refetchTickets]);
+
   const rawTickets: Ticket[] = ticketsData?.pages.flatMap((page) => page?.data || []) || [];
   const ticketsMap = new Map<number, Ticket>();
   rawTickets.forEach((t) => ticketsMap.set(t.id, t));
@@ -41,6 +47,7 @@ export const SupportTicketPage = () => {
 
   const { isPending: isPendingAddComment, mutate: addTicketCommentMutation } = useAddTicketCommentMutation();
   const { isPending: isPendingUpdateStatus, mutate: updateTicketStatusMutation } = useUpdateTicketStatusMutation();
+  const { mutate: markTicketAsReadMutation } = useMarkTicketAsReadMutation();
   const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   const { data: ticketDetailRes } = useTicketDetailQuery(selectedTicketId);
@@ -51,16 +58,20 @@ export const SupportTicketPage = () => {
 
   const isSubmittingComment = isPendingAddComment || isUploadingImages;
 
-  const handleFilterChange = (field: keyof TicketFilterParams, value: string) => {
+  const handleFilterChange = (field: keyof TicketFilterParams, value: string | null) => {
     setFilterParams((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleClearFilters = () => {
-    setFilterParams(DEFAULT_FILTER_PARAMS);
+    setFilterParams(DEFAULT_TICKET_FILTER_PARAMS);
   };
 
   const handleSelectTicket = (ticketId: number) => {
     setSelectedTicketId(ticketId);
+    const target = tickets.find((t) => t.id === ticketId);
+    if (target && (target.assigneeUnreadCount || 0) > 0) {
+      markTicketAsReadMutation(ticketId);
+    }
   };
 
   const handleRemoveCommentFile = (index: number) => {

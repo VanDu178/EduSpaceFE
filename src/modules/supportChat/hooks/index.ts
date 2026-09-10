@@ -10,7 +10,6 @@ export const useAdminStatusQuery = () => {
   return useQuery({
     queryKey: [...CHAT_QUERY_KEY, 'adminStatus'],
     queryFn: () => chatApi.getAdminStatus(),
-
   });
 };
 
@@ -89,6 +88,17 @@ export const useResolveConversationMutation = () => {
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || 'Không thể đóng chat');
+    },
+  });
+};
+
+// Mutation đánh dấu cuộc trò chuyện là đã đọc
+export const useMarkConversationAsReadMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => chatApi.markAsRead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [...CHAT_QUERY_KEY, 'conversations'] });
     },
   });
 };

@@ -3,9 +3,9 @@ export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'PENDING_USER' | 'RESOLVED' | 'CLOSED';
 
 export interface TicketFilterParams {
-  status: string;
-  category: string;
-  priority: string;
+  status: string | null;
+  category: string | null;
+  priority: string | null;
   search: string;
 }
 
@@ -38,6 +38,8 @@ export interface Ticket {
   creatorId: number;
   assigneeId?: number | null;
   sourceConversationId?: number | null;
+  creatorUnreadCount?: number;
+  assigneeUnreadCount?: number;
   resolvedAt?: string | null;
   createdAt: string;
   updatedAt: string;

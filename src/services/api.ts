@@ -9,7 +9,7 @@ interface FailedRequestItem {
 
 // Khởi tạo instance Axios dùng chung với cấu hình mặc định.
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -104,6 +104,11 @@ api.interceptors.response.use(
       // Cập nhật Authorization header mặc định của api instance
       api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
+      // Thông báo cho SocketContext và các listener khác biết token đã được cập nhật
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth:token_refreshed'));
+      }
+
       // Xử lý hàng đợi
       processQueue(null, accessToken);
 
@@ -117,7 +122,11 @@ api.interceptors.response.use(
       // Xóa thông tin đăng nhập và chuyển hướng về trang login
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth:logout'));
+        window.location.href = '/login';
+      }
 
       return Promise.reject(refreshError);
     } finally {

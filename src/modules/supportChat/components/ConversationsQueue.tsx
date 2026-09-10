@@ -26,6 +26,7 @@ export const ConversationsQueue = ({
           <div className="text-center py-10 text-slate-400 text-xs italic">Không tìm thấy cuộc trò chuyện nào.</div>
         )}
         {conversations.map((conv) => {
+          const isUnread = (conv.agentUnreadCount || 0) > 0;
           const statusInfo = CONVERSATION_STATUS_LABELS[conv.status] || {
             label: conv.status,
             color: 'bg-slate-200 text-slate-600 border-slate-300'
@@ -35,22 +36,34 @@ export const ConversationsQueue = ({
             <div
               key={conv.id}
               onClick={() => onSelectConversation(conv)}
-              className={`p-3 rounded-xl border cursor-pointer transition ${selectedConversation?.id === conv.id
+              className={`relative p-3 rounded-xl border cursor-pointer transition ${selectedConversation?.id === conv.id
                 ? 'bg-sky-50/80 border-sky-500'
-                : 'bg-slate-50/60 hover:bg-slate-100 border-slate-200/80'
+                : isUnread
+                  ? 'bg-emerald-50/40 hover:bg-emerald-50/80 border-emerald-300'
+                  : 'bg-slate-50/60 hover:bg-slate-100 border-slate-200/80'
                 }`}
             >
+              {isUnread && (
+                <span
+                  className="absolute -top-0.5 -right-0.5 z-10 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white animate-pulse"
+                  title="Có tin nhắn mới chưa đọc"
+                />
+              )}
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-semibold text-slate-900 truncate max-w-[170px]">
-                  {conv.user?.name || conv.user?.email || `User #${conv.userId}`}
-                </span>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className={`!truncate max-w-[150px] ${isUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-800'}`}>
+                    {conv.user?.name || "Khách hàng ẩn danh"}
+                  </span>
+                </div>
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${statusInfo.color}`}
                 >
                   {statusInfo.label}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 line-clamp-1">{conv.lastMessage || 'Bắt đầu trò chuyện'}</p>
+              <p className={`text-xs line-clamp-1 ${isUnread ? 'font-semibold text-slate-800' : 'text-slate-500'}`}>
+                {conv.lastMessage || 'Bắt đầu trò chuyện'}
+              </p>
             </div>
           );
         })}

@@ -39,7 +39,7 @@ const menuTree: ParentMenuItem[] = [
     items: [
       {
         key: 'support-hub',
-        label: 'Live Chat & Ticket Hub',
+        label: 'Trung tâm hỗ trợ',
         path: '/admin/support',
       },
     ],

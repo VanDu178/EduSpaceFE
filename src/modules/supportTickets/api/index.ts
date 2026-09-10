@@ -14,6 +14,11 @@ export const ticketApi = {
     return res.data;
   },
 
+  markAsRead: async (id: number) => {
+    const res = await api.post(`${BASE_PATH}/${id}/read`);
+    return res.data;
+  },
+
   addTicketComment: async (id: number, data: { content: string; attachments?: string[] }) => {
     const res = await api.post(`${BASE_PATH}/${id}/comments`, data);
     return res.data;

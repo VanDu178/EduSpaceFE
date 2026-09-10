@@ -14,6 +14,11 @@ export const chatApi = {
     return res.data;
   },
 
+  markAsRead: async (id: number) => {
+    const res = await api.post(`${BASE_PATH}/chat/conversations/${id}/read`);
+    return res.data;
+  },
+
   acceptConversation: async (id: number) => {
     const res = await api.post(`${BASE_PATH}/chat/conversations/${id}/accept`);
     return res.data;
