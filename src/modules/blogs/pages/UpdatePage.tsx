@@ -1,7 +1,7 @@
 import { Form, Spin } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FormUpdate } from '../components';
-import { useBlogsQuery, useUpdateBlogMutation } from '../hooks';
+import { useBlogQuery, useUpdateBlogMutation } from '../hooks';
 import { useBlogTypesQuery } from '../../blogTypes';
 import type { BlogPayload } from '../types';
 
@@ -10,10 +10,9 @@ const UpdatePage = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
-  const { data, isLoading } = useBlogsQuery({ limit: 1000 });
+  const { data, isLoading } = useBlogQuery(id);
   const { data: blogTypes = [], isLoading: isLoadingTypes } = useBlogTypesQuery();
-  const blogs = data?.blogs || [];
-  const blog = blogs.find((b) => b?.id === Number(id));
+  const blog = data?.blog;
 
   const updateMutation = useUpdateBlogMutation(() => {
     navigate('/admin/blogs');

@@ -1,5 +1,6 @@
 import { Modal, Space, Tag } from 'antd';
 import { getStatusTagConfig, getAccessTagConfig, getBlogTypeTagConfig } from '../utils';
+import { sanitizeHtml } from '../../../utils/sanitize';
 
 interface ModalPreviewProps {
   open: boolean;
@@ -98,7 +99,7 @@ const ModalPreview = ({
         <div
           className="text-slate-700 text-sm leading-relaxed space-y-3 break-words prose max-w-none [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_h1]:text-xl [&_h1]:font-bold [&_h2]:text-lg [&_h2]:font-bold [&_h3]:text-base [&_h3]:font-bold [&_p]:leading-relaxed"
           dangerouslySetInnerHTML={{
-            __html: contentHtml || '<p class="text-slate-400 italic">Nội dung chi tiết chưa nhập...</p>',
+            __html: contentHtml ? sanitizeHtml(contentHtml) : '<p class="text-slate-400 italic">Nội dung chi tiết chưa nhập...</p>',
           }}
         />
       </div>

@@ -5,6 +5,7 @@ import { getStatusTagConfig, getAccessTagConfig, getBlogTypeTagConfig } from '..
 import { useNavigate, useParams } from 'react-router-dom';
 import CopyButton from '../../../components/CopyButton';
 import { formatDate } from '../../../utils/format';
+import { sanitizeHtml } from '../../../utils/sanitize';
 
 const DetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -94,7 +95,7 @@ const DetailPage = () => {
                 {/* Content Description */}
                 <div className="prose max-w-none text-slate-700 text-sm md:text-base leading-relaxed">
                   {blog.content ? (
-                    <div dangerouslySetInnerHTML={{ __html: blog.content }} />
+                    <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(blog.content) }} />
                   ) : (
                     <p className="text-slate-400 italic">Không có nội dung chi tiết.</p>
                   )}

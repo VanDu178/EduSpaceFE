@@ -106,7 +106,7 @@ const FormUpdate = ({
   };
 
   const handleSelectBanner = async (file: File) => {
-    const result = await processImageFileSelect(file, bannerPreviewUrl, BLOG_BANNER_UPLOAD_CONFIG);
+    const result = await processImageFileSelect(file, bannerPreviewUrl || undefined, BLOG_BANNER_UPLOAD_CONFIG);
     if (!result) return;
 
     setBannerFile(result.file);
