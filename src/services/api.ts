@@ -48,6 +48,59 @@ api.interceptors.request.use(
   }
 );
 
+// Biến lưu trữ Single-Flight Refresh Promise dùng chung cho EduSpaceFE
+let refreshPromise: Promise<string> | null = null;
+
+/**
+ * Thực thi làm mới Access Token duy nhất (Single-Flight Deduplication).
+ */
+export const executeSharedRefreshToken = async (): Promise<string> => {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const response = await axios.post(
+        `${api.defaults.baseURL}/auth/refresh`,
+        {},
+        { withCredentials: true }
+      );
+
+      const { accessToken } = response.data.data;
+
+      // Lưu token mới vào localStorage
+      localStorage.setItem('accessToken', accessToken);
+
+      // Cập nhật Authorization header mặc định của api instance
+      api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+      // Thông báo cho SocketContext và các listener khác biết token đã được cập nhật
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth:token_refreshed'));
+      }
+
+      return accessToken;
+    } catch (error) {
+      delete api.defaults.headers.common['Authorization'];
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth:logout'));
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      }
+      throw error;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+};
+
 // Response Interceptor: Tự động bắt lỗi 401 để refresh token và gọi lại request cũ
 api.interceptors.response.use(
   (response) => response,
@@ -89,25 +142,7 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      // Gọi API refresh token
-      const response = await axios.post(
-        `${api.defaults.baseURL}/auth/refresh`,
-        {},
-        { withCredentials: true }
-      );
-
-      const { accessToken } = response.data.data;
-
-      // Lưu token mới vào localStorage
-      localStorage.setItem('accessToken', accessToken);
-
-      // Cập nhật Authorization header mặc định của api instance
-      api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-
-      // Thông báo cho SocketContext và các listener khác biết token đã được cập nhật
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('auth:token_refreshed'));
-      }
+      const accessToken = await executeSharedRefreshToken();
 
       // Xử lý hàng đợi
       processQueue(null, accessToken);
@@ -116,18 +151,7 @@ api.interceptors.response.use(
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
       return api(originalRequest);
     } catch (refreshError) {
-      // Nếu refresh token thất bại (ví dụ: refresh token hết hạn hoặc bị thu hồi)
       processQueue(refreshError, null);
-
-      // Xóa thông tin đăng nhập và chuyển hướng về trang login
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
-
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('auth:logout'));
-        window.location.href = '/login';
-      }
-
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;

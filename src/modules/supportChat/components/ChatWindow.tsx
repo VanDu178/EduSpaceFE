@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Spin, Image } from 'antd';
 import { ArrowsRightLeftIcon, PaperAirplaneIcon, PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { SupportConversation, SupportMessage } from '../types';
-import { uploadSingleFileApi, deleteFileApi, FOLDER_NAME } from '../../upload';
+import { uploadMultipleFilesApi, FOLDER_NAME } from '../../upload';
 import { CHAT_STATUS, SENDER_TYPE } from '../constants';
 
 interface ChatWindowProps {
@@ -16,6 +16,11 @@ interface ChatWindowProps {
   onChangeChatInputText: (text: string) => void;
   onOpenConvertModal: () => void;
   onResolveConversation: (convId: number) => void;
+}
+
+interface PendingFileItem {
+  file: File;
+  previewUrl: string;
 }
 
 export const ChatWindow = ({
@@ -32,20 +37,20 @@ export const ChatWindow = ({
 }: ChatWindowProps) => {
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [pendingAttachments, setPendingAttachments] = useState<string[]>([]);
+  const [pendingFiles, setPendingFiles] = useState<PendingFileItem[]>([]);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  const pendingAttachmentsRef = useRef<string[]>([]);
+  const pendingFilesRef = useRef<PendingFileItem[]>([]);
   useEffect(() => {
-    pendingAttachmentsRef.current = pendingAttachments;
-  }, [pendingAttachments]);
+    pendingFilesRef.current = pendingFiles;
+  }, [pendingFiles]);
 
-  // Clean up unsent attachments on conversation switch or unmount
+  // Clean up Blob URLs on conversation switch or unmount
   useEffect(() => {
     return () => {
-      if (pendingAttachmentsRef.current.length > 0) {
-        pendingAttachmentsRef.current.forEach((url) => {
-          deleteFileApi(url).catch((err) => console.error('Lỗi tự dọn dẹp ảnh rác:', err));
+      if (pendingFilesRef.current.length > 0) {
+        pendingFilesRef.current.forEach((item) => {
+          URL.revokeObjectURL(item.previewUrl);
         });
       }
     };
@@ -55,7 +60,7 @@ export const ChatWindow = ({
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     const file = files[0];
@@ -65,35 +70,42 @@ export const ChatWindow = ({
       return;
     }
 
-    try {
-      setIsUploadingImage(true);
-      const res = await uploadSingleFileApi(file, FOLDER_NAME.SUPPORT_CHAT);
-      if (res?.url) {
-        setPendingAttachments((prev) => [...prev, res.url]);
-      }
-    } catch (err) {
-    } finally {
-      setIsUploadingImage(false);
-    }
+    const previewUrl = URL.createObjectURL(file);
+    setPendingFiles((prev) => [...prev, { file, previewUrl }]);
   };
 
-  const handleRemoveAttachment = async (index: number) => {
-    const targetUrl = pendingAttachments[index];
-    setPendingAttachments((prev) => prev.filter((_, i) => i !== index));
-    if (targetUrl) {
-      try {
-        await deleteFileApi(targetUrl);
-      } catch (err) {
-        throw err;
+  const handleRemoveAttachment = (index: number) => {
+    setPendingFiles((prev) => {
+      const target = prev[index];
+      if (target?.previewUrl) {
+        URL.revokeObjectURL(target.previewUrl);
       }
-    }
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatInputText.trim() && pendingAttachments.length === 0) return;
-    onSendChatMessage(e, pendingAttachments.length > 0 ? pendingAttachments : undefined);
-    setPendingAttachments([]);
+    if (!chatInputText.trim() && pendingFiles.length === 0) return;
+    if (isUploadingImage || isSendingMessage) return;
+
+    let uploadedUrls: string[] = [];
+    if (pendingFiles.length > 0) {
+      try {
+        setIsUploadingImage(true);
+        const rawFiles = pendingFiles.map((item) => item.file);
+        const uploadResults = await uploadMultipleFilesApi(rawFiles, FOLDER_NAME.SUPPORT_CHAT);
+        uploadedUrls = uploadResults.map((res) => res.url).filter(Boolean);
+      } catch (err: any) {
+        console.error('Lỗi upload ảnh chat support:', err);
+      } finally {
+        setIsUploadingImage(false);
+      }
+    }
+
+    onSendChatMessage(e, uploadedUrls.length > 0 ? uploadedUrls : undefined);
+    pendingFiles.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+    setPendingFiles([]);
   };
 
   if (!selectedConversation) {
@@ -202,11 +214,11 @@ export const ChatWindow = ({
       {selectedConversation.status === CHAT_STATUS.AGENT_HANDLING && (
         <form onSubmit={handleSubmit} className="p-2.5 bg-white border-t border-slate-200 flex flex-col space-y-2 flex-shrink-0">
           {/* Pending Attachments Preview */}
-          {pendingAttachments.length > 0 && (
+          {pendingFiles.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-1">
-              {pendingAttachments.map((url, index) => (
+              {pendingFiles.map((item, index) => (
                 <div key={index} className="relative group w-14 h-14 rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
-                  <img src={url} alt="preview" className="w-full h-full object-cover" />
+                  <img src={item.previewUrl} alt="preview" className="w-full h-full object-cover" />
                   <button
                     type="button"
                     onClick={() => handleRemoveAttachment(index)}
@@ -248,7 +260,7 @@ export const ChatWindow = ({
             />
             <button
               type="submit"
-              disabled={isSendingMessage || isUploadingImage || (!chatInputText.trim() && pendingAttachments.length === 0)}
+              disabled={isSendingMessage || isUploadingImage || (!chatInputText.trim() && pendingFiles.length === 0)}
               className="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white font-medium text-xs rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <PaperAirplaneIcon className="w-4 h-4" />
