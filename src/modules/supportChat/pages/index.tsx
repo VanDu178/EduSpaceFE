@@ -11,7 +11,7 @@ import {
   useMarkConversationAsReadMutation
 } from '../hooks';
 import { useSocket, useSocketEvent } from '../../../config/socket/SocketContext';
-import { useNotification, playNotificationChime } from '../../../config/socket/NotificationContext';
+import { useNotification } from '../../../config/socket/NotificationContext';
 import { CHAT_SOCKET_EVENTS } from '../constants';
 
 export interface SupportChatPageProps {

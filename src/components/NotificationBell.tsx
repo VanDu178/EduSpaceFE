@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Popover, Badge, Spin, Empty, Tooltip } from 'antd';
+import { Popover, Badge, Spin, Empty } from 'antd';
 import {
   BellIcon,
   CheckIcon,
   TicketIcon,
   InformationCircleIcon,
-  SpeakerWaveIcon,
-  SpeakerXMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useNotification } from '../config/socket/NotificationContext';
 import type { NotificationItem } from '../services/notificationService';
@@ -19,8 +17,6 @@ export const NotificationBell: React.FC = () => {
     notifications,
     unreadCount,
     isLoading,
-    soundEnabled,
-    toggleSoundEnabled,
     markAsRead,
     requestWindowPermission,
     permissionState,
@@ -142,9 +138,8 @@ export const NotificationBell: React.FC = () => {
             <div
               key={item.id}
               onClick={() => handleNotificationClick(item)}
-              className={`p-3.5 flex gap-3 items-start transition-colors cursor-pointer ${
-                item.isRead ? 'bg-white hover:bg-slate-50' : 'bg-sky-50/40 hover:bg-sky-50/80'
-              }`}
+              className={`p-3.5 flex gap-3 items-start transition-colors cursor-pointer ${item.isRead ? 'bg-white hover:bg-slate-50' : 'bg-sky-50/40 hover:bg-sky-50/80'
+                }`}
             >
               <div className={`p-2 rounded-lg shrink-0 mt-0.5 ${item.isRead ? 'bg-slate-100' : 'bg-sky-100'}`}>
                 {getNotificationIcon(item.type)}
