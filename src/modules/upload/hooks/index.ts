@@ -67,8 +67,8 @@ export function useUpload() {
     file: File,
     abortController: AbortController,
     onSuccess?: (storagePath: string) => void
-  ) => {
-    if (activeExecutions.has(taskId)) return;
+  ): Promise<string | null> => {
+    if (activeExecutions.has(taskId)) return null;
     activeExecutions.add(taskId);
 
     let createdBunnyVideoId: string | null = null;

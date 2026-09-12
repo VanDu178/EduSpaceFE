@@ -5,7 +5,7 @@ import type { TicketCategory, TicketPriority } from '../types';
 
 export const TICKET_QUERY_KEY = ['tickets'];
 
-export const useTicketsQuery = (params?: { status?: string; category?: string; priority?: string; search?: string; limit?: number }) => {
+export const useTicketsQuery = (params?: { status?: string | null; category?: string | null; priority?: string | null; search?: string | null; limit?: number }) => {
   const cleanParams = params
     ? Object.fromEntries(Object.entries(params).filter(([_, v]) => v !== '' && v !== undefined && v !== null))
     : undefined;
