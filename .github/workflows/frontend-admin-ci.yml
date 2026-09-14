@@ -3,8 +3,8 @@ name: Frontend Admin CI/CD Pipeline
 on:
   push:
     branches: [ main ]
-  # pull_request:
-  #   branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 env:
   REGISTRY: ghcr.io
@@ -30,20 +30,27 @@ jobs:
         run: npm ci
 
       - name: Run Build Check
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: npm run build
 
   docker-build-push:
-    name: Build & Push Docker Image
+    name: Build, Scan & Push Docker Image
     needs: ci-build-check
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+      security-events: write
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Downcase Image Name
+        run: |
+          echo "IMAGE_NAME_LOWER=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -55,6 +62,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Tự động chuẩn hóa tên image (chuyển chữ hoa thành chữ thường) và gắn tag
+      - name: Extract Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
       - name: Build & Push Docker Image
         uses: docker/build-push-action@v5
         with:
@@ -62,7 +79,20 @@ jobs:
           file: ./Dockerfile
           push: true
           build-args: |
-            VITE_API_URL=${{ secrets.VITE_API_URL || 'http://localhost:5000/api' }}
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Bật cache của GitHub Actions để tăng tốc build Docker
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Quét lỗ hổng bảo mật Docker Image bằng Trivy Scanner
+      - name: Run Trivy Security Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
