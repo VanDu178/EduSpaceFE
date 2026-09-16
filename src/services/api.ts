@@ -13,6 +13,7 @@ const api = axios.create({
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
+    'X-App-Context': 'admin',
   },
   withCredentials: true, // Bắt buộc để tự động gửi HttpOnly cookie (refresh token) lên server
 });
@@ -64,7 +65,10 @@ export const executeSharedRefreshToken = async (): Promise<string> => {
       const response = await axios.post(
         `${api.defaults.baseURL}/auth/refresh`,
         {},
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: { 'X-App-Context': 'admin' },
+        }
       );
 
       const { accessToken } = response.data.data;
