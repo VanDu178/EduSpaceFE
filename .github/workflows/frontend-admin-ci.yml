@@ -32,6 +32,7 @@ jobs:
       - name: Run Build Check
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
         run: npm run build
 
   docker-build-push:
@@ -80,6 +81,7 @@ jobs:
           push: true
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
+            VITE_SOCKET_URL=${{ secrets.VITE_SOCKET_URL }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           # Bật cache của GitHub Actions để tăng tốc build Docker

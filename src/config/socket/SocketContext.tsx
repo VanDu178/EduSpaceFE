@@ -33,9 +33,22 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     }
   }, []);
 
+  const getSocketUrl = (): string | undefined => {
+    const socketEnv = import.meta.env.VITE_SOCKET_URL;
+    if (socketEnv) {
+      try {
+        return new URL(socketEnv).origin;
+      } catch {
+        if (socketEnv.startsWith('/')) return undefined;
+        return socketEnv;
+      }
+    }
+    return undefined;
+  };
+
   const connectSocket = useCallback((forceRefresh = false) => {
     const token = localStorage.getItem('accessToken');
-    const socketUrl = import.meta.env.VITE_API_URL?.replace('/api', '');
+    const socketUrl = getSocketUrl();
 
     if (!token) {
       disconnectSocket();

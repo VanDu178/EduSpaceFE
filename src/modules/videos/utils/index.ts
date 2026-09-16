@@ -62,7 +62,7 @@ export const getHlsPlaylistUrl = (identifier: string, isSlug: boolean = false): 
     return `https://${cdnDomain}/${videoId}/playlist.m3u8`;
   }
 
-  const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const rawApiUrl = import.meta.env.VITE_API_URL;
   const cleanApiUrl = rawApiUrl.replace(/\/+$/, '');
 
   if (isSlug) {
