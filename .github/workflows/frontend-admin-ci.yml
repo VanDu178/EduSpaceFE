@@ -82,6 +82,7 @@ jobs:
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
             VITE_SOCKET_URL=${{ secrets.VITE_SOCKET_URL }}
+            VITE_BUNNY_CDN_HOSTNAME=${{ secrets.VITE_BUNNY_CDN_HOSTNAME }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           # Bật cache của GitHub Actions để tăng tốc build Docker
