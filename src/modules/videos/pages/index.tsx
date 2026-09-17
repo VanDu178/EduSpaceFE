@@ -42,9 +42,6 @@ const VideoListPage = () => {
   const videos = videosData?.videos || [];
   const total = videosData?.pagination?.total || 0;
 
-  // Fallback video object từ danh sách nạp tức thì cho modal
-  const activeEditingVideo = videos.find((v) => v.id === editingVideoId) || null;
-  const activePreviewVideo = videos.find((v) => v.id === previewVideoId) || null;
 
   const { isPending: isPendingCreate, mutateAsync: createVideoMutation } = useCreateVideoMutation();
   const { isPending: isPendingUpdate, mutateAsync: updateVideoMutation } = useUpdateVideoMutation();
@@ -150,7 +147,6 @@ const VideoListPage = () => {
       <FormUpdate
         open={isUpdateModalOpen}
         videoId={editingVideoId}
-        initialVideo={activeEditingVideo}
         videoTypes={videoTypes}
         onSubmit={handleUpdateSubmit}
         onClose={() => {
@@ -163,7 +159,6 @@ const VideoListPage = () => {
       <PreviewModal
         open={isPreviewModalOpen}
         videoId={previewVideoId}
-        initialVideo={activePreviewVideo}
         onClose={() => {
           setIsPreviewModalOpen(false);
           setPreviewVideoId(null);

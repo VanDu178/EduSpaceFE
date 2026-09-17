@@ -22,7 +22,7 @@ import {
   VideoCameraIcon,
   PlayIcon,
 } from '@heroicons/react/24/outline';
-import type { Video, VideoPayload, VideoType } from '../types';
+import type { VideoPayload, VideoType } from '../types';
 import {
   STATUS_OPTIONS,
   SOURCE_TYPE_OPTIONS,
@@ -45,7 +45,6 @@ import { useVideoDetailQuery } from '../hooks';
 interface FormUpdateProps {
   open: boolean;
   videoId: string | null;
-  initialVideo?: Video | null;
   videoTypes: VideoType[];
   onSubmit: (payload: VideoPayload) => Promise<void>;
   onClose: () => void;
@@ -54,13 +53,12 @@ interface FormUpdateProps {
 export const FormUpdate = ({
   open,
   videoId,
-  initialVideo,
   videoTypes,
   onSubmit,
   onClose,
 }: FormUpdateProps) => {
-  const { data: videoData, isLoading: isLoadingDetail, isFetching: isFetchingDetail } = useVideoDetailQuery(videoId, open, initialVideo);
-  const video = videoData?.video || initialVideo || null;
+  const { data: videoData, isLoading: isLoadingDetail, isFetching: isFetchingDetail } = useVideoDetailQuery(videoId, open);
+  const video = videoData?.video || null;
 
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
@@ -333,23 +331,23 @@ export const FormUpdate = ({
         </div>
       }
     >
-      {!video && (isLoadingDetail || isFetchingDetail) ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-3">
-          <Spin size="large" />
-          <span className="text-slate-500 text-xs font-medium">Đang tải thông tin video...</span>
-        </div>
-      ) : !video ? (
-        <div className="py-20 text-center text-slate-400 italic text-sm">
-          Không tìm thấy dữ liệu video
-        </div>
-      ) : (
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleFinish}
-          disabled={isBusy}
-          className="py-2"
-        >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleFinish}
+        disabled={isBusy}
+        className="py-2"
+      >
+        {!video && (isLoadingDetail || isFetchingDetail) ? (
+          <div className="py-20 flex flex-col items-center justify-center gap-3">
+            <Spin size="large" />
+            <span className="text-slate-500 text-xs font-medium">Đang tải thông tin video...</span>
+          </div>
+        ) : !video ? (
+          <div className="py-20 text-center text-slate-400 italic text-sm">
+            Không tìm thấy dữ liệu video
+          </div>
+        ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Cột Trái: Thông tin chính & Nguồn video (7/12) */}
             <div className="lg:col-span-7 space-y-4">
@@ -744,8 +742,8 @@ export const FormUpdate = ({
               )}
             </div>
           </div>
-        </Form>
-      )}
+        )}
+      </Form>
     </Drawer>
   );
 };

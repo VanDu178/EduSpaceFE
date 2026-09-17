@@ -56,10 +56,13 @@ export const getHlsPlaylistUrl = (identifier: string, isSlug: boolean = false): 
     if (raw.startsWith('http://') || raw.startsWith('https://')) {
       return raw;
     }
-    const guidMatch = raw.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
-    const videoId = guidMatch ? guidMatch[0] : raw;
-    const cdnDomain = import.meta.env.VITE_BUNNY_CDN_HOSTNAME || 'vz-d7209424-caf.b-cdn.net';
-    return `https://${cdnDomain}/${videoId}/playlist.m3u8`;
+    const cdnDomain = import.meta.env.VITE_BUNNY_CDN_HOSTNAME;
+    if (cdnDomain) {
+      return `https://${cdnDomain}/${raw}/playlist.m3u8`;
+    }
+    const rawApiUrl = import.meta.env.VITE_API_URL || '';
+    const cleanApiUrl = rawApiUrl.replace(/\/+$/, '');
+    return `${cleanApiUrl}/videos/id/${raw}/playlist.m3u8`;
   }
 
   const rawApiUrl = import.meta.env.VITE_API_URL;

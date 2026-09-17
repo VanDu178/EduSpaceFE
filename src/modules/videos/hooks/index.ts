@@ -37,14 +37,12 @@ export const useVideosQuery = (params?: VideoQueryParams) => {
 // Hook lấy chi tiết 1 video theo ID
 export const useVideoDetailQuery = (
   id: string | null,
-  enabled: boolean = true,
-  initialVideo?: Video | null
+  enabled: boolean = true
 ) => {
   return useQuery<{ video: Video }>({
     queryKey: [...QUERY_KEY, 'detail', id],
     queryFn: () => fetchVideoByIdApi(id!),
     enabled: !!id && enabled,
-    initialData: initialVideo ? { video: initialVideo } : undefined,
   });
 };
 

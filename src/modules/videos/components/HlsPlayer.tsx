@@ -64,7 +64,11 @@ export const HlsPlayer = ({
         enableWorker: true,
         xhrSetup: (xhr: XMLHttpRequest, url: string) => {
           const token = localStorage.getItem('accessToken');
-          const isExternalCdn = url.includes('b-cdn.net') || url.includes('bunnycdn');
+          const bunnyCdnHost = import.meta.env.VITE_BUNNY_CDN_HOSTNAME;
+          const isExternalCdn =
+            url.includes('b-cdn.net') ||
+            url.includes('bunnycdn') ||
+            (bunnyCdnHost && url.includes(bunnyCdnHost));
           if (token && !isExternalCdn) {
             xhr.setRequestHeader('Authorization', `Bearer ${token}`);
           }
